@@ -500,6 +500,7 @@ public class AnalysisService {
 		logger.info("开始解析哔哩哔哩视频: {}", video);
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, video, platform);
 		try {
+			
 			// 获取视频源信息
 			List<Map<String, String>> videoStreams = BiliUtil.findVideoStreaming(video, Global.bilicookies);
 			System.out.println(videoStreams);
@@ -522,15 +523,14 @@ public class AnalysisService {
 				}
 				// 生成文件名和路径
 				String filename = StringUtil.getFileName(title, cid);
-				String coverunaddr = FileUtil.createDirFile(FileUtil.savefile, ".jpg", filename,
-						Global.platform.bilibili.name());
-				String videounaddr = FileUtil.createDirFile(FileUtil.savefile, ".mp4", filename,
-						Global.platform.bilibili.name());
-
+				String dir = FileUtil.generateDir(true,  Global.platform.bilibili.name(), true, filename, null, null);
+				String dbdir = FileUtil.generateDir(false, Global.platform.bilibili.name(), true, filename, null, null);
+				String coverunaddr =	FileUtil.generateDir(false, Global.platform.bilibili.name(), true, filename, null, "jpg");
+				String videounaddr =	FileUtil.generateDir(false, Global.platform.bilibili.name(), true, filename, null, "mp4");
 				// 下载封面
 				try {
-					HttpUtil.downBiliFromUrl(pic, filename + ".jpg",
-							FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), filename));
+					
+					HttpUtil.downBiliFromUrl(pic, filename + ".jpg",dir);
 					logger.debug("封面下载完成: {}", filename);
 				} catch (Exception e) {
 					logger.warn("封面下载失败: {}, 原因: {}", filename, e.getMessage());
@@ -543,10 +543,9 @@ public class AnalysisService {
 				String upmid = owner.getString("mid");
 				String ctime = videoInfo.get("ctime");
 				//下载up 头像  up头像不参与数据 只参与nfo
-				HttpUtil.downBiliFromUrl(upface, "upcover.jpg",
-						FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), filename));
-				String uplocal =  FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), filename)+System.getProperty("file.separator")+"upcover.jpg";
-				String piclocal =  FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), filename)+System.getProperty("file.separator")+filename+".jpg";
+				HttpUtil.downBiliFromUrl(upface, "upcover.jpg",dir);
+				String uplocal =  dbdir+"upcover.jpg";
+				String piclocal = dbdir+filename+".jpg";
 				EmbyMetadataGenerator.createBillNfo(upname,uplocal,upmid,ctime,cid,title,desc,piclocal,videoPath);
 				// 建档
 				VideoDataEntity videoDataEntity = new VideoDataEntity(cid, title, desc, platform, coverunaddr,

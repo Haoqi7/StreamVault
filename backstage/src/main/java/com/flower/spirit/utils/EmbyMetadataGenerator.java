@@ -328,7 +328,8 @@ public class EmbyMetadataGenerator {
         }
     }
 
-    public static void createFavoriteEpisodeNfo(Map<String, String> videoInfo, String outputPath, int episodeNumber,String tvshow) {
+    public static void createFavoriteEpisodeNfo(Map<String, String> videoInfo, String outputPath, int episodeNumber,
+            String tvshow) {
         try {
             String episodeTitle = videoInfo.get("title");
             String episodeOverview = videoInfo.get("desc");
@@ -374,7 +375,10 @@ public class EmbyMetadataGenerator {
                     "    <dateadded>" + dateadded + "</dateadded>\n" +
                     "</episodedetails>\n";
 
-            writeToFile(outputPath + "/" + episodeTitle + ".nfo", nfoContent);
+            // 获取视频文件所在的目录
+//            String videoDir = new File(videoInfo.get("videolocal")).getParent();
+            // 在视频文件所在目录创建episode.nfo
+            writeToFile(outputPath + "/"+episodeTitle+".nfo", nfoContent);
 
             // 添加UP主信息到tvshow.nfo
             addUpInfoToTvshowNfo(tvshow, videoInfo.get("upname"), videoInfo.get("upface"), videoInfo.get("upmid"));

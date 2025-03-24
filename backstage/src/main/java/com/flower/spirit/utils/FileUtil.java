@@ -31,27 +31,105 @@ public class FileUtil {
     public void setUploadRealPath(String uploadRealPath) {
     	FileUtil.uploadRealPath =uploadRealPath;
     }
+
+    
+    /**
+     * @param real
+     * @param platform
+     * @param odd
+     * @param filename
+     * @param favname
+     * @return  /cos/bili/odd/2025   /cos/bili/collection/fav
+     */
+    public static String generateDir(boolean real,String platform,boolean odd,String filename,String favname,String ext) {
+    	String datepath = DateUtils.getDate("yyyy")+System.getProperty("file.separator");
+    	String resdir ="";
+    	if(real) {
+    		resdir = resdir+uploadRealPath+System.getProperty("file.separator");
+    	}else {
+    		resdir = resdir+savefile+System.getProperty("file.separator");
+    	}
+    	//拼接平台
+    	resdir=resdir+platform+System.getProperty("file.separator");
+    	
+    	//拼接类型
+    	if(odd) {
+    		resdir=resdir+"odd"+System.getProperty("file.separator");
+    	}else {
+    		resdir=resdir+"collection"+System.getProperty("file.separator");
+    	}
+    	if(favname== null) {
+    		resdir =resdir+datepath+System.getProperty("file.separator");
+    	}else {
+    		resdir =resdir+favname+System.getProperty("file.separator");
+    	}
+    	if(filename!= null) {
+    		resdir =resdir+filename;
+    		if(ext != null) {
+    			resdir =resdir+System.getProperty("file.separator")+filename+"."+ext;
+    		}else {
+    			resdir =resdir+System.getProperty("file.separator");
+    		}
+    	}
+    	return resdir;
+    }
+    
+    
+    public static String generateDir(String down,String platform,boolean odd,String filename,String favname,String ext) {
+    	String datepath = DateUtils.getDate("yyyy")+System.getProperty("file.separator");
+    	String resdir ="";
+    	resdir = resdir+down+System.getProperty("file.separator");
+    	//拼接平台
+    	resdir=resdir+platform+System.getProperty("file.separator");
+    	
+    	//拼接类型
+    	if(odd) {
+    		resdir=resdir+"odd"+System.getProperty("file.separator");
+    	}else {
+    		resdir=resdir+"collection"+System.getProperty("file.separator");
+    	}
+    	if(favname== null) {
+    		resdir =resdir+datepath+System.getProperty("file.separator");
+    	}else {
+    		resdir =resdir+favname+System.getProperty("file.separator");
+    	}
+    	if(filename!= null) {
+    		resdir =resdir+filename;
+    		if(ext != null) {
+    			resdir =resdir+"."+ext;
+    		}else {
+    			resdir =resdir+System.getProperty("file.separator");
+    		}
+    	}
+    	return resdir;
+    }
+    
+    
 	
 	/**
-	 * 创建目录文件 并返回路径
+	 * 创建目录文件 并返回路径   新版废弃  不调用
 	 * @param directory
 	 * @param ext
 	 * @param filename
 	 * @param platform
 	 * @return
 	 */
+    @Deprecated
 	public static String createDirFile(String directory,String ext,String filename,String platform) {
 		String datepath = DateUtils.getDate("yyyy")+System.getProperty("file.separator");
 		String path =directory
 					+System.getProperty("file.separator")
 					+platform
-					+System.getProperty("file.separator")+datepath
+					+System.getProperty("file.separator")
+					+datepath
 					+System.getProperty("file.separator")+filename+System.getProperty("file.separator")
 					+filename
 					+ext;
 		return path;
 	}
 	
+    
+    @Deprecated
 	public  static String createTemporaryDirectory(String platform,String filename,String directory) {
 		String datepath = DateUtils.getDate("yyyy")+System.getProperty("file.separator");
 		String videofile = directory+System.getProperty("file.separator")
@@ -64,6 +142,13 @@ public class FileUtil {
 	}
 	
 
+	/**
+	 * 文件保存位置  新版废弃
+	 * @param platform
+	 * @param filename
+	 * @return
+	 */
+	@Deprecated
 	public  static String createTemporaryDirectory(String platform,String filename) {
 		String datepath = DateUtils.getDate("yyyy")+System.getProperty("file.separator");
 		String videofile = uploadRealPath
@@ -75,6 +160,7 @@ public class FileUtil {
 		return videofile;
 	}
 	
+	@Deprecated
 	public  static String createTemporaryDirectoryFav(String platform,String filename,String fav) {
 		String datepath = DateUtils.getDate("yyyy")+System.getProperty("file.separator");
 		String videofile = uploadRealPath
@@ -88,6 +174,10 @@ public class FileUtil {
 		return videofile;
 	}
 	
+	/*
+	 * 不再使用
+	 * **/
+	@Deprecated
 	public  static String createTemporaryDirectoryFav(String platform,String filename,String directory,String fav) {
 		String datepath = DateUtils.getDate("yyyy")+System.getProperty("file.separator");
 		String videofile = directory+System.getProperty("file.separator")
@@ -100,6 +190,8 @@ public class FileUtil {
 						   +filename;
 		return videofile;
 	}
+	
+	@Deprecated
 	public static String createDirFileFav(String directory,String ext,String filename,String platform,String fav) {
 		String datepath = DateUtils.getDate("yyyy")+System.getProperty("file.separator");
 		String path =directory

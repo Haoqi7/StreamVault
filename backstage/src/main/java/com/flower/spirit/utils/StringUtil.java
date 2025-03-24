@@ -58,14 +58,26 @@ public class StringUtil {
 				obj = obj.substring(0, 64);
 			}
 
-			// 先替换连续的特殊字符为单个下划线
-			String result = obj.replaceAll("[^A-Za-z0-9\\u4e00-\\u9fa5]+", "_");
+			// 1. 替换所有非中文、数字、字母的字符为点号
+			String result = obj.replaceAll("[^A-Za-z0-9\\u4e00-\\u9fa5]+", ".");
 
-			// 去除首尾下划线
-			result = result.replaceAll("^_+|_+$", "");
+			// 2. 处理连续的点号
+			result = result.replaceAll("\\.+", ".");
 
-			// 确保非空结果
-			return result.isEmpty() ? aid : result;
+			// 3. 去除首尾的点号
+			result = result.replaceAll("^\\.|\\.$", "");
+
+			// 4. 如果结果为空，使用备用ID
+			if (result.isEmpty()) {
+				return aid;
+			}
+
+			// 5. 确保文件名不以数字开头（Jellyfin可能会误认为是集数）
+			if (result.matches("^[0-9].*")) {
+				result = "ep" + result;
+			}
+
+			return result;
 		} catch (Exception e) {
 			return aid;
 		}

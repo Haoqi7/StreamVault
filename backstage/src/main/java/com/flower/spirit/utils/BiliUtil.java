@@ -68,17 +68,18 @@ public class BiliUtil {
 		}
 		String video = parseObject.getJSONObject("data").getJSONArray("durl").getJSONObject(0).getString("url");
 		if (Global.downtype.equals("http")) {
-			HttpUtil.downBiliFromUrl(video, filename + ".mp4",
-					FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename,namepath));
+			HttpUtil.downBiliFromUrl(video, filename + ".mp4",FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, namepath, null));
 		}
 		if (Global.downtype.equals("a2")) {
+		
 			Aria2Util.sendMessage(Global.a2_link,
-					Aria2Util.createBiliparameter(video, FileUtil
-							.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename, Global.down_path,namepath),
-							filename + ".mp4", Global.a2_token));
+					Aria2Util.createBiliparameter(
+							video, 
+							FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), false, filename, namepath, null),
+							filename + ".mp4",
+							Global.a2_token));
 		}
-		videoDataInfo.put("video",
-				FileUtil.createDirFileFav(FileUtil.uploadRealPath, ".mp4", filename, Global.platform.bilibili.name(),namepath));
+		videoDataInfo.put("video",FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, namepath, "mp4"));
 		videoDataInfo.put("videoname", filename + ".mp4");
 		System.out.println(videoDataInfo);
 		return videoDataInfo;
@@ -86,7 +87,6 @@ public class BiliUtil {
 
 	/**
 	 * 解析视频信息并下载视频源文件
-	 * 优化版：清晰代码结构，改进错误处理
 	 * 
 	 * @param url   视频URL
 	 * @param token 用户token
@@ -189,12 +189,11 @@ public class BiliUtil {
 		// 根据下载类型选择下载方式
 		if (Global.downtype.equals("http")) {
 			// 使用HTTP直接下载
-			String targetDir = FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), filename);
+			String targetDir = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, null);
 			HttpUtil.downBiliFromUrl(videoUrl, filename + ".mp4", targetDir);
 		} else if (Global.downtype.equals("a2")) {
 			// 使用Aria2下载
-			String targetDir = FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), filename,
-					Global.down_path);
+			String targetDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), true, filename, null, null);
 			Aria2Util.sendMessage(
 					Global.a2_link,
 					Aria2Util.createBiliparameter(videoUrl, targetDir, filename + ".mp4", Global.a2_token));
@@ -202,8 +201,7 @@ public class BiliUtil {
 
 		// 更新视频信息
 		Map<String, String> result = new HashMap<>(videoInfo);
-		result.put("video",
-				FileUtil.createDirFile(FileUtil.uploadRealPath, ".mp4", filename, Global.platform.bilibili.name()));
+		result.put("video",FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4"));
 		result.put("videoname", filename + ".mp4");
 
 		return result;
@@ -234,8 +232,8 @@ public class BiliUtil {
 
 		// 更新视频信息
 		Map<String, String> result = new HashMap<>(videoInfo);
-		result.put("video",
-				FileUtil.createDirFile(FileUtil.uploadRealPath, ".mp4", filename, Global.platform.bilibili.name()));
+		
+		result.put("video",FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4"));
 		result.put("videoname", filename + ".mp4");
 
 		return result;
@@ -246,11 +244,13 @@ public class BiliUtil {
 	 */
 	private static void processHttpDownload(String videoUrl, String audioUrl, String filename,String fav) throws Exception {
 		// 创建临时目录
-		String tempDir = FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), filename, Global.uploadRealPath);
-		String outputPath = FileUtil.createDirFile(Global.uploadRealPath, ".mp4", filename, Global.platform.bilibili.name());
+		String tempDir = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, null);
+		String outputPath =  FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4");
+		
+		
 		if(fav != null) {
-			tempDir = FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename, Global.uploadRealPath,fav);
-			outputPath = FileUtil.createDirFileFav(Global.uploadRealPath, ".mp4", filename, Global.platform.bilibili.name(),fav);
+			 tempDir = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, fav, null);
+			 outputPath =  FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, fav, "mp4");
 		}
 		
 
@@ -282,11 +282,9 @@ public class BiliUtil {
 	private static void processAria2Download(String videoUrl, String audioUrl, Map<String, String> videoInfo,
 			String filename,String fav) throws Exception {
 		// 创建下载目录
-		String downloadDir = FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), filename,
-				Global.down_path);
+		String downloadDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), true, filename, null, null);
 		if(fav != null) {
-			downloadDir = FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename,
-					Global.down_path,fav);
+			downloadDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), true, filename, null, fav);
 		}
 		// 发送下载任务
 		String videores = Aria2Util.sendMessage(Global.a2_link,
@@ -307,10 +305,8 @@ public class BiliUtil {
 		logger.info("高清视频使用DASH格式，提交到FFmpeg队列等待下载完成后合并");
 
 		// 临时目录和输出路径
-		String tempDir = FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), filename);
-		String outputPath = FileUtil.createDirFile(FileUtil.uploadRealPath, ".mp4", filename,
-				Global.platform.bilibili.name());
-
+		String tempDir =  FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, null);
+		String outputPath=  FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4");
 		// 保存队列信息
 		FfmpegQueueEntity ffmpegQueue = new FfmpegQueueEntity();
 		ffmpegQueue.setVideoid(videoInfo.get("cid"));

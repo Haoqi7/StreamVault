@@ -138,7 +138,7 @@ public class CollectDataService {
 			System.out.println(infobili);
 			JSONObject object = JSONObject.parseObject(infobili);
 			String namepath = object.getJSONObject("data").getString("title");
-			String temporaryDirectory = FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), namepath, Global.uploadRealPath);
+			String temporaryDirectory =FileUtil.generateDir(true, Global.platform.bilibili.name(), false, null, namepath, null);
 			EmbyMetadataGenerator.createFavoriteNfo(infobili, temporaryDirectory);
 			String api = "https://api.bilibili.com/x/v3/fav/resource/ids?media_id="+collectDataEntity.getOriginaladdress()+"&platform=web";
 			String httpGetBili = HttpUtil.httpGetBili(api, "UTF-8", Global.bilicookies);
@@ -222,8 +222,9 @@ public class CollectDataService {
 					List<VideoDataEntity> findByVideoid = videoDataService.findByVideoid(cid);
 					if(findByVideoid.size() == 0) {
 						Map<String, String> findVideoStreaming =  BiliUtil.findVideoStreamingNoData(map,Global.bilicookies,map.get("quality"),namepath);
-						String videounaddr =  savefile+"bilibili/"+DateUtils.getDate("yyyy")+"/"+DateUtils.getDate("MM")+"/"+filename+"/"+findVideoStreaming.get("videoname");//映射
-						 //封面down
+						String videounaddr =  FileUtil.generateDir(false, Global.platform.bilibili.name(), false, filename, namepath, "mp4");
+						
+						//封面down
 						String coverunaddr = FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename, savefile,namepath);
 						HttpUtil.downBiliFromUrl(findVideoStreaming.get("pic"), filename+".jpg", FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename, uploadRealPath,namepath));
 						//封面down
@@ -248,7 +249,8 @@ public class CollectDataService {
 						map.put("upface", uplocal);
 						map.put("piclocal", piclocal);
 						map.put("ctime", ctime);
-						EmbyMetadataGenerator.createFavoriteEpisodeNfo(map, FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename,namepath), y+1,FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), namepath, Global.uploadRealPath));
+						map.put("title", filename);
+						EmbyMetadataGenerator.createFavoriteEpisodeNfo(map, FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename,namepath), i+1,FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), namepath, Global.uploadRealPath));
 						
 					}
 					 //新建明细
