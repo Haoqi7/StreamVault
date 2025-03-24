@@ -69,7 +69,7 @@ public class FileUtil {
     		}else {
     			resdir =resdir+filename;
     		}
-    		
+//    		resdir =resdir+filename;	
     		if(ext != null) {
     			resdir =resdir+System.getProperty("file.separator")+filename+"."+ext;
     		}else {
