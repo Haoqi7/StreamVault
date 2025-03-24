@@ -239,8 +239,8 @@ public class CollectDataService {
 						String upmid = owner.getString("mid");
 						String ctime = map.get("ctime");
 						//下载up 头像  up头像不参与数据 只参与nfo
-						HttpUtil.downBiliFromUrl(upface, upmid+"upcover.jpg",dir);
-						String uplocal =  dir+upmid+"upcover.jpg";
+						HttpUtil.downBiliFromUrl(upface, "upcover"+upmid+".jpg",dir);
+						String uplocal =  dir+"upcover"+upmid+".jpg";
 						String piclocal =  dir+filename+".jpg";
 						map.put("upname", upname);
 						map.put("upmid", upmid);
