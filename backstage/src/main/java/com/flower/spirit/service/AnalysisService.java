@@ -544,9 +544,9 @@ public class AnalysisService {
 				String ctime = videoInfo.get("ctime");
 				//下载up 头像  up头像不参与数据 只参与nfo
 				HttpUtil.downBiliFromUrl(upface, "upcover.jpg",dir);
-				String uplocal =  dbdir+"upcover.jpg";
-				String piclocal = dbdir+filename+".jpg";
-				EmbyMetadataGenerator.createBillNfo(upname,uplocal,upmid,ctime,cid,title,desc,piclocal,videoPath);
+				String uplocal =  dir+"upcover.jpg";
+				String piclocal = dir+filename+".jpg";
+				EmbyMetadataGenerator.createBillNfo(upname,uplocal,upmid,ctime,cid,title,desc,piclocal);
 				// 建档
 				VideoDataEntity videoDataEntity = new VideoDataEntity(cid, title, desc, platform, coverunaddr,
 						videoPath, videounaddr, video);

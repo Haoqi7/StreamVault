@@ -203,18 +203,7 @@ public class EmbyMetadataGenerator {
     }
 
     public static void createBillNfo(String upname, String upface, String upmid, String ctime, String cid, String title,
-            String desc, String pic, String videoPath) {
-        // 打印所有参数
-        System.out.println("上传者名称: " + upname);
-        System.out.println("上传者头像: " + upface);
-        System.out.println("上传者ID: " + upmid);
-        System.out.println("创建时间: " + ctime);
-        System.out.println("内容ID: " + cid);
-        System.out.println("标题: " + title);
-        System.out.println("描述: " + desc);
-        System.out.println("封面图片: " + pic);
-        System.out.println("视频路径: " + videoPath);
-
+            String desc, String pic ) {
         try {
             // 处理标题（去除引号）
             String cleanTitle = title.replace("\"", "").trim();
@@ -242,7 +231,7 @@ public class EmbyMetadataGenerator {
             // 设置actor为UP主
             String actor = upname;
             // 获取输出路径（使用视频所在目录）
-            String outputPath = new File(videoPath).getParent();
+            String outputPath = new File(pic).getParent();
             // 调用generateMetadata方法（使用正确的参数）
             generateMetadata(
                     cleanTitle, // 标题
