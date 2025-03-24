@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>系统配置</title>
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="../static/css/style.min.css" rel="stylesheet">
+    <style>
+        .card{}
+
+    </style>
+</head>
+
+<body>
+<div class="lyear-layout-web">
+    <div class="lyear-layout-container">
+        <!--左侧导航-->
+        <div th:include="admin/include/common :: headermenu"> </div>
+
+        <!--页面主要内容-->
+        <main class="lyear-layout-content">
+
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header"><h4>系统常量</h4></div>
+                            <div class="card-body">
+
+                                <form action="#" method="post" onsubmit="return false;">
+                                    <input type="hidden" id="appid" class="appid" th:value="${config.id}" />
+                                    <div class="form-group">
+                                        <label>App token</label>
+                                        <input class="form-control" type="text" id="apptoken" name="apptoken" placeholder="apptoken" th:value="${config.apptoken}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>ip授权</label>
+                                        <input class="form-control" type="text" id="ipauth" name="ipauth" placeholder="目前没做">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>开启提交记录</label>
+                                            <select id="openprocesshistory" class="form-control openprocesshistory" name="openprocesshistory">
+                                                <option value="0"  th:selected="${config.openprocesshistory} eq '0'">否</option>
+                                                <option value="1"  th:selected="${config.openprocesshistory} eq '1'">是</option>
+                                            </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>监控定时器cron</label>
+                                        <input class="form-control" type="text" id="taskcron" name="taskcron" placeholder="默认0 0 0/3 * * ?  三小时一次" th:value="${config.taskcron}">
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-primary saveConfig" type="button">保存</button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header"><h4>B站配置</h4></div>
+                            <div class="card-body">
+
+                                <form action="#" method="post" onsubmit="return false;">
+                                    <input type="hidden" class="bili" th:value="${bili.id}" />
+                                    <div class="form-group">
+                                        <label>B站cookie</label>
+                                        <div>
+                                            <input type="type" name="bilicookies"  autocomplete="off" class="form-control bilicookies" th:value="${bili.bilicookies}">
+                                            <br/>
+                                            <button style="display: inline-block; " type="button" class="btn btn-primary scanQR" lay-submit="" >扫码登录</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>是否大会员</label>
+                                        <select class="ismember form-control" name="ismember">
+                                            <option value="否"  th:selected="${bili.bigmember} eq '否'">否</option>
+                                            <option value="是"  th:selected="${bili.bigmember} eq '是'">是</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>自定义码流(这里你放心  不管你怎么选 我都是直接下载你当前Cookie支持的最大码率)</label>
+                                        <select class="bitstream form-control" name="bitstream">
+                                            <option value="64"  th:selected="${bili.bitstream} eq '64'">720P 高清</option>
+                                            <option value="74"  th:selected="${bili.bitstream} eq '74'">720P60 高帧率(需要cookie)</option>
+                                            <option value="80"  th:selected="${bili.bitstream} eq '80'">1080P 高清(需要cookie)</option>
+                                            <option value="112"  th:selected="${bili.bitstream} eq '112'">1080P+ 高码率(需要大会员)</option>
+                                            <option value="116"  th:selected="${bili.bitstream} eq '116'">1080P60 高帧率(需要大会员)</option>
+                                            <option value="120"  th:selected="${bili.bitstream} eq '120'">4K 超清(需要大会员)</option>
+                                            <!-- <option value="125"  th:selected="${bili.bitstream} eq '125'">HDR 真彩色(需要大会员)</option>
+                                                  <option value="126"  th:selected="${bili.bitstream} eq '126'">杜比视界(需要大会员)</option> -->
+                                            <option value="127"  th:selected="${bili.bitstream} eq '127'">8K 超高清(需要大会员)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-primary saveBiliConfig" type="button">保存</button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header"><h4>抖音配置</h4></div>
+                            <div class="card-body">
+
+                                <form action="#" method="post" onsubmit="return false;">
+                                    <input type="hidden" class="tiktok" th:value="${tiktok.id}" />
+                                    <div class="form-group">
+                                        <label>抖音Cookie(使用抖音必填)</label>
+                                        <input type="type" name="tiktokcookies"  autocomplete="off" class="form-control tiktokcookies" th:value="${tiktok.cookies}">
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-primary saveTikTokConfig" type="button">保存</button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+<!--                     <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header"><h4>其他平台Cookie</h4></div>
+                            <div class="card-body">
+
+                                <form action="#" method="post" onsubmit="return false;">
+                                    <input type="hidden" class="cookiesid" th:value="${cookies.id}" />
+                                    <div class="form-group">
+                                        <label>YouTuBe(不知道填了作用是什么)</label>
+                                        <input type="type" name="youtubecookies"  autocomplete="off" class="form-control youtubecookies" th:value="${cookies.youtubecookies}" placeholder="cookie">
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-primary saveCookieConfig" type="button">保存</button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+
+            </div>
+
+        </main>
+        <!--End 页面主要内容-->
+        <div class="QRSCANBOX" style="display: none;text-align: center; ">
+            <div id="qrcode" style=" margin: 34px 25%; "></div><br />
+            <button style=" margin-top: 2rem; display: inline-block; " type="button" class="btn btn-primary scanQRend" lay-submit="" >确认登录后点我</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="../static/js/jquery.min.js"></script>
+<script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/js/perfect-scrollbar.min.js"></script>
+<script type="text/javascript" src="../static/js/main.min.js"></script>
+<script src="../static/js/layer/layer.js" type="text/javascript"></script>
+<script src="/static/js/qrcode.min.js" charset="utf-8"></script>
+<script>
+    $(function (){
+        saveConfig();
+        saveBiliConfig();
+        scanQR();
+        scanQRend();
+        saveTikTokConfig();
+        saveCookieConfig();
+    })
+
+    var qrcode_key;
+    function saveCookieConfig(){
+        $('.saveCookieConfig').click(function(){
+            var appid = $('.cookiesid').val();
+            var youtubecookies = $('.youtubecookies').val();
+            var twittercookies = $('.twittercookies').val();
+            var option = {};
+            option['id'] = appid;
+            if(youtubecookies != ""){
+                option['youtubecookies'] = youtubecookies;
+            }
+            if(twittercookies != ""){
+                option['twittercookies'] = twittercookies;
+            }
+            $.post("/admin/api/updateCookie",option,function(data,status){
+                if(data.resCode =="000001"){
+                    layer.closeAll();
+                    layer.alert(data.message,function(){
+                        window.location.reload();
+                    })
+                }else{
+                    layer.alert(data.message,function(){
+                        layer.closeAll();
+                    });
+                }
+            })
+        })
+    }
+    function saveTikTokConfig(){
+        $('.saveTikTokConfig').click(function(){
+            var appid = $('.tiktok').val();
+            var cookies = $('.tiktokcookies').val();
+            var analysisserver = $('.analysisserver').val();
+            var option = {};
+            option['id'] = appid;
+            option['cookies'] = cookies;
+            option['analysisserver'] = analysisserver;
+            $.post("/admin/api/updateTikTokConfig",option,function(data,status){
+                if(data.resCode =="000001"){
+                    layer.closeAll();
+                    layer.alert(data.message,function(){
+                        window.location.reload();
+                    })
+                }else{
+
+                    layer.alert(data.message,function(){
+                        layer.closeAll();
+                    });
+                }
+            })
+        })
+    }
+    function scanQRend(){
+        $('.scanQRend').click(function(){
+            $.get("/admin/api/checkBiliLogin?qrcodekey="+qrcode_key,function(res){
+                if(res.resCode =="000001"){
+                    layer.closeAll();
+                    console.log(res);
+                    if(res.resCode == "000001"){
+                        layer.alert(res.message,function(){
+                            window.location.reload();
+                        })
+                    }
+                }else{
+                    layer.alert(res.message);
+                }
+            })
+        })
+
+    }
+    function scanQR(){
+        $('.scanQR').click(function(){
+            layer.msg('正在等待二维码', {
+                icon: 16,
+                shade: 0.01,
+                time:0
+            });
+            $.get("/admin/api/getBiliCode",function(res){
+                if(res.resCode =="000001"){
+                    layer.closeAll();
+                    $('#qrcode').html("");
+                    var url = res.record.data.url;
+                    qrcode_key =res.record.data.qrcode_key;
+                    new QRCode(document.getElementById("qrcode"), url);
+                    console.log(res);
+                    layer.open({
+                        type: 1,
+                        skin: 'layui-layer-rim',
+                        area: ['520px', '540px'],
+                        content: $('.QRSCANBOX')
+                    });
+                }else{
+                    layer.alert(res.message);
+                }
+            })
+        })
+    }
+    function saveBiliConfig(){
+        $('.saveBiliConfig').click(function(){
+            var appid = $('.bili').val();
+            var bilicookies = $('.bilicookies').val();
+            var bigmember = $('.ismember').val();
+            var bitstream = $('.bitstream').val();
+            var option = {};
+            option['id'] = appid;
+            option['bilicookies'] = bilicookies;
+            option['bigmember'] = bigmember;
+            option['bitstream'] = bitstream;
+            $.post("/admin/api/updateBiliConfig",option,function(data,status){
+                if(data.resCode =="000001"){
+                    layer.closeAll();
+                    layer.alert(data.message,function(){
+                        window.location.reload();
+                    })
+                }else{
+
+                    layer.alert(data.message,function(){
+                        layer.closeAll();
+                    });
+                }
+            })
+        })
+    }
+    function saveConfig(){
+        $('.saveConfig').click(function(){
+            var appid = $('#appid').val();
+            var apptoken = $('#apptoken').val();
+            var openprocesshistory = $('#openprocesshistory').val();
+            var taskcron =$('#taskcron').val();
+            var option = {};
+            option['id'] = appid;
+            option['apptoken'] = apptoken;
+            option['openprocesshistory'] = openprocesshistory;
+            if(taskcron!=""){
+                option['taskcron'] = taskcron;
+            }
+            $.post("/admin/api/saveConfig",option,function(data,status){
+                if(data.resCode =="000001"){
+                    layer.closeAll();
+                    layer.alert(data.message,function(){
+                        window.location.reload();
+                    })
+                }else{
+
+                    layer.alert(data.message,function(){
+                        layer.closeAll();
+                    });
+                }
+            })
+        })
+    }
+
+
+</script>
+</body>
+</html>

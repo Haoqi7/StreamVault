@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+	<title>收藏夹-小精灵</title>
+	<link href="../static/css/bootstrap.min.css" rel="stylesheet">
+	<link href="../static/css/materialdesignicons.min.css" rel="stylesheet">
+	<link href="../static/css/style.min.css" rel="stylesheet">
+	<link href="../static/js/skin/laypage.css" rel="stylesheet">
+
+	<style>
+		table{
+			table-layout: fixed;
+		}
+		table td{
+			text-overflow:ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+
+
+	</style>
+</head>
+
+<body>
+<div class="lyear-layout-web">
+
+	<div class="lyear-layout-container">
+
+		<!--左侧导航-->
+		<div th:include="admin/include/common :: headermenu"> </div>
+		<!--End 头部信息-->
+		<!--End 头部信息-->
+
+		<!--页面主要内容-->
+		<main class="lyear-layout-content">
+
+			<div class="container-fluid">
+
+
+
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="card">
+							<div class="card-header">搜索</div>
+							<div class="card-body">
+								<form action="#!" method="post" class="form-horizontal form-search">
+									<div class="row">
+										<div class="col-md-4">
+											<div class="form-group">
+												<label class="w-120 pull-left control-label">平台：</label>
+												<div class="pull-left w-120-calc">
+													<select name="videoplatform" class="form-control videoplatform" id="type">
+														<option value="">所有</option>
+														<option value="哔哩">哔哩</option>
+														<option value="抖音">抖音</option>
+													</select>
+												</div>
+											</div>
+										</div>
+									</div>
+								</form>
+								<a class="btn btn-primary m-r-5 searchData" href="#"><i class="mdi mdi-plus"></i>搜索</a>
+								<a class="btn btn-primary m-r-5 addCollect" href="#"><i class="mdi mdi-plus"></i>添加任务</a>
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+
+
+
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="card">
+							<div class="card-body">
+								<div class="table-responsive">
+									<table class="table table-bordered">
+										<thead>
+										<tr>
+											<th>编号</th>
+											<th>任务名称</th>
+											<th>源地址</th>
+											<th>来源平台</th>
+											<th>是否监控</th>
+											<th>任务状态</th>
+											<th>总任务数</th>
+											<th>已完成的任务数</th>
+											<th>提交时间</th>
+											<th>结束时间</th>
+											<th>操作</th>
+										</tr>
+										</thead>
+										<tbody class="tableData">
+
+										</tbody>
+									</table>
+								</div>
+								<ul id="pager" class="pagination">
+
+								</ul>
+
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+		</main>
+		<!--End 页面主要内容-->
+	</div>
+
+	<!--    模态框 start-->
+	<div class="addCollectBox layui-form" style="display: none;padding: 20px;">
+		<input class="optionid" type="hidden">
+		<div class="layui-inline">
+			<label>任务名称</label>
+			<div class="layui-input-inline">
+				<input type="text" name="taskname"  autocomplete="off" class="taskname form-control">
+			</div>
+		</div>
+		<div class="layui-inline">
+			<label>来源平台</label>
+			<div class="layui-input-inline layui-show-xs-block">
+				<select class="platform form-control">
+					<option  value="哔哩">哔哩</option>
+					<option  value="抖音">抖音</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="layui-inline">
+			<label>收藏链接</label>
+			<div class="layui-input-inline">
+				<input  type="text" name="originaladdress"  autocomplete="off" class="originaladdress form-control">
+			</div>
+		</div>
+		<div class="layui-inline">
+			<label>是否开启监控</label>
+			<div class="layui-input-inline layui-show-xs-block">
+				<select class="monitoring form-control">
+					<option  value="N">否</option>
+					<option  value="Y">是</option>
+				</select>
+			</div>
+		</div>
+		<div class="buttondiv " style=" padding-left: 10%; padding-top: 5%; "><button type="button" class="btn btn-primary submitCollect">保存信息</button></div>
+		<div style="font-size: 1.2rem;">
+			<br/>
+			注意:哔哩哔哩 只需要填写收藏夹ID<br/>
+			eg. https://www.bilibili.com/medialist/detail/ml12344  中只需要填写 12344<br/>
+			抖音  作品/喜欢页面 需要填写用户id 如果是喜欢页面 请确认开放所有人可见<br/>
+			eg. https://www.douyin.com/user/12345   中只需要 123456<br/>
+			如果获取作品 链接请填写 post12345<br/>
+			如果获取喜欢 链接请填写 like12345  如果ck 是这个账号的 则不强制所有人可见权限<br/>
+			请注意监控按需开启 监控和本功能公用一个线程如果监控过多,会造成手动添加排队时间过长<br/>
+			该功能处于测试阶段,会有bug 但是我不知道<br/>
+		</div>
+	</div>
+
+	<!--    模态框end-->
+</div>
+
+<script type="text/javascript" src="../static/js/jquery.min.js"></script>
+<script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/js/perfect-scrollbar.min.js"></script>
+<script type="text/javascript" src="../static/js/main.min.js"></script>
+<script type="text/javascript" src="../static/js/laypage.js"></script>
+<script src="../static/js/layer/layer.js" type="text/javascript"></script>
+<script type="text/javascript">
+	$(function(){
+		findList(1);
+		addCollect();
+		submitCollect();
+		$('.searchData').click(function () {
+			findList(1)
+		})
+
+	});
+	function submitCollect(){
+		$('.submitCollect').click(function(){
+			var option ={
+				platform:$('.platform').val(),
+				originaladdress:$('.originaladdress').val(),
+				monitoring:$('.monitoring').val(),
+				taskname:$('.taskname').val()
+			};
+			layer.load();
+			$.post("/admin/api/submitCollectData",option,function(data,status){
+				console.log(data);
+				if(data.resCode =="000001"){
+					layer.closeAll();
+					layer.alert(data.message,function(){
+						window.location.reload();
+					})
+				}else{
+					layer.closeAll();
+					layer.alert(data.message);
+				}
+			})
+		})
+	}
+	function addCollect(){
+		$('.addCollect').click(function(){
+			layer.open({
+				type: 1,
+				skin: 'layui-layer-rim',
+				area: ['530px', '550px'],
+				content: $('.addCollectBox')
+			});
+		})
+	}
+	function viewProcesses(){
+		$('.viewProcesses').click(function () {
+			var id = $(this).attr('data-id');
+			layer.open({
+				type: 2,
+				title: '任务进程',
+				shadeClose: true,
+				maxmin: true, //开启最大化最小化按钮
+				area: ['900px', '600px'],
+				content: '/admin/collectDataDetailList?taskid='+id
+			});
+		})
+	}
+	function deleteProcesses(){
+		$('.deleteProcesses').click(function () {
+			var id = $(this).attr('data-id');
+			layer.confirm("删除任务会造成任务失败建议无执行任务时再删除！是否删除", function(index){
+				//调用接口删除
+				$.get("/admin/api/deleteCollectData?id="+id,function(res){
+					if(res.resCode =="000001"){
+						layer.msg(res.message)
+						setTimeout(function(){
+							window.location.reload();
+						},1500)
+					}else{
+						layer.alert(res.message);
+					}
+				})
+				layer.close(index);
+			});
+		})
+
+	}
+	function textnone(str){
+		if(str == null || str == undefined){
+			return "无";
+		}
+		return str;
+	}
+	function  findList(page){
+		var option = {
+			pageNo:page,
+			pageSize:25
+		}
+		var  videoplatform = $('.videoplatform').val();
+		if(videoplatform != "" ){
+			option['platform']= videoplatform;
+		}
+		$.post("/admin/api/findCollectDataList",option,
+				function(data,status){
+					console.log(data,status);
+					if(data.resCode==="000001"){
+						var record = data.record;
+						var html = "";
+						var list = record.content;
+						console.log(list);
+						for(var i = 0;i<list.length;i++){
+							html +='<tr>'
+									+'<td title="'+list[i].id+'">'+list[i].id+'</td>'
+									+'<td title="'+list[i].taskname+'">'+textnone(list[i].taskname)+'</td>'
+									+'<td title="'+list[i].originaladdress+'">'+list[i].originaladdress+'</td>'
+									+'<td title="'+list[i].platform+'">'+list[i].platform+'</td>'
+									+'<td title="'+list[i].monitoring+'">'+list[i].monitoring+'</td>'
+									+'<td title="'+list[i].taskstatus+'">'+list[i].taskstatus+'</td>'
+									+'<td title="'+list[i].count+'">'+list[i].count+'</td>'
+									+'<td title="'+list[i].carriedout+'">'+list[i].carriedout+'</td>'
+									+'<td title="'+list[i].createtime+'">'+list[i].createtime+'</td>'
+									+'<td title="'+list[i].endtime+'">'+list[i].endtime+'</td>'
+									+'<td>'
+									+'<div class="btn-group">'
+									+'<a data-id="'+list[i].id+'" class="btn btn-xs btn-default viewProcesses" href="#!" title="查看进程" data-toggle="tooltip">查看进程</a>'
+									+'<a data-id="'+list[i].id+'" class="btn btn-xs btn-default deleteProcesses" href="#!" title="删除" data-toggle="tooltip">删除</a>'
+									+'</div>'
+									+'</td></tr>'
+						}
+
+						$('.tableData').html(html)
+						viewProcesses();
+						deleteProcesses();
+						laypage({
+							cont: 'pager',
+							pages: record.totalPages,
+							curr:page,
+							jump: function(obj,first){
+								if(!first && obj.curr != page){
+									findList(obj.curr);
+								}
+							}
+						})
+					}
+
+				})
+	}
+</script>
+</body>
+</html>

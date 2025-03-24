@@ -1,0 +1,46 @@
+FROM ubuntu:20.04
+
+ENV TZ=Asia/Shanghai
+RUN sed -i 's/http:\/\/archive.ubuntu.com/http:\/\/mirrors.tuna.tsinghua.edu.cn\/ubuntu/g' /etc/apt/sources.list
+
+# Insert Steam prompt answers
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN echo steam steam/question select "I AGREE" | debconf-set-selections \
+ && echo steam steam/license note '' | debconf-set-selections
+
+# Update the repository and install SteamCMD
+ARG DEBIAN_FRONTEND=noninteractive
+RUN dpkg --add-architecture i386 \
+ && apt-get update -y \
+ && apt-get install -y --no-install-recommends ca-certificates locales steamcmd screen ffmpeg openjdk-8-jre wget software-properties-common
+
+# Add unicode support
+RUN locale-gen en_US.UTF-8
+ENV LANG 'en_US.UTF-8'
+ENV LANGUAGE 'en_US:en'
+
+ARG YT_DLP_VERSION="2023.11.16"
+RUN wget -O /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp && chmod a+rx /usr/local/bin/yt-dlp
+ENV YT_DLP_PATH /usr/local/bin/yt-dlp
+
+RUN add-apt-repository ppa:deadsnakes/ppa
+
+# Update the repository again and install Python 3.12
+RUN apt-get update -y \
+ && apt-get install -y python3.12 \
+ && rm -rf /var/lib/apt/lists/*
+
+# Create symlink for executable
+RUN ln -s /usr/games/steamcmd /usr/bin/steamcmd
+
+# Update SteamCMD and verify latest version
+RUN steamcmd +quit
+
+# 挂载目录
+VOLUME ["/tmp","/app"]
+##构建基础应用
+COPY db /home/app/db/
+RUN mkdir -p /app/resources
+ADD spirit-0.0.1-SNAPSHOT.jar app.jar
+## 启动进程
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar","--spring.profiles.active=docker"]

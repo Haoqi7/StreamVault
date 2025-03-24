@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    <head>
+        <meta charset="UTF-8">
+        <title>视频管理-进程列表</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="/static/css/font.css">
+        <link rel="stylesheet" href="/static/css/xadmin.css">
+        <script src="/static/lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/static/js/xadmin.js"></script>
+        <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript" src="/static/js/common.js"></script>
+        <!--[if lt IE 9]>
+          <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+          <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    <style>
+        .layui-table-cell {
+            height: 100%;
+            max-width: 100%;
+        }
+        .layui-table-fixed-r{
+        	display: none
+        }
+    </style>
+    </head>
+    <body>
+		<input id="taskid" type="hidden" th:value="${taskid}"/> 
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                    
+                    <div class="layui-card-body ">
+                            <form class="layui-form layui-col-space5">
+        
+                                <div class="layui-input-inline layui-show-xs-block">
+  									<select id="status">
+  										<option value="">请选择</option>
+  										<option value="已完成">已完成</option>
+  										<option value="未下载">未下载</option>
+  										<option value="不支持">不支持</option>
+                           			 </select>   
+                                </div>
+                                <div class="layui-input-inline layui-show-xs-block">
+                                <button type="button" class="layui-btn layui-btn-normal search">搜索</button>
+                                <button type="button" class="layui-btn layui-btn-normal initList">重置列表</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="layui-card-body layui-table-body layui-table-main">
+							<table class="layui-hide" id="projectList" lay-filter="projectList"></table>
+                        </div>
+                        <div class="layui-card-body ">
+                            <div class="page" id="page">
+         
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+           
+    </body>        
+	<script  th:inline="none">
+    var table;
+     $(function(){
+    	 initLayer();
+    	 loadTable();
+    	 search();
+    	 initList();
+     })
+     function initList(){
+    	 $('.initList').click(function(){
+    	     window.location.reload();
+    	 })
+     }
+     function initLayer(){
+    	 layui.use(['laydate','form'], function(){
+             var laydate = layui.laydate;
+             var  form = layui.form;
+
+             form.on('submit(add)',
+                     function(data) {
+                         console.log(data);
+         	           return false;
+           			 });
+
+
+           });
+ 
+     }
+     function search(){
+    		$('.search').click(function(){
+    			 var option = {}
+    			 var  status = $('#status').val();
+    			 if(status != "" ){
+    				 option['status']= status;
+    			 }
+    			 var  dataid = $('#taskid').val();
+    			 if(dataid != "" ){
+    				 option['dataid']= dataid;
+    			 }
+    	         table.reload('projectList', {
+    	             page: {
+    	                 curr:1
+    	             }, 
+    	 			 method:'post',
+    	 			 url: '/admin/api/findCollectDataDetail',
+    	             where: option
+    	         })
+    		})
+     }
+     function loadTable(){
+    		layui.use(['table','form'], function(){
+    			 var option = {}
+    			 var  dataid = $('#taskid').val();
+    			 if(dataid != "" ){
+    				 option['dataid']= dataid;
+    			 }
+    			  table = layui.table;
+    			  var form = layui.form;
+    			  table.render({
+    				id:'projectList',
+    				elem: '#projectList',
+    				height: 700,
+    				method:'post',
+    				url: '/admin/api/findCollectDataDetail',
+    				where: option,
+    				limit:15,
+    				request: {
+    				     pageName: 'pageNo',
+    				     limitName: 'pageSize'
+    				},
+    				page: { 
+    			        layout: ['count', 'prev', 'page', 'next', 'limit', 'skip'],
+    			        limits:[15,30,45],
+    			        first: false,
+    			        last: false,
+    			     },
+    			     cols: [[ 
+    			    	 {field: 'id', title: 'ID', width:60},
+    			    	 {field: 'videoid', title: 'videoid', width:180},
+    			    	 {field: 'videoname', title: '视频名称', width:180},
+    			    	 {field: 'originaladdress', title: 'originaladdress', width:180},
+    			    	 {field: 'status', title: '状态', width:180},
+    			    	 {field: 'createtime', title: '提交时间', width:180},
+    			     ]],
+    			     title: '媒体表'	,
+    			     parseData:function(res){
+    			    	 console.log(res);
+    			    	 return {
+    			             "code": 0, 
+    			             "msg": "",
+    			             "count": res.record.totalElements,
+    			             "data": res.record.content
+    			         };
+    			     }
+    			  });
+    			  
+    			  
+
+    			  
+    			  
+    			});
+    	}
+
+    </script>
+</html>

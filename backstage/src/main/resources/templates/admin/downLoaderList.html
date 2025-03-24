@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>提交记录-小精灵</title>
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="../static/css/style.min.css" rel="stylesheet">
+    <link href="../static/js/skin/laypage.css" rel="stylesheet">
+
+    <style>
+        table{
+            table-layout: fixed;
+        }
+        table td{
+            text-overflow:ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+
+    </style>
+</head>
+
+<body>
+<div class="lyear-layout-web">
+
+    <div class="lyear-layout-container">
+
+        <!--左侧导航-->
+        <div th:include="admin/include/common :: headermenu"> </div>
+        <!--End 头部信息-->
+        <!--End 头部信息-->
+
+        <!--页面主要内容-->
+        <main class="lyear-layout-content">
+
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header">下载器</div>
+                            <div class="card-body">
+                                <a class="btn btn-primary m-r-5 addDownLoader" href="#"><i class="mdi mdi-plus"></i>添加下载器</a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th>下载器名称</th>
+                                            <th>下载器类型</th>
+                                            <th>下载器地址</th>
+                                            <th>下载器端口</th>
+                                            <th>下载路径</th>
+                                            <th>下载器用户名</th>
+                                            <th>下载器密码</th>
+                                            <th>下载器Token</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="tableData">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <ul id="pager" class="pagination">
+
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+        <!--End 页面主要内容-->
+    </div>
+
+    <!--    模态框 start-->
+    <div class="downLoader" style="display: none;padding: 0 20px;">
+        <input type="hidden" class="downloaderid">
+        <div class="layui-form">
+            <br>
+            <div class="layui-form-item">
+                <label>
+                    下载器名称
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="downloadername" name="downloadername"  autocomplete="off" class="form-control">
+                </div>
+
+            </div>
+            <div class="layui-form-item">
+                <label>
+                    下载器类型
+                </label>
+                <div class="layui-input-inline">
+                    <select id="downloadertype" class="form-control">
+                        <option value="aria2">aria2</option>
+                        <option value="http">http</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item downloaderlinkdiv">
+                <label>
+                    下载器地址
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="downloaderlink" name="downloaderlink"  autocomplete="off" class="form-control" placeholder="eg.http://127.0.0.1  其他不要填" title="eg.http://127.0.0.1  其他不要填">
+                </div>
+
+            </div>
+            <div class="layui-form-item downloaderportdiv">
+                <label>
+                    下载端口
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="downloaderport" name="downloaderport"  autocomplete="off" class="form-control" placeholder="6800  需要自己填没有有默认值" title="6800  需要自己填没有有默认值">
+                </div>
+
+            </div>
+            <div class="layui-form-item downloadpathdiv">
+                <label>
+                    下载目录
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="downloadpath" name="downloadpath"  autocomplete="off" class="form-control" placeholder="传递给a2的下载目录  绝对路径 eg. /home/xxx or  d://xxx" title="传递给a2的下载目录  绝对路径 eg. /home/xxx or  d://xxx 如果不是外置下载器 则地址默认使用/app/resources/video">
+                </div>
+
+            </div>
+            <div class="layui-form-item usernamediv">
+                <label>
+                    下载器用户名
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="username" name="username" required="" class="form-control" placeholder="a2 填了没用  预留字段" title="a2 填了没用  预留字段">
+                </div>
+
+            </div>
+            <div class="layui-form-item passworddiv">
+                <label>
+                    下载器密码
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="password" name="password" required=""  class="form-control"  placeholder="a2 填了没用  预留字段" title="a2 填了没用  预留字段">
+                </div>
+
+            </div>
+            <div class="layui-form-item tokendiv" >
+                <label>
+                    token
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="token" name="token" required=""  class="form-control"  placeholder="a2需要填写secret 如果未设置secret不要填" title="a2需要填写secret 如果未设置secret不要填">
+                </div>
+
+            </div>
+            <div class="layui-inline">
+                <label>启用状态</label>
+                <div class="layui-input-inline layui-show-xs-block">
+                    <select class="status form-control">
+                        <option  value="0">禁用</option>
+                        <option  value="1">启用</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="buttondiv" style="padding-left: 5%;padding-top: 5%;margin-bottom: 5%;"><button type="button" class="btn btn-primary">保存信息</button></div>
+
+    </div>
+
+    <!--    模态框end-->
+</div>
+
+<script type="text/javascript" src="../static/js/jquery.min.js"></script>
+<script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/js/perfect-scrollbar.min.js"></script>
+<script type="text/javascript" src="../static/js/main.min.js"></script>
+<script type="text/javascript" src="../static/js/laypage.js"></script>
+<script src="../static/js/layer/layer.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function(){
+        findList(1);
+        loadPage();
+        saveDate();
+
+    });
+    function loadPage(){
+        $('.addDownLoader').click(function(){
+            layer.open({
+                type: 1,
+                shade: false,
+                title: "下载器维护",
+                area: ['480px', '600px'],
+                content: $('.downLoader')
+            });
+        })
+    }
+    function update(obj){
+        console.log(obj);
+        $.get("/admin/api/getDownLoader?id="+obj,function(res){
+            $('.downloaderid').val(res.record.id);
+            $('#downloadername').val(res.record.downloadername);
+            $('#downloadertype').val(res.record.downloadertype);
+            $('#downloaderlink').val(res.record.downloaderlink);
+            $('#downloaderport').val(res.record.downloaderport);
+            $('#downloadpath').val(res.record.downloadpath);
+            $('#username').val(res.record.username);
+            $('#password').val(res.record.password);
+            $('#token').val(res.record.token);
+            $('.status').val(res.record.status);
+            layer.open({
+                type: 1,
+                shade: false,
+                title: "下载器维护",
+                area: ['480px', '600px'],
+                content: $('.downLoader')
+            });
+        })
+    }
+    function saveDate(){
+        $('.buttondiv').click(function(){
+            var downloaderid = $('.downloaderid').val();
+            var downloadername = $('#downloadername').val();
+            var downloadertype = $('#downloadertype').find("option:selected").text();
+            var downloaderlink = $('#downloaderlink').val();
+            var downloaderport = $('#downloaderport').val();
+            var downloadpath = $('#downloadpath').val();
+            var username = $('#username').val();
+            var password = $('#password').val();
+            var token = $('#token').val();
+            var status = $('.status').val();
+            var option = {};
+            if(downloaderid != null){
+                option['id'] = downloaderid;
+            }
+            if(downloadername != null){
+                option['downloadername'] = downloadername;
+            }
+            if(downloadertype != null){
+                option['downloadertype'] = downloadertype;
+            }
+            if(downloaderlink != null && downloadertype =="aria2"){
+                option['downloaderlink'] = downloaderlink;
+            }
+            if(downloaderport != null && downloadertype =="aria2"){
+                option['downloaderport'] = downloaderport;
+            }
+            if(downloadpath != null && downloadertype =="aria2"){
+                option['downloadpath'] = downloadpath;
+            }
+            if(username != null && downloadertype =="aria2"){
+                option['username'] = username;
+            }
+            if(password != null && downloadertype =="aria2"){
+                option['password'] = password;
+            }
+            if(token != null && downloadertype =="aria2"){
+                option['token'] = token;
+            }
+            if(status != null){
+                option['status'] = status;
+            }
+            layer.load();
+            $.post("/admin/api/addDownLoader",option,function(data,status){
+                console.log(data);
+                if(data.resCode =="000001"){
+                    layer.closeAll();
+                    layer.alert(data.message,function(){
+                        window.location.reload();
+                    })
+                }else{
+
+                    layer.alert(data.message,function(){
+                        layer.closeAll();
+                    });
+                }
+            })
+        })
+    }
+    function updateData(){
+        $('.updateData').click(function () {
+            var id = $(this).attr('data-id');
+            update(id);
+        })
+    }
+    function deleteData(){
+        $('.deleteData').click(function () {
+            var id = $(this).attr('data-id');
+            layer.confirm('确认要删除吗？',function(index){
+                //发异步删除数据
+                $.get("/admin/api/deleteDownLoader?id="+id,function(res){
+                    layer.msg(res.message)
+                    setTimeout(function(){
+                        window.location.reload();
+                    },1500)
+                })
+
+            });
+        })
+    }
+
+    function  findList(page){
+        var option = {
+            pageNo:page,
+            pageSize:25
+        }
+        $.post("/admin/api/finddownLoaderList",option,
+            function(data,status){
+                console.log(data,status);
+                if(data.resCode==="000001"){
+                    var record = data.record;
+                    var html = "";
+                    var list = record.content;
+                    for(var i = 0;i<list.length;i++){
+                        var statu_s=list[i].status =="1"?"启用":"停用";
+                        html +='<tr>'
+                            +'<td title="'+list[i].downloadername+'">'+list[i].downloadername+'</td>'
+                            +'<td title="'+list[i].downloadertype+'">'+list[i].downloadertype+'</td>'
+                            +'<td title="'+list[i].downloaderlink+'">'+list[i].downloaderlink+'</td>'
+                            +'<td title="'+list[i].downloaderport+'">'+list[i].downloaderport+'</td>'
+                            +'<td title="'+list[i].downloadpath+'">'+list[i].downloadpath+'</td>'
+                            +'<td title="'+list[i].username+'">'+list[i].username+'</td>'
+                            +'<td title="'+list[i].password+'">'+list[i].password+'</td>'
+                            +'<td title="'+list[i].token+'">'+list[i].token+'</td>'
+                            +'<td title="'+statu_s+'">'+statu_s+'</td>'
+                            +'<td>'
+                            +'<div class="btn-group">'
+                            +'<a data-id="'+list[i].id+'" class="btn btn-xs btn-default updateData" href="#!" title="修改" data-toggle="tooltip">修改</a>'
+                            +'<a data-id="'+list[i].id+'" class="btn btn-xs btn-default deleteData" href="#!" title="删除" data-toggle="tooltip">删除</a>'
+                            +'</div>'
+                            +'</td></tr>'
+                    }
+
+                    $('.tableData').html(html)
+                    deleteData();
+                    updateData();
+                    laypage({
+                        cont: 'pager',
+                        pages: record.totalPages,
+                        curr:page,
+                        jump: function(obj,first){
+                            if(!first && obj.curr != page){
+                                findList(obj.curr);
+                            }
+                        }
+                    })
+                }
+
+            })
+    }
+</script>
+</body>
+</html>

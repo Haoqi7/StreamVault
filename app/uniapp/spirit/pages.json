@@ -1,0 +1,74 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "小精灵"
+			}
+		},
+		{
+			"path": "pages/videoPlay/videoPlay",
+			"style": {
+				"navigationBarTitleText": "播放"
+			}
+		},
+		{
+			"path" : "pages/server/serverlist",
+			"style" : 
+			{
+				"enablePullDownRefresh" : false,
+				"navigationBarTitleText": "服务器列表"
+			}
+		},
+		{
+			"path" : "pages/server/addserver",
+			"style" : 
+			{
+				"navigationBarTitleText" : "添加服务器",
+				"enablePullDownRefresh" : false
+			}
+		},
+		{
+			"path" : "pages/videoPlay/swiperPlay",
+			"style" : 
+			{
+				"navigationBarTitleText" : "咻咻",
+				"enablePullDownRefresh" : false
+			}
+		}
+    ],
+	"tabBar": {
+		"color": "#333333",
+		"selectedColor": "#00aaff",
+		"borderStyle": "white",
+		// "navigationBarTextStyle":"write",
+		"backgroundColor": "#f3f3f3",
+		"list": [{
+				"pagePath": "pages/index/index",
+				"iconPath": "static/icon/index.png",
+				"selectedIconPath": "static/icon/index.png",
+				"text": "推送"
+			},
+			{
+				"pagePath": "pages/videoPlay/swiperPlay",
+				"iconPath": "static/icon/xiuxiu.png",
+				"selectedIconPath": "static/icon/xiuxiu.png",
+				"text": "咻咻"
+			},
+			{
+				"pagePath": "pages/videoPlay/videoPlay",
+				"iconPath": "static/icon/play.png",
+				"selectedIconPath": "static/icon/play.png",
+				"text": "列表"
+			}
+			
+		]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"uniIdRouter": {}
+}
