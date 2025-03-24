@@ -249,8 +249,8 @@ public class BiliUtil {
 		
 		
 		if(fav != null) {
-			 tempDir = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, fav, null);
-			 outputPath =  FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, fav, "mp4");
+			 tempDir = FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, fav, null);
+			 outputPath =  FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, fav, "mp4");
 		}
 		
 
@@ -260,7 +260,8 @@ public class BiliUtil {
 		// 下载音视频文件
 		String videoFile = tempDir + File.separator + filename + "-video.m4s";
 		String audioFile = tempDir + File.separator + filename + "-audio.m4s";
-
+		System.err.println(videoFile);
+		System.err.println(audioFile);
 		HttpUtil.downBiliFromUrl(videoUrl, filename + "-video.m4s", tempDir);
 		HttpUtil.downBiliFromUrl(audioUrl, filename + "-audio.m4s", tempDir);
 
@@ -284,7 +285,7 @@ public class BiliUtil {
 		// 创建下载目录
 		String downloadDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), true, filename, null, null);
 		if(fav != null) {
-			downloadDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), true, filename, null, fav);
+			downloadDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), false, filename, null, fav);
 		}
 		// 发送下载任务
 		String videores = Aria2Util.sendMessage(Global.a2_link,

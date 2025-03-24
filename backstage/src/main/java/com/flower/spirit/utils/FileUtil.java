@@ -64,7 +64,12 @@ public class FileUtil {
     		resdir =resdir+favname+System.getProperty("file.separator");
     	}
     	if(filename!= null) {
-    		resdir =resdir+filename;
+    		if(favname != null) {
+    			resdir =resdir+"Season1";
+    		}else {
+    			resdir =resdir+filename;
+    		}
+    		
     		if(ext != null) {
     			resdir =resdir+System.getProperty("file.separator")+filename+"."+ext;
     		}else {

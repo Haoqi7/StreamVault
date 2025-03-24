@@ -223,12 +223,13 @@ public class CollectDataService {
 					if(findByVideoid.size() == 0) {
 						Map<String, String> findVideoStreaming =  BiliUtil.findVideoStreamingNoData(map,Global.bilicookies,map.get("quality"),namepath);
 						String videounaddr =  FileUtil.generateDir(false, Global.platform.bilibili.name(), false, filename, namepath, "mp4");
-						
 						//封面down
-						String coverunaddr = FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename, savefile,namepath);
-						HttpUtil.downBiliFromUrl(findVideoStreaming.get("pic"), filename+".jpg", FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename, uploadRealPath,namepath));
+						String codir = FileUtil.generateDir(false, Global.platform.bilibili.name(), false, filename, namepath, null);
+						String dir = FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, namepath, null);
+						String dirpath = FileUtil.generateDir(true, Global.platform.bilibili.name(), false, null, namepath, null);
+						HttpUtil.downBiliFromUrl(findVideoStreaming.get("pic"), filename+".jpg", dir);
 						//封面down
-						VideoDataEntity videoDataEntity = new VideoDataEntity(findVideoStreaming.get("cid"),findVideoStreaming.get("title"), findVideoStreaming.get("desc"), "哔哩", coverunaddr+"/"+filename+".jpg", findVideoStreaming.get("video"),videounaddr,bvid);
+						VideoDataEntity videoDataEntity = new VideoDataEntity(findVideoStreaming.get("cid"),findVideoStreaming.get("title"), findVideoStreaming.get("desc"), "哔哩", codir+"/"+filename+".jpg", findVideoStreaming.get("video"),videounaddr,bvid);
 					    videoDataDao.save(videoDataEntity);
 					    logger.info("收藏"+(i+1)+"下载流程结束");
 					    
@@ -238,19 +239,17 @@ public class CollectDataService {
 						String upmid = owner.getString("mid");
 						String ctime = map.get("ctime");
 						//下载up 头像  up头像不参与数据 只参与nfo
-						HttpUtil.downBiliFromUrl(upface, "upcover.jpg",
-								FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename,namepath));
-						
-						
-						String uplocal =  FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename,namepath)+System.getProperty("file.separator")+"upcover.jpg";
-						String piclocal =  FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename,namepath)+System.getProperty("file.separator")+filename+".jpg";
+						HttpUtil.downBiliFromUrl(upface, upmid+"upcover.jpg",dir);
+						String uplocal =  dir+upmid+"upcover.jpg";
+						String piclocal =  dir+filename+".jpg";
 						map.put("upname", upname);
 						map.put("upmid", upmid);
 						map.put("upface", uplocal);
 						map.put("piclocal", piclocal);
 						map.put("ctime", ctime);
 						map.put("title", filename);
-						EmbyMetadataGenerator.createFavoriteEpisodeNfo(map, FileUtil.createTemporaryDirectoryFav(Global.platform.bilibili.name(), filename,namepath), i+1,FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), namepath, Global.uploadRealPath));
+						System.out.println(dirpath);
+						EmbyMetadataGenerator.createFavoriteEpisodeNfo(map, dir, i+1,dirpath);
 						
 					}
 					 //新建明细
