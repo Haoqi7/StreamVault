@@ -1,10 +1,8 @@
 # StreamVault
 
-> �� 一站式视频资源管理与下载解决方案
+> 一站式视频资源管理与下载解决方案
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/qingfeng2336/stream-vault)](https://hub.docker.com/r/qingfeng2336/stream-vault)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/qingfeng2336/stream-vault)](https://github.com/qingfeng2336/stream-vault/releases)
-[![License](https://img.shields.io/github/license/qingfeng2336/stream-vault)](LICENSE)
 
 ## 项目简介
 
