@@ -1,6 +1,10 @@
 # StreamVault
 
-> 🎬 一站式视频资源管理与下载解决方案
+> �� 一站式视频资源管理与下载解决方案
+
+[![Docker Pulls](https://img.shields.io/docker/pulls/qingfeng2336/stream-vault)](https://hub.docker.com/r/qingfeng2336/stream-vault)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/qingfeng2336/stream-vault)](https://github.com/qingfeng2336/stream-vault/releases)
+[![License](https://img.shields.io/github/license/qingfeng2336/stream-vault)](LICENSE)
 
 ## 项目简介
 
@@ -24,21 +28,40 @@ StreamVault（原名：spirit）是一个视频资源管理与下载平台，支
 ### 💻 技术栈
 - 后端：Spring Boot 2.7.x + JPA + SQLite
 - 前端：UniApp（支持小程序、APP等多端）
-- 容器化：Docker多架构支持（AMD64/ARM）
+- 容器化：Docker多架构支持（AMD64/ARM64）
 
 ## 🔧 部署指南
 
 ### Docker部署（推荐）
 
 ```bash
+# 拉取镜像
 docker pull qingfeng2336/stream-vault
+
+# 运行容器
+docker run --name stream-vault -d -p 28083:28081 -v d:/home/spirit/log:/app/log -v d:/home/spirit/resources:/app/resources -v d:/home/spirit/db:/app/db -v d:/home/spirit/tmp:/tmp qingfeng2336/stream-vault
 ```
 
 [Docker Hub](https://hub.docker.com/r/qingfeng2336/stream-vault) | [使用文档](https://github.com/qingfeng2336/stream-vault/wiki)
 
+### 快速开始
+1. 访问 http://your-ip:28081/admin/login
+2. 使用默认账号密码登录
+3. 在设置中删除admin  并重新新建账号
+4. 开始使用
+
 ### 手动部署
 - 要求：Java 1.8+
 - 详细部署文档待完善
+
+## 📸 功能展示
+
+[待补充项目截图]
+
+## 📝 更新日志
+
+查看 [CHANGELOG.md](CHANGELOG.md) 了解详细更新内容。
+
 
 ## 📱 客户端使用
 
