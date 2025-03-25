@@ -64,8 +64,46 @@ public class CommandUtil {
 		return wallpaper;
 	}
 	
-	public static void main(String[] args) {
-		CommandUtil.command("ffmpeg -version");
+	
+	public static String commandos(String command) {
+		StringBuilder output = new StringBuilder();
+		try {
+			ProcessBuilder processBuilder;
+			if (System.getProperty("os.name").toLowerCase().contains("win")) {
+				processBuilder = new ProcessBuilder("cmd.exe", "/c", command);
+			} else {
+				processBuilder = new ProcessBuilder("/bin/sh", "-c", command);
+			}
+
+			processBuilder.redirectErrorStream(true);
+			Process process = processBuilder.start();
+
+			// 读取 Python 脚本输出
+			InputStream inputStream = process.getInputStream();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+
+			String line;
+			while ((line = reader.readLine()) != null) {
+				output.append(line).append("\n");
+			}
+
+			int exitCode = process.waitFor();
+			System.out.println("Python 脚本执行完毕，退出码：" + exitCode);
+
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
+		return output.toString().trim();
 	}
+	
+	public static String f2cmd(String cookie, String id) {
+
+		String cmd = "python /home/app/script/douyin.py --cookie \"" + cookie + "\" --aweme_id \""
+				+ id + "\"";
+		String result = CommandUtil.commandos(cmd);
+		return result;
+	}
+	
+
 	
 }
