@@ -503,7 +503,7 @@ public class AnalysisService {
 			
 			// 获取视频源信息
 			List<Map<String, String>> videoStreams = BiliUtil.findVideoStreaming(video, Global.bilicookies);
-			System.out.println(videoStreams);
+//			System.out.println(videoStreams);
 			if (videoStreams == null || videoStreams.isEmpty()) {
 				logger.warn("未找到视频流信息: {}", video);
 				processHistoryService.saveProcess(saveProcess.getId(), video, platform);

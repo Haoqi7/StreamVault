@@ -103,11 +103,11 @@ public class DouYinService {
                 redirect.setRequestProperty("User-Agent", DouUtil.ua);
                 redirect.setRequestProperty("Referer", DouUtil.referer);
                 redirect.setRequestProperty("Cookie",setCookieHeader);
-                System.out.println(redirect.getResponseCode());
+//                System.out.println(redirect.getResponseCode());
                 
                 Map<String, List<String>> redirect_headerFields = redirect.getHeaderFields();
-                List<String> redirect_cookies = redirect_headerFields.get("Set-Cookie");
-                System.out.println(String.join("; ", redirect_cookies));
+//                List<String> redirect_cookies = redirect_headerFields.get("Set-Cookie");
+//                System.out.println(String.join("; ", redirect_cookies));
 //                if(redirect.getResponseCode() == 302) {
 //                	Map<String, List<String>> redirect_headerFields = redirect.getHeaderFields();
 //                    List<String> redirect_cookies = redirect_headerFields.get("Set-Cookie");

@@ -6,7 +6,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositorie
     apk upgrade --update-cache && \
     apk add openjdk8 && \
     apk add ffmpeg && \
-    apk add  python3 py3-pip py3-virtualenv build-base python3-dev && \
+    apk add python3 py3-pip py3-virtualenv build-base python3-dev libffi-dev&& \
     rm -rf /tmp/* /var/cache/apk/*
 	
 RUN python3 -m venv /opt/venv && \
@@ -14,7 +14,7 @@ RUN python3 -m venv /opt/venv && \
     pip install --no-cache-dir f2
 	
 RUN wget -O /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp && chmod a+rx /usr/local/bin/yt-dlp
-ENV YT_DLP_PATH /usr/local/bin/yt-dlp
+ENV YT_DLP_PATH=/usr/local/bin/yt-dlp
 VOLUME ["/tmp","/app"]
 COPY db /home/app/db/
 COPY script /home/app/script/

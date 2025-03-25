@@ -81,7 +81,7 @@ public class BiliUtil {
 		}
 		videoDataInfo.put("video",FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, namepath, "mp4"));
 		videoDataInfo.put("videoname", filename + ".mp4");
-		System.out.println(videoDataInfo);
+//		System.out.println(videoDataInfo);
 		return videoDataInfo;
 	}
 
@@ -260,15 +260,15 @@ public class BiliUtil {
 		// 下载音视频文件
 		String videoFile = tempDir + File.separator + filename + "-video.m4s";
 		String audioFile = tempDir + File.separator + filename + "-audio.m4s";
-		System.err.println(videoFile);
-		System.err.println(audioFile);
+//		System.err.println(videoFile);
+//		System.err.println(audioFile);
 		HttpUtil.downBiliFromUrl(videoUrl, filename + "-video.m4s", tempDir);
 		HttpUtil.downBiliFromUrl(audioUrl, filename + "-audio.m4s", tempDir);
 
 		// 合并音视频文件
 		String ffmpegCmd = String.format("ffmpeg -i %s -i %s -c:v copy -c:a copy -f mp4 %s",
 				videoFile, audioFile, outputPath);
-		System.out.println(ffmpegCmd);
+//		System.out.println(ffmpegCmd);
 		CommandUtil.command(ffmpegCmd);
 
 		// 清理临时文件
@@ -361,7 +361,7 @@ public class BiliUtil {
 		}
 		String serchPersion = HttpUtil.getSerchPersion(api, "UTF-8");
 		JSONObject videoData = JSONObject.parseObject(serchPersion);
-		System.out.println(videoData);
+//		System.out.println(videoData);
 		if (videoData.getString("code").equals("0")) {
 			// 优化多集问题 从page 里取
 
@@ -493,6 +493,6 @@ public class BiliUtil {
 		/// video/BV1qM4y1w716
 
 		String a2path = FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), Global.down_path);
-		System.out.println(a2path);
+//		System.out.println(a2path);
 	}
 }

@@ -72,7 +72,7 @@ public class FfmpegQueueService {
 				}
 				
 			}
-			System.out.println(sendMessage);
+//			System.out.println(sendMessage);
 		}
 	}
 

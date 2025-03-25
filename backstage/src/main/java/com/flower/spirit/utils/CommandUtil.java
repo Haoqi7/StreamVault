@@ -88,7 +88,7 @@ public class CommandUtil {
 			}
 
 			int exitCode = process.waitFor();
-			System.out.println("Python 脚本执行完毕，退出码：" + exitCode);
+//			System.out.println("Python 脚本执行完毕，退出码：" + exitCode);
 
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
@@ -101,6 +101,7 @@ public class CommandUtil {
 		String cmd = "/opt/venv/bin/python3 /home/app/script/douyin.py --cookie \"" + cookie + "\" --aweme_id \""
 				+ id + "\"";
 		String result = CommandUtil.commandos(cmd);
+//		System.out.println(result);
 		return result;
 	}
 	

@@ -303,7 +303,7 @@ public class CollectDataService {
 			logger.info(entity.getOriginaladdress()+"任务中第"+i+"个");
 			String status ="";
 			JSONObject aweme_detail = allDYData.getJSONObject(i);	
-			System.out.println(aweme_detail);
+//			System.out.println(aweme_detail);
 			String aweme_type = aweme_detail.getString("aweme_type");
 			String awemeId = aweme_detail.getString("aweme_id");
 			try {
