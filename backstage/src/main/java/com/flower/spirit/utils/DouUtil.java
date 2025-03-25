@@ -37,7 +37,7 @@ public class DouUtil {
 	
 	//private static JSONObject ttwidData =  JSONObject.parseObject("{\"region\":\"cn\",\"aid\":1768,\"needFid\":false,\"service\":\"www.ixigua.com\",\"migrate_info\":{\"ticket\":\"\",\"source\":\"node\"},\"cbUrlProtocol\":\"https\",\"union\":true}");  //需要配合ttwid 使用
 	
-	public static String ua="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36";
+	public static String ua="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0";
 	public static String  odin_tt ="324fb4ea4a89c0c05827e18a1ed9cf9bf8a17f7705fcc793fec935b637867e2a5a9b8168c885554d029919117a18ba69";
 	public static String  passport_csrf_token ="2f142a9bb5db1f81f249d6fc997fe4a1";
 	public static String referer =  "https://www.douyin.com/";
@@ -56,7 +56,7 @@ public class DouUtil {
 		     if(matcher_v1.find()) {
 		    	 String vedioId = matcher_v1.group(0);
 		    	 logger.info("DouYin vedioId="+vedioId);
-		    	 data  = DouUtil.getBogus(vedioId,"local");
+		    	 data  = DouUtil.getBogus(vedioId);
 		    	  if(data != null) {
 		    		  logger.info("接口解析数据"+data);
 		    		  return data;
@@ -69,7 +69,7 @@ public class DouUtil {
 		     if(matcher_v2.find()) {
 		    	 String vedioId = matcher_v2.group(0).replaceAll("video", "").replaceAll("/", "");
 		    	 logger.info("DouYin vedioId="+vedioId);
-		    	 data  = DouUtil.getBogus(vedioId,"local");
+		    	 data  = DouUtil.getBogus(vedioId);
 		    	  if(data != null) {
 		    		  logger.info("接口解析数据"+data);
 		    		  return data;
@@ -144,36 +144,38 @@ public class DouUtil {
 	 * @throws HttpException
 	 * @throws IOException
 	 */
-	public static  Map<String, String> getBogus(String aweme_id,String type) throws HttpException, IOException {
+	public static  Map<String, String> getBogus(String aweme_id) throws HttpException, IOException {
 		 Map<String, String> res = new HashMap<String, String>();
 		 if(null !=Global.tiktokCookie && !"".equals(Global.tiktokCookie) ) {
-			 String cookie = simplifycookie(Global.tiktokCookie);
-//			 String cookie = Global.tiktokCookie;
-			 Map<String, String> generatetoken = generatetoken(aweme_id);
-			 String httpget = DouUtil.httpget(generatetoken.get("url").trim(),cookie);
+		
+			 String httpget = CommandUtil.f2cmd(Global.tiktokCookie,aweme_id);
 			 JSONObject data = JSONObject.parseObject(httpget);
-			 JSONObject aweme_detail = data.getJSONObject("aweme_detail");
 			 String coveruri = "";
-			 JSONArray cover = aweme_detail.getJSONObject("video").getJSONObject("cover").getJSONArray("url_list");
+			 JSONArray cover = data.getJSONArray("cover");
 			 if(cover.size() >=2) {
 				 coveruri = cover.getString(cover.size()-1);
 			 }else {
 				 coveruri = cover.getString(0);
 			 }
-			 JSONArray jsonArray = aweme_detail.getJSONObject("video").getJSONObject("play_addr").getJSONArray("url_list");
+			 JSONArray jsonArray = data.getJSONArray("video_play_addr");
 			 String videoplay = "";
 			 if(jsonArray.size() >=2) {
 				 videoplay = jsonArray.getString(jsonArray.size()-1);
 			 }else {
 				 videoplay = jsonArray.getString(0);
 			 }
-			 String desc = aweme_detail.getString("desc");
+			 String desc = data.getString("desc");
+			 String nickname = data.getString("nickname");
+			 String uid = data.getString("uid");
+			 String create_time = data.getString("create_time");
 			 res.put("awemeid", aweme_id);
 			 res.put("videoplay", videoplay);
 			 res.put("desc", desc);
 			 res.put("cover", coveruri);
-			 res.put("cookie", cookie.trim());
 			 res.put("type", "api");
+			 res.put("nickname", nickname);
+			 res.put("uid", uid);
+			 res.put("create_time", create_time);
 			 return res;
 		 }
 		 return null;
@@ -206,11 +208,11 @@ public class DouUtil {
 					cookie = generatetoken.get("cookie");
 				}else {
 					 logger.info("本地生成异常(空信息)--正在使用remote模式");
-					 return getBogus(aweme_id, "remote");
+					 return getBogus(aweme_id);
 				}
 			} catch (Exception e) {
 				 logger.info("本地生成异常--正在使用remote模式");
-				 return getBogus(aweme_id, "remote");
+				 return getBogus(aweme_id);
 			}
 		}else {
 //			logger.info("使用远程生成xBogus");
@@ -227,11 +229,11 @@ public class DouUtil {
 			 String httpget = DouUtil.httpget(url.trim(), cookie.trim());
 			 JSONObject data = JSONObject.parseObject(httpget);
 			 if(null == data) {
-				 return getBogus(aweme_id, "remote");
+				 return getBogus(aweme_id);
 			 }
 			 JSONObject aweme_detail = data.getJSONObject("aweme_detail");
 			 if(null == aweme_detail && type.equals("local")) {
-				 return getBogus(aweme_id, "remote");
+				 return getBogus(aweme_id);
 			 }
 			 String coveruri = "";
 			 JSONArray cover = aweme_detail.getJSONObject("video").getJSONObject("cover").getJSONArray("url_list");

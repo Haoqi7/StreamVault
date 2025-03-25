@@ -94,7 +94,7 @@ public class AnalysisService {
 		String url = this.getUrl(video);
 		Map<String, Runnable> platformHandlers = new HashMap<>();
 		platformHandlers.put("哔哩", () -> executeTask(bilibili, () -> this.bilivideo(platform, url)));
-//		platformHandlers.put("抖音", () -> executeTask(douyin, () -> this.dyvideo(platform, url)));
+		platformHandlers.put("抖音", () -> executeTask(douyin, () -> this.dyvideo(platform, url)));
 //		platformHandlers.put("steam", () -> executeTask(steamcmd, () -> this.steamwork(video)));
 //		platformHandlers.put("tiktok", () -> executeTask(douyin, () -> this.tiktok(platform, url)));
 //		platformHandlers.put("YouTube", () -> executeTask(ytdlp, () -> this.YouTube(platform, url)));
@@ -575,7 +575,7 @@ public class AnalysisService {
 		Map<String, String> downVideo = DouUtil.downVideo(video);
 
 		this.putRecord(downVideo.get("awemeid"), downVideo.get("desc"), downVideo.get("videoplay"),
-				downVideo.get("cover"), platform, video, downVideo.get("type"), downVideo.get("cookie"));
+				downVideo.get("cover"), platform, video, downVideo.get("type"), Global.tiktokCookie,downVideo);
 		System.gc();
 
 		processHistoryService.saveProcess(saveProcess.getId(), video, platform);
@@ -590,53 +590,37 @@ public class AnalysisService {
 	 * @param playApi
 	 * @param cover
 	 * @param platform
+	 * @throws IOException 
 	 */
 	public void putRecord(String awemeId, String desc, String playApi, String cover, String platform,
-			String originaladdress, String type, String cookie) {
+			String originaladdress, String type, String cookie,Map<String, String> map) throws IOException {
 		String filename = StringUtil.getFileName(desc, awemeId);
-		String videofile = FileUtil.createDirFile(Global.down_path, ".mp4", filename, Global.platform.douyin.name());
-		String videounrealaddr = FileUtil.createDirFile(FileUtil.savefile, ".mp4", filename,
-				Global.platform.douyin.name());
-		String coverunaddr = FileUtil.createDirFile(FileUtil.savefile, ".jpg", filename, Global.platform.douyin.name());
-		if (type.equals("client")) {
-			logger.info("已使用htmlunit进行解析,下载器类型为:" + Global.downtype);
-			if (Global.downtype.equals("a2")) {
-				Aria2Util.sendMessage(Global.a2_link,
-						Aria2Util.createparameter("https:" + playApi, FileUtil
-								.createTemporaryDirectory(Global.platform.douyin.name(), filename, Global.down_path),
-								filename + ".mp4", Global.a2_token));
-			}
-			if (Global.downtype.equals("http")) {
-				// 内置下载器
-				HttpUtil.downLoadFromUrl("https:" + playApi, filename + ".mp4", FileUtil
-						.createTemporaryDirectory(Global.platform.douyin.name(), filename, FileUtil.uploadRealPath));
-			}
-			videofile = FileUtil.createDirFile(FileUtil.uploadRealPath, ".mp4", filename,
-					Global.platform.douyin.name());
-			// 下载封面图当容器映射目录
-			HttpUtil.downLoadFromUrl("https:" + cover, filename + ".jpg",
-					FileUtil.createTemporaryDirectory(Global.platform.douyin.name(), filename, Global.uploadRealPath) + "/");
+		String videofile = FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), true, filename, null, null);
+		String videounrealaddr = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null, "mp4");
+		String coverunaddr = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null, "jpg");
+		logger.info("已使用f2库进行解析,下载器类型为:" + Global.downtype);
+		if (Global.downtype.equals("a2")) {
+			Aria2Util.sendMessage(Global.a2_link,
+					Aria2Util.createDouparameter(playApi, FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), true, filename, null, null),
+							filename + ".mp4", Global.a2_token, cookie));
 		}
-		if (type.equals("api")) {
-			logger.info("已使用api进行解析,下载器类型为:" + Global.downtype);
-			if (Global.downtype.equals("a2")) {
-				Aria2Util.sendMessage(Global.a2_link, Aria2Util.createDouparameter(playApi,
-						FileUtil.createTemporaryDirectory(Global.platform.douyin.name(), filename, Global.down_path),
-						filename + ".mp4", Global.a2_token, cookie));
-			}
-			if (Global.downtype.equals("http")) {
-				// 内置下载器
-				HttpUtil.downDouFromUrl(playApi, filename + ".mp4", FileUtil.createTemporaryDirectory(
-						Global.platform.douyin.name(), filename, FileUtil.uploadRealPath), cookie);
-			}
-			videofile = FileUtil.createDirFile(FileUtil.uploadRealPath, ".mp4", filename,
-					Global.platform.douyin.name());
-			HttpUtil.downLoadFromUrl(cover, filename + ".jpg",
-					FileUtil.createTemporaryDirectory(Global.platform.douyin.name(), filename, Global.uploadRealPath) + "/");
+		if (Global.downtype.equals("http")) {
+			// 内置下载器
+			HashMap<String,String> header = new HashMap<String, String>();
+			header.put("User-Agent", DouUtil.ua);
+			header.put("cookie", Global.tiktokCookie);
+			
+			videofile = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
+			HttpUtil.downloadFile(playApi,  filename + ".mp4", videofile, header);
 		}
+		
+		String coverdir = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
+		HttpUtil.downLoadFromUrl(cover, filename + ".jpg",coverdir);
 		// 推送完成后建立历史资料 此处注意 a2 地址需要与spring boot 一致否则 无法打开视频
 		VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId, desc, desc, platform, coverunaddr, videofile,
 				videounrealaddr, originaladdress);
+		//生成元数据
+		EmbyMetadataGenerator.createDouNfo(map.get("nickname"), map.get("uid"), map.get("create_time"), awemeId, desc, desc, coverunaddr,videofile);
 		videoDataDao.save(videoDataEntity);
 		logger.info("下载流程结束");
 	}

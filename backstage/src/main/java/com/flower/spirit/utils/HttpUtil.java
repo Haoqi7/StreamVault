@@ -1,5 +1,7 @@
 package com.flower.spirit.utils;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -8,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
+
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
@@ -27,6 +31,9 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
+/**
+ * 这个方法中有大量遗弃方法不再调用   
+ */
 @SuppressWarnings("deprecation")
 public class HttpUtil {
 
@@ -415,6 +422,82 @@ public class HttpUtil {
         }
         bos.close();
         return bos.toByteArray();
+    }
+    
+    
+    public static void downloadFile(String urlStr, String fileName, String savePath, Map<String, String> headers) throws IOException {
+        HttpURLConnection conn = null;
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+        File saveDir = new File(savePath);
+        File file = null;
+
+        try {
+            // 创建保存目录
+            if (!saveDir.exists()) {
+                saveDir.mkdirs();
+            }
+            file = new File(saveDir, fileName);
+
+            // 建立连接
+            URL url = new URL(urlStr);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(30000);
+
+            // 设置请求头
+            if (headers != null) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    conn.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
+
+            // 获取文件大小
+            int fileLength = conn.getContentLength();
+            
+            bis = new BufferedInputStream(conn.getInputStream());
+            bos = new BufferedOutputStream(new FileOutputStream(file));
+
+            byte[] buffer = new byte[8192];
+            int len;
+            long downloaded = 0;
+            long lastProgressTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
+
+            while ((len = bis.read(buffer)) != -1) {
+                bos.write(buffer, 0, len);
+                downloaded += len;
+
+                // 每500ms更新一次进度
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - lastProgressTime >= 15000) {
+                    // 计算进度
+                    int progress = (int) (downloaded * 100 / fileLength);
+                    // 计算速度 (KB/s)
+                    double speed = (downloaded / 1024.0) / ((currentTime - startTime) / 1000.0);
+                    // 计算剩余时间（秒）
+                    long remainingTime = (long) ((fileLength - downloaded) / (speed * 1024));
+                    
+                    LoggerFactory.getLogger(HttpUtil.class).info(
+                        String.format("下载进度: %d%%, 速度: %.2f KB/s, 预计剩余时间: %d秒, 文件: %s", 
+                        progress, speed, remainingTime, fileName)
+                    );
+                    
+                    lastProgressTime = currentTime;
+                }
+            }
+            // 确保数据写入
+            bos.flush();
+        } finally {
+            // 关闭资源
+            try {
+                if (bos != null) bos.close();
+                if (bis != null) bis.close();
+                if (conn != null) conn.disconnect();
+            } catch (IOException e) {
+                LoggerFactory.getLogger(HttpUtil.class).error("关闭资源时出错: " + e.getMessage());
+            }
+        }
     }
 
 }

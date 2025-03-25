@@ -45,11 +45,14 @@ public class EmbyMetadataGenerator {
                     "    <premiered>" + premiered + "</premiered>\n" +
                     "    <watched>false</watched>\n" +
                     "    <playcount>0</playcount>\n" +
-                    "    <studio>bilibili-" + actor + "</studio>\n" +
+                    "    <studio>" + actor + "</studio>\n" +
                     "    <actor>\n" +
                     "        <name>" + actor + "</name>\n" +
-                    "        <role>UP主</role>\n" +
-                    "        <thumb>" + upface.replace('\\', '/') + "</thumb>\n" +
+                    "        <role>创作主</role>\n" +
+                    (upface != null && !upface.trim().isEmpty()
+                            ? "        <thumb>" + upface.replace('\\', '/') + "</thumb>\n"
+                            : "")
+                    +
                     "    </actor>\n" +
                     "    <trailer/>\n" +
                     "    <languages>中文</languages>\n" +
@@ -202,8 +205,45 @@ public class EmbyMetadataGenerator {
         }
     }
 
+    public static void createDouNfo(String upname,String upmid, String ctime, String cid, String title,
+            String desc, String pic,String out) {
+        String year = "";
+        try {
+            long timestamp = Long.parseLong(ctime);
+            java.util.Date date = new java.util.Date(timestamp * 1000L);
+            java.text.SimpleDateFormat yearFormat = new java.text.SimpleDateFormat("yyyy");
+            year = yearFormat.format(date);
+        } catch (Exception e) {
+            year = "2025"; // 默认年份
+        }
+        String overview = desc;
+        if (overview == null || overview.equals("-") || overview.trim().isEmpty()) {
+            overview = "由创作主【" + upname + "】上传的视频内容";
+        }
+        overview += "创作主：" + upname + "\rUID：" + upmid + "\r视频ID：" + cid;
+        String genre = "抖音";
+        String director = upname;
+        // 设置actor为UP主
+        String actor = "抖音"+upname;
+        // 获取输出路径（使用视频所在目录）
+        generateMetadata(
+        		title, // 标题
+                year, // 年份
+                overview, // 概述/描述
+                genre, // 类型
+                director, // 导演（UP主）
+                actor, // 演员（UP主）
+                out, // 输出路径
+                null, // UP主头像
+                upmid, // UP主ID
+                pic // 封面图片
+        );
+        System.out.println("元数据生成成功: " + title);
+    }
+    
+    
     public static void createBillNfo(String upname, String upface, String upmid, String ctime, String cid, String title,
-            String desc, String pic ) {
+            String desc, String pic) {
         try {
             // 处理标题（去除引号）
             String cleanTitle = title.replace("\"", "").trim();
@@ -365,9 +405,9 @@ public class EmbyMetadataGenerator {
                     "</episodedetails>\n";
 
             // 获取视频文件所在的目录
-//            String videoDir = new File(videoInfo.get("videolocal")).getParent();
+            // String videoDir = new File(videoInfo.get("videolocal")).getParent();
             // 在视频文件所在目录创建episode.nfo
-            writeToFile(outputPath + "/"+episodeTitle+".nfo", nfoContent);
+            writeToFile(outputPath + "/" + episodeTitle + ".nfo", nfoContent);
 
             // 添加UP主信息到tvshow.nfo
             addUpInfoToTvshowNfo(tvshow, videoInfo.get("upname"), videoInfo.get("upface"), videoInfo.get("upmid"));
