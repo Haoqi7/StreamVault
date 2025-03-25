@@ -6,7 +6,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositorie
     apk upgrade --update-cache && \
     apk add openjdk8 && \
     apk add ffmpeg && \
-    apk add python3 && \
+    apk add python3 py3-pip && \
     rm -rf /tmp/* /var/cache/apk/*
 # 安装 Python 包 f2
 RUN pip install f2

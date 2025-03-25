@@ -98,7 +98,7 @@ public class CommandUtil {
 	
 	public static String f2cmd(String cookie, String id) {
 
-		String cmd = "python /home/app/script/douyin.py --cookie \"" + cookie + "\" --aweme_id \""
+		String cmd = "/opt/venv/bin/python3 /home/app/script/douyin.py --cookie \"" + cookie + "\" --aweme_id \""
 				+ id + "\"";
 		String result = CommandUtil.commandos(cmd);
 		return result;
