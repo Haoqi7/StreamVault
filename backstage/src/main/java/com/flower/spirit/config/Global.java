@@ -88,6 +88,8 @@ public class Global {
 	public static String savefile;
 	public static String uploadRealPath;
 
+	public static boolean getGeneratenfo =false;
+
 	@Value("${file.save}")
 	public void setSavefile(String value) {
 		Global.savefile = value;

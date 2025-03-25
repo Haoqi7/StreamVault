@@ -114,9 +114,12 @@ public class EmbyMetadataGenerator {
             nfoContent.append("    <playcount/>\n");
             nfoContent.append("    <studio>哔哩哔哩</studio>\n");
             nfoContent.append("    <country>中国</country>\n");
-            nfoContent.append("    <thumb aspect=\"poster\">" + cover.replace('\\', '/') + "</thumb>\n");
-            nfoContent.append("    <thumb aspect=\"banner\">" + cover.replace('\\', '/') + "</thumb>\n");
-            nfoContent.append("    <thumb aspect=\"landscape\">" + cover.replace('\\', '/') + "</thumb>\n");
+            if(cover!= null) {
+                nfoContent.append("    <thumb aspect=\"poster\">" + cover.replace('\\', '/') + "</thumb>\n");
+                nfoContent.append("    <thumb aspect=\"banner\">" + cover.replace('\\', '/') + "</thumb>\n");
+                nfoContent.append("    <thumb aspect=\"landscape\">" + cover.replace('\\', '/') + "</thumb>\n");
+            }
+    
 
             // 只有在upInfoList不为空时才添加UP主信息
             if (upInfoList != null && !upInfoList.isEmpty()) {
@@ -243,7 +246,7 @@ public class EmbyMetadataGenerator {
     
     
     public static void createBillNfo(String upname, String upface, String upmid, String ctime, String cid, String title,
-            String desc, String pic) {
+            String desc, String pic,String out) {
         try {
             // 处理标题（去除引号）
             String cleanTitle = title.replace("\"", "").trim();
@@ -263,7 +266,7 @@ public class EmbyMetadataGenerator {
             if (overview == null || overview.equals("-") || overview.trim().isEmpty()) {
                 overview = "由UP主【" + upname + "】上传的视频内容";
             }
-            overview += "\nUP主：" + upname + "\nUID：" + upmid + "\n视频ID：" + cid;
+            overview += ",UP主：" + upname + ",UID：" + upmid + ",视频ID：" + cid;
             // 设置类型（genre）
             String genre = "哔哩哔哩";
             // 设置导演为UP主
@@ -271,7 +274,6 @@ public class EmbyMetadataGenerator {
             // 设置actor为UP主
             String actor = upname;
             // 获取输出路径（使用视频所在目录）
-            String outputPath = new File(pic).getParent();
             // 调用generateMetadata方法（使用正确的参数）
             generateMetadata(
                     cleanTitle, // 标题
@@ -280,7 +282,7 @@ public class EmbyMetadataGenerator {
                     genre, // 类型
                     director, // 导演（UP主）
                     actor, // 演员（UP主）
-                    outputPath, // 输出路径
+                    out, // 输出路径
                     upface, // UP主头像
                     upmid, // UP主ID
                     pic // 封面图片
@@ -312,8 +314,10 @@ public class EmbyMetadataGenerator {
                         if (!content.toString().contains("<profile>" + upmid + "</profile>")) {
                             content.append("    <actor>\n");
                             content.append("        <name>" + upname + "</name>\n");
-                            content.append("        <role>UP主</role>\n");
-                            content.append("        <thumb>" + upface.replace('\\', '/') + "</thumb>\n");
+                            content.append("        <role>发布者</role>\n");
+                            if(upface!= null) {
+                            	 content.append("        <thumb>" + upface.replace('\\', '/') + "</thumb>\n");
+                            }
                             content.append("        <profile>" + upmid + "</profile>\n");
                             content.append("    </actor>\n");
                         }
@@ -356,6 +360,23 @@ public class EmbyMetadataGenerator {
             e.printStackTrace();
         }
     }
+    
+    public static void createFavoriteDouNfo(String title, String output) {
+        try {
+            String overview = title;
+            String genre = "来自抖音";
+            String rating = "0.0";
+            String outputPath = output;
+            String ctime = DateUtils.getDate("yyyy");
+            // 确保输出目录存在
+            new File(outputPath).mkdirs();
+            // 生成初始tvshow.nfo，不包含UP主信息
+            generateSeriesNfo(title, overview, genre, rating, outputPath, null, null, ctime);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
 
     public static void createFavoriteEpisodeNfo(Map<String, String> videoInfo, String outputPath, int episodeNumber,
             String tvshow) {
@@ -411,6 +432,67 @@ public class EmbyMetadataGenerator {
 
             // 添加UP主信息到tvshow.nfo
             addUpInfoToTvshowNfo(tvshow, videoInfo.get("upname"), videoInfo.get("upface"), videoInfo.get("upmid"));
+
+        } catch (Exception e) {
+            System.err.println("生成单集nfo文件失败: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    
+    public static void createFavoriteEpisodeDouNfo(Map<String, String> videoInfo, String outputPath, int episodeNumber,
+            String tvshow) {
+        try {
+            String episodeTitle = videoInfo.get("title");
+            String episodeOverview = videoInfo.get("desc");
+            if (episodeOverview == null || episodeOverview.equals("-") || episodeOverview.trim().isEmpty()) {
+                episodeOverview = "由创作主【" + videoInfo.get("upname") + "】上传的视频";
+            }
+
+            // 处理时间
+            String airedDate = "";
+            String dateadded = "";
+            try {
+                long timestamp = Long.parseLong(videoInfo.get("ctime"));
+                Date date = new java.util.Date(timestamp * 1000L);
+                SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat dateTimeFormat = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                airedDate = dateFormat.format(date);
+                dateadded = dateTimeFormat.format(date);
+            } catch (Exception e) {
+                airedDate = "2025-01-01";
+                dateadded = "2025-01-01 00:00:00";
+            }
+
+            String nfoContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                    "<episodedetails>\n" +
+                    "    <title>" + episodeTitle + "</title>\n" +
+                    "    <season>1</season>\n" +
+                    "    <episode>" + episodeNumber + "</episode>\n" +
+                    "    <showtitle>第" + episodeNumber + "集</showtitle>\n" +
+                    "    <aired>" + airedDate + "</aired>\n" +
+                    "    <plot>" + episodeOverview + "</plot>\n" +
+                    "    <runtime></runtime>\n" +
+                    "    <thumb>" + videoInfo.get("piclocal").replace('\\', '/') + "</thumb>\n" +
+                    "    <uniqueid type=\"抖音\" default=\"true\">" + videoInfo.get("bvid") + "</uniqueid>\n" +
+                    "    <director>" + videoInfo.get("upname") + "</director>\n" +
+                    "    <actor>\n" +
+                    "        <name>" + videoInfo.get("upname") + "</name>\n" +
+                    "        <role>创作主</role>\n" +
+                    "        <profile>" + videoInfo.get("upmid") + "</profile>\n" +
+                    "    </actor>\n" +
+                    "    <id>" + videoInfo.get("cid") + "</id>\n" +
+                    "    <source>bilibili</source>\n" +
+                    "    <dateadded>" + dateadded + "</dateadded>\n" +
+                    "</episodedetails>\n";
+
+            // 获取视频文件所在的目录
+            // String videoDir = new File(videoInfo.get("videolocal")).getParent();
+            // 在视频文件所在目录创建episode.nfo
+            writeToFile(outputPath + "/" + episodeTitle + ".nfo", nfoContent);
+
+            // 添加UP主信息到tvshow.nfo
+            addUpInfoToTvshowNfo(tvshow, videoInfo.get("upname"),null, videoInfo.get("upmid"));
 
         } catch (Exception e) {
             System.err.println("生成单集nfo文件失败: " + e.getMessage());

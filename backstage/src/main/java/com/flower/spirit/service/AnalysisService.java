@@ -97,9 +97,9 @@ public class AnalysisService {
 		platformHandlers.put("抖音", () -> executeTask(douyin, () -> this.dyvideo(platform, url)));
 //		platformHandlers.put("steam", () -> executeTask(steamcmd, () -> this.steamwork(video)));
 //		platformHandlers.put("tiktok", () -> executeTask(douyin, () -> this.tiktok(platform, url)));
-//		platformHandlers.put("YouTube", () -> executeTask(ytdlp, () -> this.YouTube(platform, url)));
-//		platformHandlers.put("instagram", () -> executeTask(ytdlp, () -> this.instagram(platform, url)));
-//		platformHandlers.put("twitter", () -> executeTask(ytdlp, () -> this.twitter(platform, url)));
+		platformHandlers.put("YouTube", () -> executeTask(ytdlp, () -> this.YouTube(platform, url)));
+		platformHandlers.put("instagram", () -> executeTask(ytdlp, () -> this.instagram(platform, url)));
+		platformHandlers.put("twitter", () -> executeTask(ytdlp, () -> this.twitter(platform, url)));
 		// 获取并执行对应平台的处理逻辑
 		Runnable handler = platformHandlers.get(platform);
 		if (handler != null) {
@@ -544,9 +544,9 @@ public class AnalysisService {
 				String ctime = videoInfo.get("ctime");
 				//下载up 头像  up头像不参与数据 只参与nfo
 				HttpUtil.downBiliFromUrl(upface, "upcover.jpg",dir);
-				String uplocal =  dir+"upcover.jpg";
-				String piclocal = dir+filename+".jpg";
-				EmbyMetadataGenerator.createBillNfo(upname,uplocal,upmid,ctime,cid,title,desc,piclocal);
+				if(Global.getGeneratenfo) {
+					EmbyMetadataGenerator.createBillNfo(upname,"upcover.jpg",upmid,ctime,cid,title,desc,filename+".jpg",dir);
+				}
 				// 建档
 				VideoDataEntity videoDataEntity = new VideoDataEntity(cid, title, desc, platform, coverunaddr,
 						videoPath, videounaddr, video);
@@ -598,6 +598,7 @@ public class AnalysisService {
 		String videofile = FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), true, filename, null, null);
 		String videounrealaddr = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null, "mp4");
 		String coverunaddr = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null, "jpg");
+		String coverfile = filename + ".jpg";
 		logger.info("已使用f2库进行解析,下载器类型为:" + Global.downtype);
 		if (Global.downtype.equals("a2")) {
 			Aria2Util.sendMessage(Global.a2_link,
@@ -615,12 +616,14 @@ public class AnalysisService {
 		}
 		
 		String coverdir = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
-		HttpUtil.downLoadFromUrl(cover, filename + ".jpg",coverdir);
+		HttpUtil.downLoadFromUrl(cover, coverfile,coverdir);
 		// 推送完成后建立历史资料 此处注意 a2 地址需要与spring boot 一致否则 无法打开视频
 		VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId, desc, desc, platform, coverunaddr, videofile,
 				videounrealaddr, originaladdress);
 		//生成元数据
-		EmbyMetadataGenerator.createDouNfo(map.get("nickname"), map.get("uid"), map.get("create_time"), awemeId, desc, desc, coverunaddr,videofile);
+		if(Global.getGeneratenfo) {
+			EmbyMetadataGenerator.createDouNfo(map.get("nickname"), map.get("uid"), map.get("create_time"), awemeId, desc, desc, coverfile,videofile);
+		}
 		videoDataDao.save(videoDataEntity);
 		logger.info("下载流程结束");
 	}

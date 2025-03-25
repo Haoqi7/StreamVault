@@ -9,6 +9,8 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.flower.spirit.config.Global;
+
 @Component
 public class FileUtil {
 	
@@ -64,12 +66,15 @@ public class FileUtil {
     		resdir =resdir+favname+System.getProperty("file.separator");
     	}
     	if(filename!= null) {
-    		if(favname != null) {
-    			resdir =resdir+"Season1";
+    		if(Global.getGeneratenfo) {
+        		if(favname != null) {
+        			resdir =resdir+"Season1";
+        		}else {
+        			resdir =resdir+filename;
+        		}
     		}else {
-    			resdir =resdir+filename;
+    			resdir =resdir+filename;	
     		}
-//    		resdir =resdir+filename;	
     		if(ext != null) {
     			resdir =resdir+System.getProperty("file.separator")+filename+"."+ext;
     		}else {

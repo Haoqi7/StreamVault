@@ -76,6 +76,9 @@ public class AppConfig {
 		if(cookies.getYoutubecookies() != null && !cookies.getYoutubecookies().equals("")) {
 			Global.twittercookies  = cookies.getTwittercookies();
 		}
+		if(data.getGeneratenfo()!= null && data.getGeneratenfo().equals("1")) {
+			Global.getGeneratenfo =  true;
+		}
 		//清空 ffmpeg 队列
 		ffmpegQueueService.clearTask();
 		logger.info("ffmpeg队列已清空");

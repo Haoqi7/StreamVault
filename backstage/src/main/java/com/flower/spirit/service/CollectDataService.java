@@ -1,6 +1,7 @@
 package com.flower.spirit.service;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -135,11 +136,12 @@ public class CollectDataService {
 			String info = "https://api.bilibili.com/x/v3/fav/folder/info?media_id="+collectDataEntity.getOriginaladdress();
 			String infobili = HttpUtil.httpGetBili(info, "UTF-8", Global.bilicookies);
 			//收藏夹介绍
-			System.out.println(infobili);
 			JSONObject object = JSONObject.parseObject(infobili);
 			String namepath = object.getJSONObject("data").getString("title");
 			String temporaryDirectory =FileUtil.generateDir(true, Global.platform.bilibili.name(), false, null, namepath, null);
-			EmbyMetadataGenerator.createFavoriteNfo(infobili, temporaryDirectory);
+			if(Global.getGeneratenfo) {
+				EmbyMetadataGenerator.createFavoriteNfo(infobili, temporaryDirectory);
+			}
 			String api = "https://api.bilibili.com/x/v3/fav/resource/ids?media_id="+collectDataEntity.getOriginaladdress()+"&platform=web";
 			String httpGetBili = HttpUtil.httpGetBili(api, "UTF-8", Global.bilicookies);
 			JSONArray jsonArray = JSONObject.parseObject(httpGetBili).getJSONArray("data");
@@ -240,17 +242,17 @@ public class CollectDataService {
 						String ctime = map.get("ctime");
 						//下载up 头像  up头像不参与数据 只参与nfo
 						HttpUtil.downBiliFromUrl(upface, "upcover"+upmid+".jpg",dir);
-						String uplocal =  dir+"upcover"+upmid+".jpg";
-						String piclocal =  dir+filename+".jpg";
+						String uplocal =  "upcover"+upmid+".jpg";
+						String piclocal =  filename+".jpg";
 						map.put("upname", upname);
 						map.put("upmid", upmid);
 						map.put("upface", uplocal);
 						map.put("piclocal", piclocal);
 						map.put("ctime", ctime);
 						map.put("title", filename);
-						System.out.println(dirpath);
-						EmbyMetadataGenerator.createFavoriteEpisodeNfo(map, dir, i+1,dirpath);
-						
+						if(Global.getGeneratenfo) {
+							EmbyMetadataGenerator.createFavoriteEpisodeNfo(map, dir, i+1,dirpath);
+						}
 					}
 					 //新建明细
 					status =findByVideoid.size() == 0?"已完成":"已完成(未下载已存在)";
@@ -282,7 +284,13 @@ public class CollectDataService {
 	
 	
 	public void createDyData(CollectDataEntity entity) throws Exception {
-
+		String taskname = entity.getTaskname(); //任务名称 作为tvshou.nfo元数据
+		//生成tvshow.nfo元数据
+		String temporaryDirectory =FileUtil.generateDir(true, Global.platform.douyin.name(), false, null, taskname, null);
+		if(Global.getGeneratenfo) {
+			EmbyMetadataGenerator.createFavoriteDouNfo(taskname, temporaryDirectory);
+		}
+		
 		logger.info("任务开始"+entity.getOriginaladdress());
 		JSONArray allDYData = this.getAllDYData(entity);
 		
@@ -295,6 +303,7 @@ public class CollectDataService {
 			logger.info(entity.getOriginaladdress()+"任务中第"+i+"个");
 			String status ="";
 			JSONObject aweme_detail = allDYData.getJSONObject(i);	
+			System.out.println(aweme_detail);
 			String aweme_type = aweme_detail.getString("aweme_type");
 			String awemeId = aweme_detail.getString("aweme_id");
 			try {
@@ -351,31 +360,41 @@ public class CollectDataService {
 
 			List<VideoDataEntity> findByVideoid = videoDataService.findByVideoid(awemeId);
 			if(findByVideoid.size()==0) {
-				 // 复制代码 懒得优化 后期再说
 				 String filename = StringUtil.getFileName(desc, awemeId);
-//			     String videofile = Global.down_path+"/"+DateUtils.getDate("yyyy")+"/"+DateUtils.getDate("MM")+"/"+filename+".mp4";
-//		         String videounrealaddr = savefile+"video/"+DateUtils.getDate("yyyy")+"/"+DateUtils.getDate("MM")+"/"+filename+".mp4";
-//		         String coverunaddr =  savefile+"cover/"+DateUtils.getDate("yyyy")+"/"+DateUtils.getDate("MM")+"/"+filename+".jpg";
-				 String videofile = FileUtil.createDirFile(Global.down_path, ".mp4", filename, Global.platform.douyin.name());
-			     String videounrealaddr = FileUtil.createDirFile(FileUtil.savefile, ".mp4", filename, Global.platform.douyin.name());
-		         String coverunaddr = FileUtil.createDirFile(FileUtil.savefile, ".jpg", filename, Global.platform.douyin.name());
-			 
+				 String dir = FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), false, filename, taskname, null);
+				 String videofile = FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), false, filename, taskname, "mp4");
+				 String videounrealaddr = FileUtil.generateDir(false, Global.platform.douyin.name(), false, filename, taskname, "mp4");
+		         String coverunaddr =FileUtil.generateDir(false, Global.platform.douyin.name(), false, filename, taskname, "jpg");
+		         String dir2 = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
 		         logger.info("已使用批量下载,下载器类型为:"+Global.downtype);
 		         if(Global.downtype.equals("a2")) {
-			      	  // Aria2Util.sendMessage(Global.a2_link,  Aria2Util.createDouparameter(videoplay, Global.down_path+"/"+DateUtils.getDate("yyyy")+"/"+DateUtils.getDate("MM"), filename+".mp4", Global.a2_token,Global.tiktokCookie));
-			      	   Aria2Util.sendMessage(Global.a2_link,  Aria2Util.createDouparameter(videoplay, FileUtil.createTemporaryDirectory(Global.platform.douyin.name(), filename,Global.down_path), filename+".mp4", Global.a2_token,Global.tiktokCookie));
-			      	  // videofile = "/app/resources/video/"+DateUtils.getDate("yyyy")+"/"+DateUtils.getDate("MM")+"/"+filename+".mp4";
+			      	   Aria2Util.sendMessage(Global.a2_link,  Aria2Util.createDouparameter(videoplay, dir, filename+".mp4", Global.a2_token,Global.tiktokCookie));
 		         }
+		     	HashMap<String,String> header = new HashMap<String, String>();
+				header.put("User-Agent", DouUtil.ua);
+				header.put("cookie", Global.tiktokCookie);
 		         if(Global.downtype.equals("http")) {
 		        	//内置下载器
-		        	HttpUtil.downDouFromUrl(videoplay, filename+".mp4",FileUtil.createTemporaryDirectory(Global.platform.douyin.name(), filename, FileUtil.uploadRealPath),Global.tiktokCookie);
-		        	//videofile = "/app/resources/video/"+DateUtils.getDate("yyyy")+"/"+DateUtils.getDate("MM")+"/"+filename+".mp4";
+					dir = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
+					videofile = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
+					HttpUtil.downloadFile(videoplay,  filename + ".mp4", videofile, header);
 		         }
-		         videofile = FileUtil.createDirFile(FileUtil.uploadRealPath, ".mp4", filename, Global.platform.douyin.name());
-		         HttpUtil.downLoadFromUrl(coveruri, filename+".jpg", FileUtil.createTemporaryDirectory(Global.platform.douyin.name(), filename, FileUtil.uploadRealPath)+"/");
-		         VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId,desc, desc, "抖音", coverunaddr, videofile,videounrealaddr,entity.getOriginaladdress());
+		         HttpUtil.downloadFile(coveruri,  filename + ".jpg", dir2, header);
+		         VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId,desc, desc, "抖音", coverunaddr,  FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, "mp4"),videounrealaddr,entity.getOriginaladdress());
 		         videoDataDao.save(videoDataEntity);
-		 		logger.info("下载流程结束");
+		         
+				 if(Global.getGeneratenfo) {
+					Map<String, String> map = new HashMap<String, String>();
+					map.put("title", desc);
+					map.put("desc", desc);
+					map.put("upname", aweme_detail.getJSONObject("author").getString("nickname"));
+					map.put("ctime", aweme_detail.getString("create_time"));
+					map.put("piclocal", filename + ".jpg");
+					map.put("upmid", aweme_detail.getJSONObject("author").getString("uid"));
+					map.put("cid", awemeId);
+					EmbyMetadataGenerator.createFavoriteEpisodeDouNfo(map, dir, i+1,temporaryDirectory);
+				 }
+		 		 logger.info("下载流程结束");
 			}
 			if(status.equals("")) {
 				status =findByVideoid.size() == 0?"已完成":"已完成(未下载已存在)";

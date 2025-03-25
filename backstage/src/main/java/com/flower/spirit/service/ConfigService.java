@@ -24,6 +24,9 @@ public class ConfigService {
 	public AjaxEntity saveConfig(ConfigEntity configEntity) {
 		configDao.save(configEntity);
 		Global.apptoken =configEntity.getApptoken();
+		if(configEntity.getGeneratenfo()!= null && configEntity.getGeneratenfo().equals("1")) {
+			Global.getGeneratenfo =  true;
+		}
 		return new AjaxEntity(Global.ajax_option_success, "操作成功", configEntity);
 	}
 
