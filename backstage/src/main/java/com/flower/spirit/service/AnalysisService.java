@@ -571,14 +571,18 @@ public class AnalysisService {
 	 * @throws Exception
 	 */
 	public void dyvideo(String platform, String video) throws Exception {
-		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, video, platform);
-		Map<String, String> downVideo = DouUtil.downVideo(video);
+		if(null!=Global.tiktokCookie && !Global.tiktokCookie.equals("")) {
+			ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, video, platform);
+			Map<String, String> downVideo = DouUtil.downVideo(video);
 
-		this.putRecord(downVideo.get("awemeid"), downVideo.get("desc"), downVideo.get("videoplay"),
-				downVideo.get("cover"), platform, video, downVideo.get("type"), Global.tiktokCookie,downVideo);
-		System.gc();
+			this.putRecord(downVideo.get("awemeid"), downVideo.get("desc"), downVideo.get("videoplay"),
+					downVideo.get("cover"), platform, video, downVideo.get("type"), Global.tiktokCookie,downVideo);
+			System.gc();
 
-		processHistoryService.saveProcess(saveProcess.getId(), video, platform);
+			processHistoryService.saveProcess(saveProcess.getId(), video, platform);
+		}
+		logger.info("抖音cookie未填 不处理");
+	
 
 	}
 
