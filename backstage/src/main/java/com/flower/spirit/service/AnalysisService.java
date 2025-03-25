@@ -580,8 +580,10 @@ public class AnalysisService {
 			System.gc();
 
 			processHistoryService.saveProcess(saveProcess.getId(), video, platform);
+		}else {
+			logger.info("抖音cookie未填 不处理");
 		}
-		logger.info("抖音cookie未填 不处理");
+		
 	
 
 	}

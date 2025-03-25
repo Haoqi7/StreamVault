@@ -128,7 +128,7 @@ public class CollectDataService {
 	public AjaxEntity submitCollectData(CollectDataEntity collectDataEntity) {
 		if(null != collectDataEntity.getPlatform() && collectDataEntity.getPlatform().equals("哔哩") ) {
 			//必须授权ck
-			if(Global.bilicookies.equals("")) {
+			if(null == Global.bilicookies ||Global.bilicookies.equals("")) {
 				logger.info("必须填写bili ck,本次执行失败");
 				return new AjaxEntity(Global.ajax_uri_error, "必须填写bili ck", null);
 			}
@@ -167,7 +167,7 @@ public class CollectDataService {
 			
 		}
 		if(null != collectDataEntity.getPlatform() && collectDataEntity.getPlatform().equals("抖音") ) {
-			if(Global.tiktokCookie.equals("")) {
+			if(null == Global.tiktokCookie || Global.tiktokCookie.equals("")) {
 				return new AjaxEntity(Global.ajax_uri_error, "此功能必须填写ck", null);
 			}
 			if(collectDataEntity.getOriginaladdress().contains("post") || collectDataEntity.getOriginaladdress().contains("like")) {
