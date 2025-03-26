@@ -24,7 +24,12 @@ public class YouTuBeUtil {
 		command.add(url);
 //		command.add("-P "+outpath);
 		command.add("-o");
-		command.add(outpath + File.separator + "%(title)s"+File.separator+ "%(title)s.%(ext)s");
+		if(Global.getGeneratenfo) {
+			command.add(outpath + File.separator + "%(title)s"+File.separator+ "%(id)s.%(ext)s");
+		}else {
+			command.add(outpath + File.separator + "%(title)s"+File.separator+ "%(title)s.%(ext)s");
+		}
+		
 		command.add("--write-thumbnail");     
 		command.add("%(title)s.%(ext)s");
 		command.add("--restrict-filenames");

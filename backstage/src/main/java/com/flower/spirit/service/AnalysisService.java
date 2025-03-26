@@ -252,35 +252,8 @@ public class AnalysisService {
 			String baseName = FilenameUtils.getBaseName(filename);
 			String baseNameNo = baseName.replaceAll("_", " ");
 			String dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseName, null, null);
-			String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true, baseNameNo, null, null);
-			
-			File oldDir = new File(dir);
-			File newDir = new File(dir.replace(baseName, baseNameNo));
-			if (oldDir.exists()) {
-				oldDir.renameTo(newDir);
-				dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseNameNo, null, null);
-			}
-			//修改视频文件名
-			String oldVideoPath = dir + baseName + "." + FilenameUtils.getExtension(filename);
-			String newVideoPath = dir + baseNameNo + "." + FilenameUtils.getExtension(filename);
-			File oldVideo = new File(oldVideoPath);
-			File newVideo = new File(newVideoPath);
-			if (oldVideo.exists()) {
-				oldVideo.renameTo(newVideo);
-				filename = newVideo.getAbsolutePath();
-			}
-			//修改缩略图文件名
-			String oldCoverPath = dir + baseName + ".webp";
-			String newCoverPath = dir + baseNameNo + ".webp";
-			File oldCover = new File(oldCoverPath);
-			File newCover = new File(newCoverPath);
-			if (oldCover.exists()) {
-				oldCover.renameTo(newCover);
-			}
-			
+			String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true, new File(new File(filename).getParent()).getName(), null, null);
 			System.out.println(exec);
-
-
 //			String title = parseObject.getString("title");
 			String description = parseObject.getString("description");
 			String display_id = parseObject.getString("display_id");
@@ -297,7 +270,7 @@ public class AnalysisService {
 			videoDataDao.save(videoDataEntity);
 			processHistoryService.saveProcess(saveProcess.getId(), youtube, platform);
 			if(Global.getGeneratenfo) {
-				EmbyMetadataGenerator.generateMetadata(baseNameNo,upload_date.substring(0,4),description,"推特",null,uploader,dir,null,uploader_url,dir+baseNameNo+".webp");
+				EmbyMetadataGenerator.generateMetadata(baseNameNo,upload_date.substring(0,4),description,"推特",null,uploader,new File(filename).getParent(),null,uploader_url,dir+baseNameNo+".webp");
 			}
 			
 			return ;
