@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,23 +13,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.flower.spirit.config.Global;
 import com.flower.spirit.dao.FfmpegQueueDao;
 import com.flower.spirit.dao.FfmpegQueueDataDao;
 import com.flower.spirit.dao.VideoDataDao;
-import com.flower.spirit.entity.FfmpegQueueDataEntity;
-import com.flower.spirit.entity.FfmpegQueueEntity;
 import com.flower.spirit.entity.ProcessHistoryEntity;
 import com.flower.spirit.entity.VideoDataEntity;
 import com.flower.spirit.utils.Aria2Util;
@@ -139,48 +131,42 @@ public class AnalysisService {
 	private void twitter(String platform, String url) {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, url, platform);
 		try {
-			String exec = YtDlpUtil.exec(url);
-			int lastIndexOf = exec.lastIndexOf("}}");
-			exec = exec.substring(0, lastIndexOf + 2);
+			String dirtemp = FileUtil.generateDir(true, Global.platform.twitter.name(), true, null, null, null);
+			String exec = YouTuBeUtil.exec(url,dirtemp);
+			//已经下载完成了
 			JSONObject parseObject = JSONObject.parseObject(exec);
-			String thumbnail = parseObject.getString("thumbnail");
-			String videourl = parseObject.getString("url");
-			String id = parseObject.getString("id");
+			String filename = parseObject.getString("filename");
+			//先处理文件名
+//			System.out.println(filename);
+			String baseName = FilenameUtils.getBaseName(filename);
+			String baseNameNo = baseName.replaceAll("_", " ");
+			String dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseName, null, null);
+			String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true, new File(new File(filename).getParent()).getName(), null, null);
+//			System.out.println(exec);
+//			String title = parseObject.getString("title");
 			String description = parseObject.getString("description");
-			String title = parseObject.getString("title");
-			String filename = StringUtil.getFileName(title, id);
-			String videounrealaddr = FileUtil.createDirFile(FileUtil.savefile, ".mp4", filename,
-					Global.platform.twitter.name());
-			String coverunaddr = FileUtil.createDirFile(FileUtil.savefile, ".jpg", filename,
-					Global.platform.twitter.name());
-			String filepath = FileUtil.createDirFile("/app/resources", ".mp4", filename,
-					Global.platform.twitter.name());
-			if (Global.downtype.equals("http")) {
-				// http 需要创建临时目录
-				String newpath = FileUtil.createTemporaryDirectory(Global.platform.twitter.name(), filename,
-						"/app/resources");
-				FileUtils.createDirectory(newpath);
-				HttpUtil.downLoadFromUrl(videourl, filename + ".mp4", newpath);
-			}
-			if (Global.downtype.equals("a2")) {
-				// a2 不需要 目录有a2托管 此处路径应该可以优化
-				String a2path = FileUtil.createTemporaryDirectory(Global.platform.twitter.name(), filename,
-						Global.down_path);
-				String videores = Aria2Util.sendMessage(Global.a2_link,
-						Aria2Util.createBiliparameter(videourl, a2path, filename + ".mp4", Global.a2_token));
-			}
-			HttpUtil.downLoadFromUrl(thumbnail, filename + ".jpg",
-					FileUtil.createTemporaryDirectory(Global.platform.twitter.name(), filename, Global.uploadRealPath) + "/");
-			// 建档
-			VideoDataEntity videoDataEntity = new VideoDataEntity(id, title, description, platform, coverunaddr,
-					filepath, videounrealaddr, url);
+			String display_id = parseObject.getString("display_id");
+			String uploader = parseObject.getString("uploader");
+			String uploader_url = parseObject.getString("uploader_url");
+			String upload_date = parseObject.getString("upload_date");
+			String name = new File(filename).getName();
+
+			String coverdb = dircos+baseNameNo+".webp";
+			
+			String videodb = dircos+name;
+			
+			VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.twitter.name(),coverdb ,filename, videodb, url);
 			videoDataDao.save(videoDataEntity);
 			processHistoryService.saveProcess(saveProcess.getId(), url, platform);
-
+			if(Global.getGeneratenfo) {
+				EmbyMetadataGenerator.generateMetadata(baseNameNo,upload_date.substring(0,4),description,"twitter",null,uploader,new File(filename).getParent(),null,uploader_url,dir+baseNameNo+".webp");
+			}
+			
+//			return ;
 		} catch (Exception e) {
 
+			// logger.error(youtube+"解析异常");
 		}
-		processHistoryService.saveProcess(saveProcess.getId(), url, platform);
 
 	}
 
@@ -240,7 +226,7 @@ public class AnalysisService {
 	private void YouTube(String platform, String youtube) throws Exception {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, youtube, platform);
 		try {
-			String dirtemp = FileUtil.generateDir(true, Global.platform.twitter.name(), true, null, null, null);
+			String dirtemp = FileUtil.generateDir(true, Global.platform.youtube.name(), true, null, null, null);
 			String exec = YouTuBeUtil.exec(youtube,dirtemp);
 			
 
@@ -248,12 +234,12 @@ public class AnalysisService {
 			JSONObject parseObject = JSONObject.parseObject(exec);
 			String filename = parseObject.getString("filename");
 			//先处理文件名
-			System.out.println(filename);
+//			System.out.println(filename);
 			String baseName = FilenameUtils.getBaseName(filename);
 			String baseNameNo = baseName.replaceAll("_", " ");
-			String dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseName, null, null);
-			String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true, new File(new File(filename).getParent()).getName(), null, null);
-			System.out.println(exec);
+			String dir = FileUtil.generateDir(true, Global.platform.youtube.name(), true, baseName, null, null);
+			String dircos = FileUtil.generateDir(false, Global.platform.youtube.name(), true, new File(new File(filename).getParent()).getName(), null, null);
+//			System.out.println(exec);
 //			String title = parseObject.getString("title");
 			String description = parseObject.getString("description");
 			String display_id = parseObject.getString("display_id");
@@ -266,14 +252,14 @@ public class AnalysisService {
 			
 			String videodb = dircos+name;
 			
-			VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.twitter.name(),coverdb ,filename, videodb, youtube);
+			VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.youtube.name(),coverdb ,filename, videodb, youtube);
 			videoDataDao.save(videoDataEntity);
 			processHistoryService.saveProcess(saveProcess.getId(), youtube, platform);
 			if(Global.getGeneratenfo) {
-				EmbyMetadataGenerator.generateMetadata(baseNameNo,upload_date.substring(0,4),description,"推特",null,uploader,new File(filename).getParent(),null,uploader_url,dir+baseNameNo+".webp");
+				EmbyMetadataGenerator.generateMetadata(baseNameNo,upload_date.substring(0,4),description,"youtube",null,uploader,new File(filename).getParent(),null,uploader_url,dir+baseNameNo+".webp");
 			}
 			
-			return ;
+//			return ;
 		} catch (Exception e) {
 			throw e;
 			// logger.error(youtube+"解析异常");
