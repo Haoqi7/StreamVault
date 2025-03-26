@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,9 +98,9 @@ public class AnalysisService {
 		Map<String, Runnable> platformHandlers = new HashMap<>();
 		platformHandlers.put("哔哩", () -> executeTask(bilibili, () -> this.bilivideo(platform, url)));
 		platformHandlers.put("抖音", () -> executeTask(douyin, () -> this.dyvideo(platform, url)));
+		platformHandlers.put("YouTube", () -> executeTask(ytdlp, () -> this.YouTube(platform, url)));
 //		platformHandlers.put("steam", () -> executeTask(steamcmd, () -> this.steamwork(video)));
 //		platformHandlers.put("tiktok", () -> executeTask(douyin, () -> this.tiktok(platform, url)));
-		platformHandlers.put("YouTube", () -> executeTask(ytdlp, () -> this.YouTube(platform, url)));
 		platformHandlers.put("instagram", () -> executeTask(ytdlp, () -> this.instagram(platform, url)));
 		platformHandlers.put("twitter", () -> executeTask(ytdlp, () -> this.twitter(platform, url)));
 		// 获取并执行对应平台的处理逻辑
@@ -227,107 +230,77 @@ public class AnalysisService {
 		processHistoryService.saveProcess(saveProcess.getId(), url, platform);
 	}
 
+	/**
+	 * 
+	 * 暂时不支持 其他下载了 统一由yt-dlp下载 避免产生较多的下载碎片 
+	 * @param platform
+	 * @param youtube
+	 * @throws Exception
+	 */
 	private void YouTube(String platform, String youtube) throws Exception {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, youtube, platform);
 		try {
-			String exec = YouTuBeUtil.exec("https://www.youtube.com/watch?v=f7EDFdA10pg");
+			String dirtemp = FileUtil.generateDir(true, Global.platform.twitter.name(), true, null, null, null);
+			String exec = YouTuBeUtil.exec(youtube,dirtemp);
+			
+
+			//已经下载完成了
 			JSONObject parseObject = JSONObject.parseObject(exec);
-			String a_link = "";
-			String v_linl = "";
-			String title = parseObject.getString("title");
+			String filename = parseObject.getString("filename");
+			//先处理文件名
+			System.out.println(filename);
+			String baseName = FilenameUtils.getBaseName(filename);
+			String baseNameNo = baseName.replaceAll("_", " ");
+			String dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseName, null, null);
+			String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true, baseNameNo, null, null);
+			
+			File oldDir = new File(dir);
+			File newDir = new File(dir.replace(baseName, baseNameNo));
+			if (oldDir.exists()) {
+				oldDir.renameTo(newDir);
+				dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseNameNo, null, null);
+			}
+			//修改视频文件名
+			String oldVideoPath = dir + baseName + "." + FilenameUtils.getExtension(filename);
+			String newVideoPath = dir + baseNameNo + "." + FilenameUtils.getExtension(filename);
+			File oldVideo = new File(oldVideoPath);
+			File newVideo = new File(newVideoPath);
+			if (oldVideo.exists()) {
+				oldVideo.renameTo(newVideo);
+				filename = newVideo.getAbsolutePath();
+			}
+			//修改缩略图文件名
+			String oldCoverPath = dir + baseName + ".webp";
+			String newCoverPath = dir + baseNameNo + ".webp";
+			File oldCover = new File(oldCoverPath);
+			File newCover = new File(newCoverPath);
+			if (oldCover.exists()) {
+				oldCover.renameTo(newCover);
+			}
+			
+			System.out.println(exec);
+
+
+//			String title = parseObject.getString("title");
 			String description = parseObject.getString("description");
 			String display_id = parseObject.getString("display_id");
-			String thumbnail = parseObject.getString("thumbnail");
-			if (parseObject.containsKey("requested_formats")) {
-				JSONArray jsonArray = parseObject.getJSONArray("requested_formats");
-				for (int i = 0; i < jsonArray.size(); i++) {
-					JSONObject jsonObject = jsonArray.getJSONObject(i);
-					String ext = jsonObject.getString("video_ext");
-					String url = jsonObject.getString("url");
-					if (ext.equals("none")) {
-						a_link = url;
-					}
-					if (ext.equals("webm")) {
-						v_linl = url;
-					}
-				}
-			}
-			if (a_link.equals("") || v_linl.equals("")) {
-				logger.error(youtube + "解析异常");
-				return;
-			}
-			String filename = StringUtil.getFileName(title, display_id);
-			String videounrealaddr = FileUtil.createDirFile(FileUtil.savefile, ".mp4", filename,
-					Global.platform.youtube.name());
-			String coverunaddr = FileUtil.createDirFile(FileUtil.savefile, ".jpg", filename,
-					Global.platform.youtube.name());
-			String filepath = FileUtil.createDirFile("/app/resources", ".mp4", filename,
-					Global.platform.youtube.name());
-			if (Global.downtype.equals("http")) {
-				// http 需要创建临时目录
+			String uploader = parseObject.getString("uploader");
+			String uploader_url = parseObject.getString("uploader_url");
+			String upload_date = parseObject.getString("upload_date");
+			String name = new File(filename).getName();
 
-				String newpath = FileUtil.createTemporaryDirectory(Global.platform.youtube.name(), filename,
-						"/app/resources");
-				FileUtils.createDirectory(newpath);
-				HttpUtil.downLoadFromUrl(v_linl, filename + "-video.webm", newpath);
-				HttpUtil.downLoadFromUrl(a_link, filename + "-audio.weba", newpath);
-				// 此处可以直接合并 由于http 不是异步
-				CommandUtil.command("ffmpeg -i " + newpath + File.separator + filename + "-video.webm -i " + newpath
-						+ File.separator + filename + "-audio.weba -c:v copy -c:a copy -f mp4 " + filepath);
-				// 删除
-				FileUtils.deleteFile(newpath + File.separator + filename + "-video.m4s");
-				FileUtils.deleteFile(newpath + File.separator + filename + "-audio.m4s");
-			}
-			if (Global.downtype.equals("a2")) {
-				// a2 不需要 目录有a2托管 此处路径应该可以优化
-				String a2path = FileUtil.createTemporaryDirectory(Global.platform.youtube.name(), filename,
-						Global.down_path);
-				String videores = Aria2Util.sendMessage(Global.a2_link,
-						Aria2Util.createBiliparameter(v_linl, a2path, filename + "-video.webm", Global.a2_token));
-				String audiores = Aria2Util.sendMessage(Global.a2_link,
-						Aria2Util.createBiliparameter(a_link, a2path, filename + "-audio.weba", Global.a2_token));
-				// 保存到FfmpegQueueEntity队列
-				logger.info("youtube仅支持dash 提交到ffmpeg队列等待下载完成合并-前置任务结束");
-				FfmpegQueueEntity ffmpegQueueEntity = new FfmpegQueueEntity();
-				ffmpegQueueEntity.setVideoid(display_id);
-				ffmpegQueueEntity.setVideoname(title);
-				ffmpegQueueEntity
-						.setPendingfolder(FileUtil.createTemporaryDirectory(Global.platform.youtube.name(), filename));
-				ffmpegQueueEntity.setAudiostatus("0");
-				ffmpegQueueEntity.setVideostatus("0");
-				ffmpegQueueEntity.setFilepath(FileUtil.createDirFile(FileUtil.uploadRealPath, ".mp4", filename,
-						Global.platform.youtube.name()));
-				ffmpegQueueEntity.setStatus("0");
-				ffmpegQueueEntity.setCreatetime(DateUtils.getDateTime());
-				ffmpegQueueDao.save(ffmpegQueueEntity);
-				// 数据
-				FfmpegQueueDataEntity videoData = new FfmpegQueueDataEntity();
-				videoData.setQueueid(ffmpegQueueEntity.getId());
-				videoData.setTaskid(JSONObject.parseObject(videores).getString("result"));
-				videoData.setFiletype("v");
-				videoData.setStatus("0");
-				videoData.setFilepath(FileUtil.createTemporaryDirectory(Global.platform.youtube.name(), filename) + "/"
-						+ filename + "-video.webm");
-				videoData.setCreatetime(DateUtils.getDateTime());
-				ffmpegQueueDataDao.save(videoData);
-				FfmpegQueueDataEntity audioData = new FfmpegQueueDataEntity();
-				audioData.setQueueid(ffmpegQueueEntity.getId());
-				audioData.setTaskid(JSONObject.parseObject(audiores).getString("result"));
-				audioData.setFiletype("a");
-				audioData.setStatus("0");
-				audioData.setFilepath(FileUtil.createTemporaryDirectory(Global.platform.youtube.name(), filename) + "/"
-						+ filename + "-audio.weba");
-				audioData.setCreatetime(DateUtils.getDateTime());
-				ffmpegQueueDataDao.save(audioData);
-			}
-			HttpUtil.downLoadFromUrl(thumbnail, filename + ".jpg",
-					FileUtil.createTemporaryDirectory(Global.platform.youtube.name(), filename, Global.uploadRealPath) + "/");
-			// 建档
-			VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, title, description, platform, coverunaddr,
-					filepath, videounrealaddr, youtube);
+			String coverdb = dircos+baseNameNo+".webp";
+			
+			String videodb = dircos+name;
+			
+			VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.twitter.name(),coverdb ,filename, videodb, youtube);
 			videoDataDao.save(videoDataEntity);
 			processHistoryService.saveProcess(saveProcess.getId(), youtube, platform);
-
+			if(Global.getGeneratenfo) {
+				EmbyMetadataGenerator.generateMetadata(baseNameNo,upload_date.substring(0,4),description,"推特",null,uploader,dir,null,uploader_url,dir+baseNameNo+".webp");
+			}
+			
+			return ;
 		} catch (Exception e) {
 			throw e;
 			// logger.error(youtube+"解析异常");
@@ -715,9 +688,7 @@ public class AnalysisService {
 	}
 
 	public static void main(String[] args) {
-		String x = "1234}}aaa11";
-		int lastIndexOf = x.lastIndexOf("}}");
-		System.out.println(x.substring(0, lastIndexOf + 2));
+
 	}
 
 }

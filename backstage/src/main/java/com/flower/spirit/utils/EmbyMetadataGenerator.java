@@ -39,7 +39,7 @@ public class EmbyMetadataGenerator {
                     "    <certification/>\n" +
                     "    <id>" + upmid + "</id>\n" +
                     "    <tmdbid/>\n" +
-                    "    <country>中国</country>\n" +
+                    "    <country>无</country>\n" +
                     "    <status/>\n" +
                     "    <code/>\n" +
                     "    <premiered>" + premiered + "</premiered>\n" +

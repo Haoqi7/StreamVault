@@ -75,7 +75,7 @@
         $('.masonry-item').unbind('click');
         $('.masonry-item').click(function (){
             var videourl = $(this).attr('data-video');
-            var html ="<video src='"+transferName(videourl)+"' height='100%' width='100%' controls='controls'>"
+            var html ="<video src='"+videourl+"' height='100%' width='100%' controls='controls'>"
             layer.open({
                 type: 1,
                 skin: 'layui-layer-rim',
