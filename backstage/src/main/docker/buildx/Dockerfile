@@ -1,6 +1,6 @@
 FROM alpine
 ENV TZ=Asia/Shanghai
-ARG BUILD_VERSION=2025.03.25
+ARG BUILD_VERSION=2025.03.26
 ENV YT_DLP_VERSION=$BUILD_VERSION
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories && \
     apk upgrade --update-cache && \

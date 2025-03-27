@@ -1,7 +1,7 @@
 ###docker buildx
     
 
-    docker buildx build --platform linux/arm64,linux/amd64 -t qingfeng2336/stream-vault:dev --push -f ./Dockerfile .
+    docker buildx build --platform linux/arm64,linux/amd64 -t qingfeng2336/stream-vault --push -f ./Dockerfile .
 
     docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -t qingfeng2336/stream-vault --push -f ./Dockerfile .
 
@@ -15,6 +15,8 @@
 
 
 	docker buildx build --platform linux/amd64 -t qingfeng2336/stream-vault:steam --push -f ./Dockerfile.steam .
+
+	docker buildx build --platform linux/arm64,linux/amd64 -t qingfeng2336/stream-vault:nouse --push -f ./Dockerfile.dev .
 ## 映射目录
 
 /resources/video   to download addr

@@ -140,6 +140,7 @@ public class AnalysisService {
 //			System.out.println(filename);
 			String baseName = FilenameUtils.getBaseName(filename);
 			String baseNameNo = baseName.replaceAll("_", " ");
+			String filedoc = new File(filename).getParent();
 			String dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseName, null, null);
 			String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true, new File(new File(filename).getParent()).getName(), null, null);
 //			System.out.println(exec);
@@ -159,7 +160,7 @@ public class AnalysisService {
 			videoDataDao.save(videoDataEntity);
 			processHistoryService.saveProcess(saveProcess.getId(), url, platform);
 			if(Global.getGeneratenfo) {
-				EmbyMetadataGenerator.generateMetadata(baseNameNo,upload_date.substring(0,4),description,"twitter",null,uploader,new File(filename).getParent(),null,uploader_url,dir+baseNameNo+".webp");
+				EmbyMetadataGenerator.generateMetadata(filedoc,upload_date.substring(0,4),description,"twitter",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
 			}
 			
 //			return ;
@@ -237,6 +238,7 @@ public class AnalysisService {
 //			System.out.println(filename);
 			String baseName = FilenameUtils.getBaseName(filename);
 			String baseNameNo = baseName.replaceAll("_", " ");
+			String filedoc = new File(filename).getParent();
 			String dir = FileUtil.generateDir(true, Global.platform.youtube.name(), true, baseName, null, null);
 			String dircos = FileUtil.generateDir(false, Global.platform.youtube.name(), true, new File(new File(filename).getParent()).getName(), null, null);
 //			System.out.println(exec);
@@ -256,7 +258,7 @@ public class AnalysisService {
 			videoDataDao.save(videoDataEntity);
 			processHistoryService.saveProcess(saveProcess.getId(), youtube, platform);
 			if(Global.getGeneratenfo) {
-				EmbyMetadataGenerator.generateMetadata(baseNameNo,upload_date.substring(0,4),description,"youtube",null,uploader,new File(filename).getParent(),null,uploader_url,dir+baseNameNo+".webp");
+				EmbyMetadataGenerator.generateMetadata(filedoc,upload_date.substring(0,4),description,"youtube",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
 			}
 			
 //			return ;
