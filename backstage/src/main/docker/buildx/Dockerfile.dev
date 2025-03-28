@@ -6,7 +6,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositorie
     apk upgrade --update-cache && \
     apk add openjdk8 && \
     apk add ffmpeg && \
-    apk add python3 py3-pip py3-virtualenv build-base python3-dev&& \
+    apk add python3 py3-pip py3-virtualenv build-base python3-dev libffi-dev&& \
     rm -rf /tmp/* /var/cache/apk/*
 	
 RUN python3 -m venv /opt/venv && \
@@ -20,4 +20,6 @@ COPY db /home/app/db/
 COPY script /home/app/script/
 RUN mkdir -p /app/resources
 ADD spirit-0.0.1-SNAPSHOT.jar app.jar
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar","--spring.profiles.active=docker"]
+ENV JAVA_OPTS="-Xmx512m -Xms256m"
+#ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar --spring.profiles.active=docker"]
+ENTRYPOINT ["sh", "-c", "if [ -n \"$http_proxy\" ]; then export http_proxy=$http_proxy; export https_proxy=$https_proxy; fi; java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar --spring.profiles.active=docker"]
