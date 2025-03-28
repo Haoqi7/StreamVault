@@ -15,6 +15,7 @@
 > 1. 如Docker Hub镜像版本不包含环境变量需要使用的参数（例如：代理、掩码、时区等），建议自行修改Dockerfile并编译。编译文件位于`backstage/src/main/docker/buildx`，已包含所有必要文件，仅需执行Docker编译即可。每次修复bug后都会提交更新后的jar文件，无需单独编译jar。
 > 2. 更多详细部署方式和配置说明，请先查看[旧版文档](doc/README.md)和[更新日志](doc/updaterecords.md)，部署方式等可以参考旧版方式。
 > 3. 更多详细细节待补充，敬请期待。
+> 4. 所有配套客户端及源码可在 `app` 文件夹下找到
 
 ## 🌟 项目简介
 
@@ -111,6 +112,8 @@ docker run --name stream-vault -d -p 28083:28081 \
 - 🤖 Android APP
 - 💬 微信小程序（开发者模式）
 - 🌍 其他UniApp支持的平台
+
+
 
 ## 🔌 API接口
 
