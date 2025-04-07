@@ -37,6 +37,14 @@ public class ConfigEntity implements Serializable {
 	private String taskcron; //任务定时器
 	
 	private String generatenfo;
+	
+	private String agenttype; //类型
+	
+	private String agentaddress;  //地址
+	
+	private String agentport;  //端口
+	
+	private String agentaccpass;  //密码
 
 	public Integer getId() {
 		return id;
@@ -85,6 +93,39 @@ public class ConfigEntity implements Serializable {
 	public void setGeneratenfo(String generatenfo) {
 		this.generatenfo = generatenfo;
 	}
+
+	public String getAgenttype() {
+		return agenttype;
+	}
+
+	public void setAgenttype(String agenttype) {
+		this.agenttype = agenttype;
+	}
+
+	public String getAgentaddress() {
+		return agentaddress;
+	}
+
+	public void setAgentaddress(String agentaddress) {
+		this.agentaddress = agentaddress;
+	}
+
+	public String getAgentport() {
+		return agentport;
+	}
+
+	public void setAgentport(String agentport) {
+		this.agentport = agentport;
+	}
+
+	public String getAgentaccpass() {
+		return agentaccpass;
+	}
+
+	public void setAgentaccpass(String agentaccpass) {
+		this.agentaccpass = agentaccpass;
+	}
+
 	
 	
 	

@@ -79,9 +79,39 @@ public class AppConfig {
 		if(data.getGeneratenfo()!= null && data.getGeneratenfo().equals("1")) {
 			Global.getGeneratenfo =  true;
 		}
+		if (data.getAgenttype() != null && !data.getAgenttype().trim().isEmpty() &&
+			    data.getAgentaddress() != null && !data.getAgentaddress().trim().isEmpty() &&
+			    data.getAgentport() != null && !data.getAgentport().trim().isEmpty()) {
+
+			   
+		}
 		//清空 ffmpeg 队列
 		ffmpegQueueService.clearTask();
 		logger.info("ffmpeg队列已清空");
 	}
+	
+    public static String buildProxyArgument(ConfigEntity data) {
+        if (data == null || 
+            isBlank(data.getAgenttype()) || 
+            isBlank(data.getAgentaddress()) || 
+            isBlank(data.getAgentport())) {
+            return "--proxy \"\""; // 直接连接
+        }
+
+        StringBuilder proxyUrl = new StringBuilder();
+        proxyUrl.append(data.getAgenttype()).append("://");
+
+        if (!isBlank(data.getAgentaccpass())) {
+            proxyUrl.append(data.getAgentaccpass()).append("@");
+        }
+
+        proxyUrl.append(data.getAgentaddress()).append(":").append(data.getAgentport()).append("/");
+
+        return "--proxy " + proxyUrl.toString();
+    }
+
+    private static boolean isBlank(String str) {
+        return str == null || str.trim().isEmpty();
+    }
 
 }
