@@ -87,6 +87,7 @@ public class Global {
 	// 文件映射和保存路径
 	public static String savefile;
 	public static String uploadRealPath;
+	public static String apppath;
 
 	public static boolean getGeneratenfo =false;
 	
@@ -100,5 +101,11 @@ public class Global {
 	@Value("${file.save.path}")
 	public void setUploadRealPath(String value) {
 		Global.uploadRealPath = value;
+	}
+	
+	
+	@Value("${file.app.path}")
+	public void setAppPath(String value) {
+		Global.apppath = value;
 	}
 }

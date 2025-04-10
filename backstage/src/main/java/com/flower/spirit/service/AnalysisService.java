@@ -63,7 +63,7 @@ public class AnalysisService {
 
 	private ExecutorService bilibili = Executors.newFixedThreadPool(1);
 
-	private ExecutorService ytdlp = Executors.newFixedThreadPool(1);
+	private ExecutorService ytdlp = Executors.newFixedThreadPool(5);
 
 	@Autowired
 	private FfmpegQueueDao ffmpegQueueDao;
@@ -132,7 +132,7 @@ public class AnalysisService {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, url, platform);
 		try {
 			String dirtemp = FileUtil.generateDir(true, Global.platform.twitter.name(), true, null, null, null);
-			String exec = YouTuBeUtil.exec(url,dirtemp);
+			String exec = YouTuBeUtil.exec(url,dirtemp,"twitter");
 			//已经下载完成了
 			JSONObject parseObject = JSONObject.parseObject(exec);
 			String filename = parseObject.getString("filename");
@@ -228,7 +228,7 @@ public class AnalysisService {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, youtube, platform);
 		try {
 			String dirtemp = FileUtil.generateDir(true, Global.platform.youtube.name(), true, null, null, null);
-			String exec = YouTuBeUtil.exec(youtube,dirtemp);
+			String exec = YouTuBeUtil.exec(youtube,dirtemp,"youtube");
 			
 
 			//已经下载完成了

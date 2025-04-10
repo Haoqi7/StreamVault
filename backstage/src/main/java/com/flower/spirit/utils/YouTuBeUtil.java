@@ -14,13 +14,23 @@ import com.flower.spirit.config.Global;
 
 public class YouTuBeUtil {
 
-	public static String exec(String url,String outpath) throws IOException, InterruptedException {
+	public static String exec(String url,String outpath,String p) throws IOException, InterruptedException {
 		List<String> command = new ArrayList<>();
 		command.add("yt-dlp");
 		command.add("--print-json");
 //		if (Global.youtubecookies != null && !Global.youtubecookies.equals("")) {
 //			command.add("--cookies " + Global.youtubecookies);
 //		}
+		String apppath = Global.apppath;
+		File cookieDir = new File(apppath + "/cookies");
+		if(p.equals("youtube")) {
+			//
+			File youtubeFile = new File(cookieDir, "youtube.txt");
+			if(youtubeFile.exists()) {
+				command.add("--cookies");
+				command.add(youtubeFile.getAbsolutePath());
+			}
+		}
 		if(Global.proxyinfo!=null) {
 			command.add("--proxy");
 			command.add(Global.proxyinfo);
@@ -34,7 +44,9 @@ public class YouTuBeUtil {
 		}
 		
 		command.add("--write-thumbnail");     
-		command.add("%(title)s.%(ext)s");
+		command.add("--convert-thumbnails");
+		command.add("webp");
+//		command.add("%(title)s.%(ext)s");
 		command.add("--restrict-filenames");
 //		System.out.println(command.toString());
 		ProcessBuilder processBuilder = new ProcessBuilder(command);
@@ -65,10 +77,15 @@ public class YouTuBeUtil {
 				audioExt != null &&
 				!"none".equals(audioExt);
 	}
+	
+	
+	
+	
+	
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			String exec = YouTuBeUtil.exec("https://www.youtube.com/watch?v=f7EDFdA10pg","xx");
+			String exec = YouTuBeUtil.exec("https://www.youtube.com/watch?v=f7EDFdA10pg","xx","youtube");
 			JSONObject parseObject = JSONObject.parseObject(exec);
 			String a_link = "";
 			String v_linl = "";

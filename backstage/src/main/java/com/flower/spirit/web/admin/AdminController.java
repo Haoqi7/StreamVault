@@ -17,6 +17,7 @@ import com.flower.spirit.entity.CollectDataDetailEntity;
 import com.flower.spirit.entity.CollectDataEntity;
 import com.flower.spirit.entity.ConfigEntity;
 import com.flower.spirit.entity.CookiesConfigEntity;
+import com.flower.spirit.entity.CookiesRequestEntity;
 import com.flower.spirit.entity.DownloaderEntity;
 import com.flower.spirit.entity.ProcessHistoryEntity;
 import com.flower.spirit.entity.TikTokConfigEntity;
@@ -360,5 +361,15 @@ public class AdminController {
 	@GetMapping(value = "/checkVersion")
 	public AjaxEntity checkVersion() {
 		return systemService.checkVersion();
+	}
+	
+	@PostMapping(value = "/writeCookies")
+	public AjaxEntity writeCookies(CookiesRequestEntity cookiesRequestEntity) {
+		return cookiesConfigService.writeCookies(cookiesRequestEntity);
+	}
+	
+	@PostMapping(value = "/checkCookies")
+	public AjaxEntity checkCookies() {
+		return cookiesConfigService.checkCookies();
 	}
 } 

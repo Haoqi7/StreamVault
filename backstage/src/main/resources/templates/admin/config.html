@@ -198,19 +198,33 @@
                     
                    <div class="col-md-6">
                         <div class="card">
-                            <div class="card-header"><h4>占个位置</h4></div>
+                            <div class="card-header"><h4>Cookie管理&nbsp;&nbsp;<font style="font-size: 12px"><a href="https://cookie-editor.com/">测试时使用Cookie-Editor</a></font></h4></div>
                             <div class="card-body">
                                 <form action="#" method="post" onsubmit="return false;">
                                     <div class="form-group">
+                                        <label>Cookie状态</label>
+                                        <div class="youtube-status">YouTube Cookie: 检查中...</div>
+                                        <div class="twitter-status">Twitter Cookie: 检查中...</div>
+                                        <button type="button" class="btn btn-info btn-sm" onclick="checkCookies()">刷新状态</button>
                                     </div>
                                     <div class="form-group">
+                                        <label>导入Cookie</label>
+                                          <div class="form-group">
+	                                        <select class="form-control" id="cookiePlatform">
+	                                            <option value="youtube">YouTube</option>
+	                                            <option value="twitter">Twitter</option>
+	                                        </select>
+                                         </div>
+                                         <div class="form-group">
+                                        	<textarea class="form-control" id="cookieContent" rows="3" placeholder="请输入Netscape格式的Cookie内容"></textarea>
+                                          </div>
+                                        <button type="button" class="btn btn-primary" onclick="writeCookies()">保存</button>
                                     </div>
                                 </form>
-
                             </div>
                         </div>
                     </div>
-                   <div class="col-md-6">
+<!--                    <div class="col-md-6">
                         <div class="card">
                             <div class="card-header"><h4>占个位置</h4></div>
                             <div class="card-body">
@@ -223,7 +237,7 @@
 
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
@@ -251,9 +265,54 @@
         saveTikTokConfig();
         saveCookieConfig();
         saveAgentConfig();
+        checkCookies();
     })
 
     var qrcode_key;
+    function checkCookies(){
+        $.ajax({
+            url: '/admin/api/checkCookies',
+            type: 'POST',
+            success: function(res) {
+                console.log(res);
+                if(res.resCode === '000001') {
+                    var status = res.record;
+                    var youtube = status.youtube ? '存在' : '不存在';
+                    var twitter = status.twitter ? '存在' : '不存在';
+                    $('.youtube-status').text('YouTube Cookie: ' + youtube);
+                    $('.twitter-status').text('Twitter Cookie: ' + twitter);
+                } else {
+                    layer.msg(res.message)
+                }
+            }
+        });
+    }
+    
+    function writeCookies(){
+        var platform = $('#cookiePlatform').val();
+        var cookies = $('#cookieContent').val();
+        if(!platform || !cookies) {
+            layer.msg("平台和Cookie内容不能为空")
+            return;
+        }
+        $.ajax({
+            url: '/admin/api/writeCookies',
+            type: 'POST',
+            data: {
+                platform: platform,
+                cookies: cookies
+            },
+            success: function(res) {
+                if(res.resCode === '000001') {
+                	layer.msg("保存成功")
+                    checkCookies();
+                    $('#cookieContent').val('');
+                } else {
+                	layer.msg("保存失败")
+                }
+            }
+        });
+    }
     function saveAgentConfig(){
     	$('.saveAgentConfig').click(function(){
     		//这里先这样把 本来后台搞一个bean复制 可以少传一点  拉倒吧 先这样
