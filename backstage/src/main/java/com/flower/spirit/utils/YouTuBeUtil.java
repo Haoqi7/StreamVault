@@ -18,10 +18,11 @@ public class YouTuBeUtil {
 		List<String> command = new ArrayList<>();
 		command.add("yt-dlp");
 		command.add("--print-json");
-		if (Global.youtubecookies != null && !Global.youtubecookies.equals("")) {
-			command.add("--cookies " + Global.youtubecookies);
-		}
+//		if (Global.youtubecookies != null && !Global.youtubecookies.equals("")) {
+//			command.add("--cookies " + Global.youtubecookies);
+//		}
 		if(Global.proxyinfo!=null) {
+			command.add("--proxy");
 			command.add(Global.proxyinfo);
 		}
 		command.add(url);
@@ -44,11 +45,11 @@ public class YouTuBeUtil {
 		String line;
 		while ((line = reader.readLine()) != null) {
 			stringBuilder.append(line);
-			;
 		}
 		int exitCode = process.waitFor();
 		System.out.println("Command executed with exit code: " + exitCode);
 		String completeString = stringBuilder.toString();
+//		System.out.println(completeString);
 		return completeString;
 	}
 

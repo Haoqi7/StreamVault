@@ -96,7 +96,7 @@ public class AppConfig {
             isBlank(data.getAgenttype()) || 
             isBlank(data.getAgentaddress()) || 
             isBlank(data.getAgentport())) {
-            return "--proxy \"\""; // 直接连接
+            return null; // 直接连接
         }
 
         StringBuilder proxyUrl = new StringBuilder();
@@ -108,7 +108,7 @@ public class AppConfig {
 
         proxyUrl.append(data.getAgentaddress()).append(":").append(data.getAgentport()).append("/");
 
-        return "--proxy " + proxyUrl.toString();
+        return proxyUrl.toString();
     }
 
     private static boolean isBlank(String str) {
