@@ -89,6 +89,8 @@ public class Global {
 	public static String uploadRealPath;
 
 	public static boolean getGeneratenfo =false;
+	
+	public static String proxyinfo;
 
 	@Value("${file.save}")
 	public void setSavefile(String value) {

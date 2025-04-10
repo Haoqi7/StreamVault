@@ -82,7 +82,8 @@ public class AppConfig {
 		if (data.getAgenttype() != null && !data.getAgenttype().trim().isEmpty() &&
 			    data.getAgentaddress() != null && !data.getAgentaddress().trim().isEmpty() &&
 			    data.getAgentport() != null && !data.getAgentport().trim().isEmpty()) {
-
+			Global.proxyinfo = buildProxyArgument(data);
+			logger.info("已启动yt-dlp网络代理,代理地址:"+Global.proxyinfo);
 			   
 		}
 		//清空 ffmpeg 队列
