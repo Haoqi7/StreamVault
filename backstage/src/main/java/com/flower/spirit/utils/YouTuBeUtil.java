@@ -18,19 +18,24 @@ public class YouTuBeUtil {
 		List<String> command = new ArrayList<>();
 		command.add("yt-dlp");
 		command.add("--print-json");
-//		if (Global.youtubecookies != null && !Global.youtubecookies.equals("")) {
-//			command.add("--cookies " + Global.youtubecookies);
-//		}
 		String apppath = Global.apppath;
 		File cookieDir = new File(apppath + "/cookies");
 		if(p.equals("youtube")) {
-			//
 			File youtubeFile = new File(cookieDir, "youtube.txt");
 			if(youtubeFile.exists()) {
 				command.add("--cookies");
 				command.add(youtubeFile.getAbsolutePath());
 			}
 		}
+		
+		if(p.equals("twitter")) {
+			File twitterFile = new File(cookieDir, "twitter.txt");
+			if(twitterFile.exists()) {
+				command.add("--cookies");
+				command.add(twitterFile.getAbsolutePath());
+			}
+		}
+		
 		if(Global.proxyinfo!=null) {
 			command.add("--proxy");
 			command.add(Global.proxyinfo);
