@@ -113,5 +113,15 @@ public class AppConfig {
     private static boolean isBlank(String str) {
         return str == null || str.trim().isEmpty();
     }
-
+    
+    
+    public static void main(String[] args) {
+		ConfigEntity configEntity = new ConfigEntity();
+		configEntity.setAgenttype("http");
+		configEntity.setAgentaddress("127.0.0.1");
+		configEntity.setAgentport("3333");
+		configEntity.setAgentaccpass("xxx:xxx");
+		String proxyArgument = buildProxyArgument(configEntity);
+		System.out.println(proxyArgument);
+	}
 }

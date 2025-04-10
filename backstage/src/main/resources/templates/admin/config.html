@@ -8,8 +8,40 @@
     <link href="../static/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="../static/css/style.min.css" rel="stylesheet">
     <style>
-        .card{}
-
+        .card { margin-bottom: 15px; }
+        .card-header { padding: 10px 15px; }
+        .card-header h4 { margin: 0; font-size: 16px; }
+        .card-body { padding: 15px; }
+        .form-group { margin-bottom: 10px; }
+        .form-control { padding: 6px 8px; height: 32px; }
+        .btn { padding: 5px 15px; }
+        label { margin-bottom: 3px; font-size: 13px; }
+        .container-fluid { padding: 15px; }
+        select.form-control { padding-right: 25px; }
+        /* masonry布局 */
+        .row {
+            column-count: 2;
+            column-gap: 15px;
+            margin: 0;
+        }
+        .col-md-6 {
+            break-inside: avoid;
+            padding: 0;
+            margin: 0 0 15px 0;
+            width: 100%;
+            display: inline-block;
+        }
+        .card {
+            margin: 0;
+            height: auto;
+            break-inside: avoid;
+        }
+        /* 响应式处理 */
+        @media (max-width: 768px) {
+            .row {
+                column-count: 1;
+            }
+        }
     </style>
 </head>
 
@@ -110,10 +142,38 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                    
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header"><h4>代理配置<font style="font-size: 12px">(仅在yt-dlp调用时使用)</font></h4></div>
+                            <div class="card-body">
 
+                                <form action="#" method="post" onsubmit="return false;">
+                                    <div class="form-group">
+                                        <label>代理类型</label>
+                                        <input type="type" name="agenttype"  autocomplete="off" class="form-control agenttype" th:value="${config.agenttype}"   placeholder="http/https/socks5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>代理地址</label>
+                                        <input type="type" name="agentaddress"  autocomplete="off" class="form-control agentaddress" th:value="${config.agentaddress}"   placeholder="127.0.0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>代理端口</label>
+                                        <input type="type" name="agentport"  autocomplete="off" class="form-control agentport" th:value="${config.agentport}"   placeholder="16666">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>账号及密码</label>
+                                        <input type="type" name="agentaccpass"  autocomplete="off" class="form-control agentaccpass" th:value="${config.agentaccpass}"   placeholder="username:pass">
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-primary saveAgentConfig" type="button">保存</button>
+                                    </div>
+                                </form>
 
-                <div class="row">
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-header"><h4>抖音配置</h4></div>
@@ -133,27 +193,38 @@
                             </div>
                         </div>
                     </div>
-<!--                     <div class="col-md-6">
+                    
+                    
+                    
+                   <div class="col-md-6">
                         <div class="card">
-                            <div class="card-header"><h4>其他平台Cookie</h4></div>
+                            <div class="card-header"><h4>占个位置</h4></div>
                             <div class="card-body">
-
                                 <form action="#" method="post" onsubmit="return false;">
-                                    <input type="hidden" class="cookiesid" th:value="${cookies.id}" />
                                     <div class="form-group">
-                                        <label>YouTuBe(不知道填了作用是什么)</label>
-                                        <input type="type" name="youtubecookies"  autocomplete="off" class="form-control youtubecookies" th:value="${cookies.youtubecookies}" placeholder="cookie">
                                     </div>
                                     <div class="form-group">
-                                        <button class="btn btn-primary saveCookieConfig" type="button">保存</button>
                                     </div>
                                 </form>
 
                             </div>
                         </div>
-                    </div> -->
-                </div>
+                    </div>
+                   <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header"><h4>占个位置</h4></div>
+                            <div class="card-body">
+                                <form action="#" method="post" onsubmit="return false;">
+                                    <div class="form-group">
+                                    </div>
+                                    <div class="form-group">
+                                    </div>
+                                </form>
 
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </main>
@@ -179,9 +250,57 @@
         scanQRend();
         saveTikTokConfig();
         saveCookieConfig();
+        saveAgentConfig();
     })
 
     var qrcode_key;
+    function saveAgentConfig(){
+    	$('.saveAgentConfig').click(function(){
+    		//这里先这样把 本来后台搞一个bean复制 可以少传一点  拉倒吧 先这样
+    		  var appid = $('#appid').val();
+              var apptoken = $('#apptoken').val();
+              var openprocesshistory = $('#openprocesshistory').val();
+              var taskcron =$('#taskcron').val();
+              var generatenfo = $("#generatenfo").val();
+              var option = {};
+              option['id'] = appid;
+              option['apptoken'] = apptoken;
+              option['openprocesshistory'] = openprocesshistory;
+              option['generatenfo'] = generatenfo;
+              if(taskcron!=""){
+                  option['taskcron'] = taskcron;
+              }
+              var agenttype = $(".agenttype").val();
+              var agentaddress = $(".agentaddress").val();
+              var agentport = $(".agentport").val();
+              var agentaccpass = $(".agentaccpass").val();
+              if(agenttype!=""){
+                  option['agenttype'] = agenttype;
+              }
+              if(agentaddress!=""){
+                  option['agentaddress'] = agentaddress;
+              }
+              if(agentport!=""){
+                  option['agentport'] = agentport;
+              }
+              if(agentaccpass!=""){
+                  option['agentaccpass'] = agentaccpass;
+              }
+              $.post("/admin/api/saveConfig",option,function(data,status){
+                  if(data.resCode =="000001"){
+                      layer.closeAll();
+                      layer.alert(data.message,function(){
+                          window.location.reload();
+                      })
+                  }else{
+                      layer.alert(data.message,function(){
+                          layer.closeAll();
+                      });
+                  }
+              })
+    		
+    	})
+    }
     function saveCookieConfig(){
         $('.saveCookieConfig').click(function(){
             var appid = $('.cookiesid').val();
