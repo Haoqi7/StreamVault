@@ -21,8 +21,10 @@ public class YouTuBeUtil {
 		if (Global.youtubecookies != null && !Global.youtubecookies.equals("")) {
 			command.add("--cookies " + Global.youtubecookies);
 		}
+		if(Global.proxyinfo!=null) {
+			command.add(Global.proxyinfo);
+		}
 		command.add(url);
-//		command.add("-P "+outpath);
 		command.add("-o");
 		if(Global.getGeneratenfo) {
 			command.add(outpath + File.separator + "%(title)s"+File.separator+ "%(id)s.%(ext)s");

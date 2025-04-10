@@ -37,6 +37,8 @@ public class ConfigService {
 						configEntity.getAgentport() != null && !configEntity.getAgentport().trim().isEmpty()) {
 			Global.proxyinfo = AppConfig.buildProxyArgument(configEntity);
 			logger.info("已启动yt-dlp网络代理,代理地址:"+Global.proxyinfo); 
+		}else {
+			Global.proxyinfo=null;
 		}
 		return new AjaxEntity(Global.ajax_option_success, "操作成功", configEntity);
 	}
