@@ -39,7 +39,7 @@ import com.flower.spirit.utils.Steamcmd;
 import com.flower.spirit.utils.StringUtil;
 import com.flower.spirit.utils.TikTokUtil;
 import com.flower.spirit.utils.URLUtil;
-import com.flower.spirit.utils.YouTuBeUtil;
+import com.flower.spirit.utils.YtDlpUtil;
 import com.flower.spirit.utils.YtDlpUtil;
 
 /**
@@ -132,7 +132,7 @@ public class AnalysisService {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, url, platform);
 		try {
 			String dirtemp = FileUtil.generateDir(true, Global.platform.twitter.name(), true, null, null, null);
-			String exec = YouTuBeUtil.exec(url,dirtemp,"twitter");
+			String exec = YtDlpUtil.exec(url,dirtemp,"twitter");
 			//已经下载完成了
 			JSONObject parseObject = JSONObject.parseObject(exec);
 			String filename = parseObject.getString("filename");
@@ -228,7 +228,7 @@ public class AnalysisService {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, youtube, platform);
 		try {
 			String dirtemp = FileUtil.generateDir(true, Global.platform.youtube.name(), true, null, null, null);
-			String exec = YouTuBeUtil.exec(youtube,dirtemp,"youtube");
+			String exec = YtDlpUtil.exec(youtube,dirtemp,"youtube");
 			
 
 			//已经下载完成了
