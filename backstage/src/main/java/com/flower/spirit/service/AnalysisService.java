@@ -176,47 +176,42 @@ public class AnalysisService {
 	private void instagram(String platform, String url) {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, url, platform);
 		try {
-			String exec = YtDlpUtil.exec(url);
+			String dirtemp = FileUtil.generateDir(true, Global.platform.instagram.name(), true, null, null, null);
+			String exec = YtDlpUtil.exec(url,dirtemp,"instagram");
+			System.out.println(exec);
+			//已经下载完成了
 			JSONObject parseObject = JSONObject.parseObject(exec);
-			String thumbnail = parseObject.getString("thumbnail");
-			String videourl = parseObject.getString("url");
-			String id = parseObject.getString("id");
+			String filename = parseObject.getString("filename");
+			//先处理文件名
+//			System.out.println(filename);
+			String baseName = FilenameUtils.getBaseName(filename);
+			String baseNameNo = baseName.replaceAll("_", " ");
+			String filedoc = new File(filename).getParent();
+			String namefix = new File(new File(filename).getParent()).getName();  //先这个搞
+			String dir = FileUtil.generateDir(true, Global.platform.instagram.name(), true, baseName, null, null);
+			String dircos = FileUtil.generateDir(false, Global.platform.instagram.name(), true, new File(new File(filename).getParent()).getName(), null, null);
 			String description = parseObject.getString("description");
-			String title = parseObject.getString("title");
-			String filename = StringUtil.getFileName(title, id);
-			String videounrealaddr = FileUtil.createDirFile(FileUtil.savefile, ".mp4", filename,
-					Global.platform.instagram.name());
-			String coverunaddr = FileUtil.createDirFile(FileUtil.savefile, ".jpg", filename,
-					Global.platform.instagram.name());
-			String filepath = FileUtil.createDirFile("/app/resources", ".mp4", filename,
-					Global.platform.instagram.name());
-			if (Global.downtype.equals("http")) {
-				// http 需要创建临时目录
-				String newpath = FileUtil.createTemporaryDirectory(Global.platform.instagram.name(), filename,
-						"/app/resources");
-				FileUtils.createDirectory(newpath);
-				HttpUtil.downLoadFromUrl(videourl, filename + ".mp4", newpath);
-			}
-			if (Global.downtype.equals("a2")) {
-				// a2 不需要 目录有a2托管 此处路径应该可以优化
-				String a2path = FileUtil.createTemporaryDirectory(Global.platform.instagram.name(), filename,
-						Global.down_path);
-				String videores = Aria2Util.sendMessage(Global.a2_link,
-						Aria2Util.createBiliparameter(videourl, a2path, filename + ".mp4", Global.a2_token));
-			}
-			HttpUtil.downLoadFromUrl(thumbnail, filename + ".jpg",
-					FileUtil.createTemporaryDirectory(Global.platform.instagram.name(), filename, Global.uploadRealPath)
-							+ "/");
-			// 建档
-			VideoDataEntity videoDataEntity = new VideoDataEntity(id, title, description, platform, coverunaddr,
-					filepath, videounrealaddr, url);
+			String display_id = parseObject.getString("display_id");
+			String uploader = parseObject.getString("uploader");
+			String uploader_url = parseObject.getString("uploader_url");
+			String upload_date = parseObject.getString("upload_date");
+			String name = new File(filename).getName();
+
+			String coverdb = dircos+baseNameNo+".webp";
+			
+			String videodb = dircos+name;
+			
+			VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.instagram.name(),coverdb ,filename, videodb, url);
 			videoDataDao.save(videoDataEntity);
 			processHistoryService.saveProcess(saveProcess.getId(), url, platform);
-
+			if(Global.getGeneratenfo) {
+				EmbyMetadataGenerator.generateMetadata(namefix,upload_date.substring(0,4),description,"instagram",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
+			}
+			sendNotify.sendNotifyData(namefix, url, platform);
 		} catch (Exception e) {
 
+			// logger.error(youtube+"解析异常");
 		}
-		processHistoryService.saveProcess(saveProcess.getId(), url, platform);
 	}
 
 	/**
