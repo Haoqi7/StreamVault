@@ -18,28 +18,30 @@
         label { margin-bottom: 3px; font-size: 13px; }
         .container-fluid { padding: 15px; }
         select.form-control { padding-right: 25px; }
-        /* masonry布局 */
+        
+        /* 修改为flex布局 */
         .row {
-            column-count: 2;
-            column-gap: 15px;
-            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
         }
         .col-md-6 {
-            break-inside: avoid;
-            padding: 0;
-            margin: 0 0 15px 0;
-            width: 100%;
-            display: inline-block;
+            position: relative;
+            width: 50%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-bottom: 15px;
         }
         .card {
+            height: 100%;
             margin: 0;
-            height: auto;
-            break-inside: avoid;
         }
+        
         /* 响应式处理 */
         @media (max-width: 768px) {
-            .row {
-                column-count: 1;
+            .col-md-6 {
+                width: 100%;
             }
         }
     </style>
@@ -228,20 +230,46 @@
                             </div>
                         </div>
                     </div>
-<!--                    <div class="col-md-6">
+                    <div class="col-md-6">
                         <div class="card">
-                            <div class="card-header"><h4>占个位置</h4></div>
+                            <div class="card-header"><h4>WebHook通知</h4></div>
                             <div class="card-body">
                                 <form action="#" method="post" onsubmit="return false;">
                                     <div class="form-group">
+                                        <label>通知渠道</label>
+                                        <select class="form-control" id="notifyChannel" onchange="changeChannel()">
+                                            <option value="qywx">企业微信</option>
+                                            <option value="dingding">钉钉(未测试)</option>
+                                            <option value="feishu">飞书(未测试)</option>
+                                        </select>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group qywx-config">
+                                        <label>企业微信WebHook Key</label>
+                                        <input type="text" class="form-control" id="qywxKey">
+                                    </div>
+                                    <div class="form-group dingding-config" style="display:none;">
+                                        <label>钉钉WebHook Key</label>
+                                        <input type="text" class="form-control" id="dingdingKey">
+                                        <label class="mt-2">钉钉加签密钥(可选)</label>
+                                        <input type="text" class="form-control" id="dingdingSecret">
+                                    </div>
+                                    <div class="form-group feishu-config" style="display:none;">
+                                        <label>飞书WebHook Key</label>
+                                        <input type="text" class="form-control" id="feishuKey">
+                                    </div>
+                      
+                                    <button type="button" class="btn btn-primary" onclick="saveNotifyConfig()">保存配置</button>
+                                    <div class="form-group" >
+                                    	<br/>该功能正在逐步适配中 目前已经支持单链接提交下载完成之后的推送通知<br/>
+                                    	目前仅测试了企业微信WebHook 群机器人 其他为测试<br/>
+                                    	后续会添加收藏监控变动情况 cookie存活情况等<br/>
+                                    	本处通知暂时不考虑aria2异步下载器中是否下载成功<br/>
+                                    	本处通知优先适配HTTP下载的通知<br/>
                                     </div>
                                 </form>
-
                             </div>
                         </div>
-                    </div> -->
+                    </div>
                 </div>
             </div>
 
@@ -270,9 +298,69 @@
         saveCookieConfig();
         saveAgentConfig();
         checkCookies();
+        getNotifyConfig();
     })
 
     var qrcode_key;
+    function getNotifyConfig(){
+        $.ajax({
+        	url: '/admin/api/getNotifyConfig',
+            type: 'GET',
+            success: function(res) {
+                if(res.resCode === "000001" && res.record) {
+                    var config = res.record;
+                    // 设置通知渠道
+                    $("#notifyChannel").val(config.notifychannel);
+                    // 触发渠道切换显示对应表单
+                    changeChannel();
+                    
+                    // 根据渠道设置对应的值
+                    if(config.notifychannel === 'qywx') {
+                        $("#qywxKey").val(config.qywxkey);
+                    } else if(config.notifychannel === 'dingding') {
+                        $("#dingdingKey").val(config.dingdingKey);
+                        $("#dingdingSecret").val(config.dingdingSecret);
+                    } else if(config.notifychannel === 'feishu') {
+                        $("#feishuKey").val(config.feishuKey);
+                    }
+                }
+            }
+        });
+    }
+    
+    function saveNotifyConfig(){
+        var channel = $("#notifyChannel").val();
+        var data = {
+            notifychannel: channel
+        };
+        
+        // 根据选择的渠道设置对应的key
+        if(channel === 'qywx') {
+            data.qywxkey = $("#qywxKey").val();
+        } else if(channel === 'dingding') {
+            data.dingdingKey = $("#dingdingKey").val();
+            data.dingdingSecret = $("#dingdingSecret").val();
+        } else if(channel === 'feishu') {
+            data.feishuKey = $("#feishuKey").val();
+        }
+        
+        $.ajax({
+        	url: '/admin/api/saveNotifyConfig',
+            type: 'POST',
+            data: data,
+            success: function(res) {
+                if(res.resCode === "000001") {
+                    layer.alert("保存成功");
+                } else {
+                    layer.alert("保存失败"+res.message);
+                }
+            },
+            error: function() {
+                layer.alert("保存失败", "请检查网络连接");
+            }
+        });
+    }
+    
     function checkCookies(){
         $.ajax({
             url: '/admin/api/checkCookies',
@@ -525,7 +613,16 @@
         })
     }
 
+    function changeChannel() {
+        var channel = $("#notifyChannel").val();
+        $(".qywx-config, .dingding-config, .feishu-config").hide();
+        $("." + channel + "-config").show();
+    }
 
+    // // 页面加载完成后自动获取配置
+    // $(document).ready(function() {
+    //     getNotifyConfig();
+    // });
 </script>
 </body>
 </html>

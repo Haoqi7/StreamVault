@@ -12,11 +12,13 @@ import com.flower.spirit.entity.BiliConfigEntity;
 import com.flower.spirit.entity.ConfigEntity;
 import com.flower.spirit.entity.TikTokConfigEntity;
 import com.flower.spirit.entity.CookiesConfigEntity;
+import com.flower.spirit.entity.NotifyConfigEntity;
 import com.flower.spirit.service.BiliConfigService;
 import com.flower.spirit.service.ConfigService;
 import com.flower.spirit.service.CookiesConfigService;
 import com.flower.spirit.service.DownloaderService;
 import com.flower.spirit.service.FfmpegQueueService;
+import com.flower.spirit.service.NotifyConfigService;
 import com.flower.spirit.service.TikTokConfigService;
 
 /**
@@ -46,6 +48,9 @@ public class AppConfig {
 	
 	@Autowired
 	private CookiesConfigService cookiesConfigService;
+	
+	@Autowired 
+	private NotifyConfigService notifyConfigService;
 	
 	
 	@PostConstruct
@@ -92,6 +97,9 @@ public class AppConfig {
 		//清空 ffmpeg 队列
 		ffmpegQueueService.clearTask();
 		logger.info("ffmpeg队列已清空");
+		
+		//全局通知
+		Global.notify = notifyConfigService.getData(null);
 	}
 	
     public static String buildProxyArgument(ConfigEntity data) {

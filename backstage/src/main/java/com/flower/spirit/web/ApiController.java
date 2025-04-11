@@ -39,9 +39,13 @@ public class ApiController {
 	 */
 	@RequestMapping("/processingVideos")
 	@CrossOrigin
-	public AjaxEntity processingVideos(String token,String video) throws Exception {
+	public AjaxEntity processingVideos(String token,String video) {
 //		 analysisService.processingVideos(token,video);
-		analysisService.processingVideos(token,video);
+		try {
+			analysisService.processingVideos(token,video);
+		} catch (Exception e) {
+			System.err.println("xxxxx");
+		}
 		return new AjaxEntity(Global.ajax_success, "已提交,等待系统处理", "");
 	
 	}

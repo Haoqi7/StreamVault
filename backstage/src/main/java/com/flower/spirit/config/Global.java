@@ -3,6 +3,8 @@ package com.flower.spirit.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.flower.spirit.entity.NotifyConfigEntity;
+
 /**
  * 
  * <p>
@@ -94,6 +96,8 @@ public class Global {
 	public static String proxyinfo;
 	
 	public static String useragent = null;
+	
+	public static NotifyConfigEntity notify;
 
 	@Value("${file.save}")
 	public void setSavefile(String value) {

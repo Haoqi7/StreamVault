@@ -40,6 +40,7 @@ import com.flower.spirit.utils.StringUtil;
 import com.flower.spirit.utils.TikTokUtil;
 import com.flower.spirit.utils.URLUtil;
 import com.flower.spirit.utils.YtDlpUtil;
+import com.flower.spirit.utils.sendNotify;
 import com.flower.spirit.utils.YtDlpUtil;
 
 /**
@@ -162,7 +163,7 @@ public class AnalysisService {
 			if(Global.getGeneratenfo) {
 				EmbyMetadataGenerator.generateMetadata(filedoc,upload_date.substring(0,4),description,"twitter",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
 			}
-			
+			sendNotify.sendNotifyData(filedoc, url, platform);
 //			return ;
 		} catch (Exception e) {
 
@@ -260,7 +261,7 @@ public class AnalysisService {
 			if(Global.getGeneratenfo) {
 				EmbyMetadataGenerator.generateMetadata(filedoc,upload_date.substring(0,4),description,"youtube",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
 			}
-			
+			sendNotify.sendNotifyData(filedoc, youtube, platform);
 //			return ;
 		} catch (Exception e) {
 			throw e;
@@ -486,6 +487,7 @@ public class AnalysisService {
 						videoPath, videounaddr, video);
 				videoDataDao.save(videoDataEntity);
 				logger.info("视频 {} 处理完成", title);
+				sendNotify.sendNotifyData(title, video, platform);
 			}
 			logger.info("哔哩哔哩视频解析下载流程结束");
 		} catch (Exception e) {
@@ -512,7 +514,7 @@ public class AnalysisService {
 			this.putRecord(downVideo.get("awemeid"), downVideo.get("desc"), downVideo.get("videoplay"),
 					downVideo.get("cover"), platform, video, downVideo.get("type"), Global.tiktokCookie,downVideo);
 			System.gc();
-
+			sendNotify.sendNotifyData(downVideo.get("desc"), video, platform);
 			processHistoryService.saveProcess(saveProcess.getId(), video, platform);
 		}else {
 			logger.info("抖音cookie未填 不处理");
