@@ -44,7 +44,7 @@ public class ApiController {
 		try {
 			analysisService.processingVideos(token,video);
 		} catch (Exception e) {
-			System.err.println("xxxxx");
+			System.err.println("线程中异常 先打印 不一定有用 标记");
 		}
 		return new AjaxEntity(Global.ajax_success, "已提交,等待系统处理", "");
 	

@@ -142,6 +142,7 @@ public class AnalysisService {
 			String baseName = FilenameUtils.getBaseName(filename);
 			String baseNameNo = baseName.replaceAll("_", " ");
 			String filedoc = new File(filename).getParent();
+			String namefix = new File(new File(filename).getParent()).getName();  //先这个搞
 			String dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseName, null, null);
 			String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true, new File(new File(filename).getParent()).getName(), null, null);
 //			System.out.println(exec);
@@ -161,9 +162,9 @@ public class AnalysisService {
 			videoDataDao.save(videoDataEntity);
 			processHistoryService.saveProcess(saveProcess.getId(), url, platform);
 			if(Global.getGeneratenfo) {
-				EmbyMetadataGenerator.generateMetadata(filedoc,upload_date.substring(0,4),description,"twitter",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
+				EmbyMetadataGenerator.generateMetadata(namefix,upload_date.substring(0,4),description,"twitter",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
 			}
-			sendNotify.sendNotifyData(filedoc, url, platform);
+			sendNotify.sendNotifyData(namefix, url, platform);
 //			return ;
 		} catch (Exception e) {
 
@@ -241,6 +242,7 @@ public class AnalysisService {
 			String baseNameNo = baseName.replaceAll("_", " ");
 			String filedoc = new File(filename).getParent();
 			String dir = FileUtil.generateDir(true, Global.platform.youtube.name(), true, baseName, null, null);
+			String namefix = new File(new File(filename).getParent()).getName();  //先这个搞
 			String dircos = FileUtil.generateDir(false, Global.platform.youtube.name(), true, new File(new File(filename).getParent()).getName(), null, null);
 //			System.out.println(exec);
 //			String title = parseObject.getString("title");
@@ -259,9 +261,9 @@ public class AnalysisService {
 			videoDataDao.save(videoDataEntity);
 			processHistoryService.saveProcess(saveProcess.getId(), youtube, platform);
 			if(Global.getGeneratenfo) {
-				EmbyMetadataGenerator.generateMetadata(filedoc,upload_date.substring(0,4),description,"youtube",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
+				EmbyMetadataGenerator.generateMetadata(namefix,upload_date.substring(0,4),description,"youtube",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
 			}
-			sendNotify.sendNotifyData(filedoc, youtube, platform);
+			sendNotify.sendNotifyData(namefix, youtube, platform);
 //			return ;
 		} catch (Exception e) {
 			throw e;
