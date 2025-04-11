@@ -2,6 +2,8 @@ package com.flower.spirit.utils;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * 
  * <p>
@@ -94,6 +96,9 @@ public class StringUtil {
 		}
 		return remoteAddr != null ? remoteAddr : request.getRemoteAddr();
 	}
+    public static boolean isNotBlank(final CharSequence cs) {
+        return !StringUtils.isBlank(cs);
+    }
 
 	public static void main(String[] args) {
 		System.out.println(StringUtil.getFileName("反恐精英1.6 #动画制作 #游戏 #反恐精英 #童年回忆", "123"));

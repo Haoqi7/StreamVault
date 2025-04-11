@@ -56,6 +56,9 @@ public class AppConfig {
 		if(null != data.getOpenprocesshistory() && data.getOpenprocesshistory().equals("1")) {
 			Global.openprocesshistory =true;
 		}
+		if(null!=data.getUseragent() && !"".equals(data.getUseragent())) {
+			Global.useragent = data.getUseragent();
+		}
 		BiliConfigEntity bili = biliConfigService.getData();
 		Global.bilicookies =bili.getBilicookies();
 		if(null != bili.getBigmember() && bili.getBigmember().equals("是")) {

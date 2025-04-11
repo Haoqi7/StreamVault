@@ -12,6 +12,7 @@ import com.flower.spirit.config.AppConfig;
 import com.flower.spirit.config.Global;
 import com.flower.spirit.dao.ConfigDao;
 import com.flower.spirit.entity.ConfigEntity;
+import com.flower.spirit.utils.BeanUtil;
 
 @Service
 public class ConfigService {
@@ -27,6 +28,10 @@ public class ConfigService {
 	}
 
 	public AjaxEntity saveConfig(ConfigEntity configEntity) {
+		
+		List<ConfigEntity> list =  configDao.findAll();
+		ConfigEntity configData = list.get(0);
+		BeanUtil.copyPropertiesIgnoreCase(configData, configEntity);
 		configDao.save(configEntity);
 		Global.apptoken =configEntity.getApptoken();
 		if(configEntity.getGeneratenfo()!= null && configEntity.getGeneratenfo().equals("1")) {
@@ -39,6 +44,11 @@ public class ConfigService {
 			logger.info("已启动yt-dlp网络代理,代理地址:"+Global.proxyinfo); 
 		}else {
 			Global.proxyinfo=null;
+		}
+		if(null!=configEntity.getUseragent() && !"".equals(configEntity.getUseragent())) {
+			Global.useragent = configEntity.getUseragent();
+		}else {
+			Global.useragent = null;
 		}
 		return new AjaxEntity(Global.ajax_option_success, "操作成功", configEntity);
 	}

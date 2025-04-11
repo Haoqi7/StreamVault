@@ -53,6 +53,10 @@ public class YtDlpUtil {
 		command.add("webp");
 //		command.add("%(title)s.%(ext)s");
 		command.add("--restrict-filenames");
+		if(null != Global.useragent) {
+			command.add("--user-agent");
+			command.add(Global.useragent);
+		}
 //		System.out.println(command.toString());
 		ProcessBuilder processBuilder = new ProcessBuilder(command);
 		Process process = processBuilder.start();

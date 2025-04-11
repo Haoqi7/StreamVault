@@ -45,6 +45,8 @@ public class ConfigEntity implements Serializable {
 	private String agentport;  //端口
 	
 	private String agentaccpass;  //密码
+	
+	private String useragent;
 
 	public Integer getId() {
 		return id;
@@ -124,6 +126,14 @@ public class ConfigEntity implements Serializable {
 
 	public void setAgentaccpass(String agentaccpass) {
 		this.agentaccpass = agentaccpass;
+	}
+
+	public String getUseragent() {
+		return useragent;
+	}
+
+	public void setUseragent(String useragent) {
+		this.useragent = useragent;
 	}
 
 	

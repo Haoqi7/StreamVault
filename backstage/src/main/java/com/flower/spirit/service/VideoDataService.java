@@ -1,5 +1,6 @@
 package com.flower.spirit.service;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,7 @@ import com.flower.spirit.common.AjaxEntity;
 import com.flower.spirit.config.Global;
 import com.flower.spirit.dao.VideoDataDao;
 import com.flower.spirit.entity.VideoDataEntity;
+import com.flower.spirit.utils.CommandUtil;
 import com.flower.spirit.utils.FileUtils;
 import com.flower.spirit.utils.StringUtil;
 
@@ -80,7 +82,8 @@ public class VideoDataService {
 			VideoDataEntity videoDataEntity = findById.get();
 			//新版 优化 此处可以修改为直接删除文件夹
 //			FileUtils.deleteFile(videoDataEntity.getVideoaddr()); 
-			FileUtils.deleteParentDirectorie(videoDataEntity.getVideoaddr());  //直接删除上级文件夹
+//			FileUtils.deleteParentDirectorie(videoDataEntity.getVideoaddr());  //直接删除上级文件夹
+			CommandUtil.deleteDirectory(new File(videoDataEntity.getVideoaddr()).getParentFile().getPath());//更换系统级原生删除方法
 //			FileUtils.deleteFile(videoDataEntity.getVideocover().replace(savefile, uploadRealPath));
 			videoDataDao.deleteById(data.getId());
 		}

@@ -92,6 +92,8 @@ public class Global {
 	public static boolean getGeneratenfo =false;
 	
 	public static String proxyinfo;
+	
+	public static String useragent = null;
 
 	@Value("${file.save}")
 	public void setSavefile(String value) {

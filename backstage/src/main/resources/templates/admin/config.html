@@ -91,6 +91,10 @@
                                         <input class="form-control" type="text" id="taskcron" name="taskcron" placeholder="默认0 0 0/3 * * ?  三小时一次" th:value="${config.taskcron}">
                                     </div>
                                     <div class="form-group">
+                                        <label>userAgent</label>
+                                        <input class="form-control" type="text" id="userAgent" name="userAgent" th:value="${config.useragent}" placeholder="传递给youtube  x 等平台 降低风控可能 不填则不传">
+                                    </div>
+                                    <div class="form-group">
                                         <button class="btn btn-primary saveConfig" type="button">保存</button>
                                     </div>
                                 </form>
@@ -216,7 +220,7 @@
 	                                        </select>
                                          </div>
                                          <div class="form-group">
-                                        	<textarea class="form-control" id="cookieContent" rows="3" placeholder="请输入Netscape格式的Cookie内容"></textarea>
+                                        	<textarea class="form-control" id="cookieContent" rows="3" placeholder="请输入Netscape格式的Cookie内容,建议使用浏览器隐私模式获取的cookie,不然当你再去浏览对应平台时cookie会异常"></textarea>
                                           </div>
                                         <button type="button" class="btn btn-primary" onclick="writeCookies()">保存</button>
                                     </div>
@@ -321,6 +325,7 @@
               var openprocesshistory = $('#openprocesshistory').val();
               var taskcron =$('#taskcron').val();
               var generatenfo = $("#generatenfo").val();
+              var userAgent = $('#userAgent').val();
               var option = {};
               option['id'] = appid;
               option['apptoken'] = apptoken;
@@ -344,6 +349,9 @@
               }
               if(agentaccpass!=""){
                   option['agentaccpass'] = agentaccpass;
+              }
+              if(userAgent!=""){
+                  option['useragent'] = userAgent;
               }
               $.post("/admin/api/saveConfig",option,function(data,status){
                   if(data.resCode =="000001"){
@@ -489,6 +497,7 @@
             var openprocesshistory = $('#openprocesshistory').val();
             var taskcron =$('#taskcron').val();
             var generatenfo = $("#generatenfo").val();
+            var userAgent = $('#userAgent').val();
             var option = {};
             option['id'] = appid;
             option['apptoken'] = apptoken;
@@ -496,6 +505,9 @@
             option['generatenfo'] = generatenfo;
             if(taskcron!=""){
                 option['taskcron'] = taskcron;
+            }
+            if(userAgent!=""){
+                option['useragent'] = userAgent;
             }
             $.post("/admin/api/saveConfig",option,function(data,status){
                 if(data.resCode =="000001"){
