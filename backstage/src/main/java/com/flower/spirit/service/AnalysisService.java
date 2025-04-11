@@ -154,7 +154,7 @@ public class AnalysisService {
 			String upload_date = parseObject.getString("upload_date");
 			String name = new File(filename).getName();
 
-			String coverdb = dircos+baseNameNo+".webp";
+			String coverdb = dircos+baseName+".webp";
 			
 			String videodb = dircos+name;
 			
@@ -197,7 +197,7 @@ public class AnalysisService {
 			String upload_date = parseObject.getString("upload_date");
 			String name = new File(filename).getName();
 
-			String coverdb = dircos+baseNameNo+".webp";
+			String coverdb = dircos+baseName+".webp";
 			
 			String videodb = dircos+name;
 			
@@ -248,7 +248,7 @@ public class AnalysisService {
 			String upload_date = parseObject.getString("upload_date");
 			String name = new File(filename).getName();
 
-			String coverdb = dircos+baseNameNo+".webp";
+			String coverdb = dircos+baseName+".webp";
 			
 			String videodb = dircos+name;
 			
