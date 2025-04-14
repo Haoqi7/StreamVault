@@ -18,8 +18,42 @@
             white-space: nowrap;
             overflow: hidden;
         }
-
-
+        
+        .thumbnail-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .thumbnail-preview {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            pointer-events: none; /* 防止鼠标事件 */
+        }
+        
+        .thumbnail-preview img {
+            max-width: 400px;
+            max-height: 300px;
+        }
+        
+        .thumbnail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+            pointer-events: none; /* 防止鼠标事件 */
+        }
     </style>
 </head>
 
@@ -40,49 +74,51 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="card">
-                                <div class="card-header">搜索</div>
+                                <div class="card-header bg-light">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <h5 class="card-title mb-0">搜索</h5>
+                                        </div>
+                                        <div class="col-auto">
+                                            <a class="btn btn-primary btn-sm searchData" href="#">
+                                                <i class="mdi mdi-magnify"></i> 搜索
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="card-body">
                                     <form action="#!" method="post" class="form-horizontal form-search">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <label class="w-120 pull-left control-label">视频名称：</label>
-                                                    <div class="pull-left w-120-calc">
-                                                        <input type="text" class="form-control pull-left videoname" name="videoname" value="" placeholder="请输入视频名称" />
-                                                    </div>
+                                                    <label class="control-label">视频名称</label>
+                                                    <input type="text" class="form-control videoname" name="videoname" placeholder="请输入视频名称" />
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <label class="w-120 pull-left control-label">视频简介：</label>
-                                                    <div class="pull-left w-120-calc">
-                                                        <input type="text" class="form-control pull-left videodesc" name="videodesc" value="" placeholder="视频简介" />
-                                                    </div>
+                                                    <label class="control-label">视频简介</label>
+                                                    <input type="text" class="form-control videodesc" name="videodesc" placeholder="视频简介" />
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <label class="w-120 pull-left control-label">平台：</label>
-                                                    <div class="pull-left w-120-calc">
-                                                        <select name="videoplatform" class="form-control videoplatform" id="type">
-                                                            <option value="">所有</option>
-                                                            <option value="tiktok">tiktok</option>
-                                                            <option value="哔哩">哔哩</option>
-                                                            <option value="抖音">抖音</option>
-                                                            <option value="YouTube">YouTube</option>
-                                                            <option value="YouTube">instagram</option>
-                                                            <option value="YouTube">twitter</option>
-                                                            <option value="wallpaper">wallpaper</option>
-                                                        </select>
-                                                    </div>
+                                                    <label class="control-label">平台</label>
+                                                    <select name="videoplatform" class="form-control videoplatform" id="type">
+                                                        <option value="">所有</option>
+                                                        <option value="tiktok">tiktok</option>
+                                                        <option value="哔哩">哔哩</option>
+                                                        <option value="抖音">抖音</option>
+                                                        <option value="YouTube">YouTube</option>
+                                                        <option value="instagram">instagram</option>
+                                                        <option value="twitter">twitter</option>
+                                                        <option value="wallpaper">wallpaper</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
-
                                     </form>
-                                    <a class="btn btn-primary m-r-5 searchData" href="#"><i class="mdi mdi-plus"></i>搜索</a>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -91,31 +127,34 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="card">
+                            <div class="card-header bg-light">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h5 class="card-title mb-0">视频列表</h5>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead>
+                                    <table class="table table-hover">
+                                        <thead class="thead-light">
                                         <tr>
-                                            <th>编号</th>
-                                            <th>视频原地址</th>
-                                            <th>视频名称</th>
-                                            <th>视频简介</th>
-                                            <th>来源平台</th>
-                                            <th>视频封面</th>
-                                            <th>视频真实地址</th>
-                                            <th>下载时间</th>
-                                            <th>操作</th>
+                                            <th style="width: 60px">编号</th>
+                                            <th style="width: 100px">封面</th>
+                                            <th>视频信息</th>
+                                            <th style="width: 100px">平台</th>
+                                            <th style="width: 150px">下载时间</th>
+                                            <th style="width: 120px">操作</th>
                                         </tr>
                                         </thead>
                                         <tbody class="tableData">
-
                                         </tbody>
                                     </table>
                                 </div>
-                                <ul id="pager" class="pagination">
-
-                                </ul>
-
+                                <div class="d-flex justify-content-center mt-3">
+                                    <ul id="pager" class="pagination pagination-sm">
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -206,9 +245,104 @@
 
         })
     }
-    function getImage(str){
-        //str ="http://127.0.0.1:28081/resources/bilibili/2023/10/%E9%9B%AA%E5%AD%A9%E5%AD%90/%E9%9B%AA%E5%AD%A9%E5%AD%90.jpg?apptoken=123";
-        return "<img src="+str+"/>"
+    function getImage(url) {
+        if(url) {
+            return '<div class="thumbnail-container">' +
+                   '<img src="'+url+'" class="img-thumbnail" style="max-width: 80px; max-height: 60px;" ' +
+                   'onmouseenter="showPreview(this)" onmouseleave="hidePreview()">' +
+                   '</div>';
+        }
+        return '';
+    }
+
+    var previewTimer;
+    var hideTimer;
+
+    function showPreview(img) {
+        clearTimeout(hideTimer);
+        clearTimeout(previewTimer);
+        
+        previewTimer = setTimeout(function() {
+            var preview = document.getElementById('thumbnail-preview');
+            if (!preview) {
+                preview = document.createElement('div');
+                preview.id = 'thumbnail-preview';
+                preview.className = 'thumbnail-preview';
+                document.body.appendChild(preview);
+                
+                var overlay = document.createElement('div');
+                overlay.className = 'thumbnail-overlay';
+                overlay.id = 'thumbnail-overlay';
+                document.body.appendChild(overlay);
+            }
+            
+            var previewImg = preview.querySelector('img');
+            if (!previewImg) {
+                previewImg = document.createElement('img');
+                preview.appendChild(previewImg);
+            }
+            
+            previewImg.src = img.src;
+            preview.style.display = 'block';
+            document.getElementById('thumbnail-overlay').style.display = 'block';
+        }, 100); // 延迟100ms显示,避免快速移动时的闪烁
+    }
+
+    function hidePreview() {
+        clearTimeout(previewTimer);
+        hideTimer = setTimeout(function() {
+            var preview = document.getElementById('thumbnail-preview');
+            var overlay = document.getElementById('thumbnail-overlay');
+            if (preview) preview.style.display = 'none';
+            if (overlay) overlay.style.display = 'none';
+        }, 100); // 延迟100ms隐藏,避免快速移动时的闪烁
+    }
+
+    function formatTime(time) {
+        if(!time) return '';
+        return new Date(time).toLocaleString();
+    }
+
+    function formatVideoInfo(item) {
+        var html = '<div class="video-info">';
+        
+        // 解析originaladdress
+        var addressType = '';
+        var addressValue = '';
+        if(item.videoplatform === '抖音') {
+            if(item.originaladdress.startsWith('post')) {
+                addressType = '作品';
+                addressValue = item.originaladdress.substring(4);
+            } else if(item.originaladdress.startsWith('like')) {
+                addressType = '喜欢';
+                addressValue = item.originaladdress.substring(4);
+            } else if(item.originaladdress.startsWith('recommend')) {
+                addressType = '首页推荐';
+                addressValue = item.originaladdress.substring(9);
+            } else if(item.originaladdress.startsWith('fav-')) {
+                addressType = '收藏夹';
+                var parts = item.originaladdress.split('-');
+                addressValue = parts[1] + ' (' + parts[2].substring(3) + ')';
+            } else if(item.originaladdress.startsWith('https://v.douyin.com/')) {
+                addressType = '分享链接';
+                addressValue = item.originaladdress;
+            }
+        } else if(item.videoplatform === '哔哩') {
+            addressType = '收藏夹';
+            addressValue = item.originaladdress;
+        } else {
+            addressType = '其他';
+            addressValue = item.originaladdress;
+        }
+
+        html += '<div class="font-weight-bold text-truncate" title="'+item.videoname+'">'+item.videoname+'</div>';
+        html += '<div class="small text-muted text-truncate" title="'+item.videodesc+'">'+item.videodesc+'</div>';
+        html += '<div class="small">';
+        html += '<span class="badge badge-info">'+addressType+'</span> ';
+        html += '<span class="text-muted">'+addressValue+'</span>';
+        html += '</div>';
+        html += '</div>';
+        return html;
     }
 
     function  findList(page){
@@ -236,22 +370,20 @@
                     var html = "";
                     var list = record.content;
                     for(var i = 0;i<list.length;i++){
-                        html +='<tr>'
-                             +'<td title="'+list[i].id+'">'+list[i].id+'</td>'
-                             +'<td title="'+list[i].originaladdress+'">'+list[i].originaladdress+'</td>'
-                             +'<td title="'+list[i].videoname+'">'+list[i].videoname+'</td>'
-                             +'<td title="'+list[i].videodesc+'">'+list[i].videodesc+'</td>'
-                             +'<td title="'+list[i].videoplatform+'">'+list[i].videoplatform+'</td>'
-                             +'<td title="'+list[i].videocover+'">'+getImage(list[i].videocover)+'</td>'
-                             +'<td title="'+list[i].videoaddr+'">'+list[i].videoaddr+'</td>'
-                             +'<td title="'+list[i].createtime+'">'+list[i].createtime+'</td>'
-                             +'<td>'
-                             +'<div class="btn-group">'
-                             +'<a data-id="'+list[i].id+'" class="btn btn-xs btn-default editData" href="#!" title="编辑" data-toggle="tooltip">编辑</a>'
-                             +'<a data-id="'+list[i].id+'" data-video="'+list[i].videounrealaddr+'" class="btn btn-xs btn-default playVideo" href="#!" title="播放" data-toggle="tooltip">播放</i></a>'
-                             +'<a data-id="'+list[i].id+'" class="btn btn-xs btn-default deleteData" href="#!" title="删除" data-toggle="tooltip">删除</a>'
-                             +'</div>'
-                             +'</td></tr>'
+                        html += '<tr>';
+                        html += '<td>'+list[i].id+'</td>';
+                        html += '<td>'+getImage(list[i].videocover)+'</td>';
+                        html += '<td>'+formatVideoInfo(list[i])+'</td>';
+                        html += '<td><span class="badge badge-info">'+list[i].videoplatform+'</span></td>';
+                        html += '<td>'+formatTime(list[i].createtime)+'</td>';
+                        html += '<td>';
+                        html += '<div class="btn-group btn-group-sm">';
+                        html += '<a data-id="'+list[i].id+'" class="btn btn-outline-primary editData" href="#!" title="编辑" data-toggle="tooltip"><i class="mdi mdi-pencil"></i></a>';
+                        html += '<a data-id="'+list[i].id+'" data-video="'+list[i].videounrealaddr+'" class="btn btn-outline-success playVideo" href="#!" title="播放" data-toggle="tooltip"><i class="mdi mdi-play"></i></a>';
+                        html += '<a data-id="'+list[i].id+'" class="btn btn-outline-danger deleteData" href="#!" title="删除" data-toggle="tooltip"><i class="mdi mdi-delete"></i></a>';
+                        html += '</div>';
+                        html += '</td>';
+                        html += '</tr>';
                     }
 
                     $('.tableData').html(html)
@@ -269,7 +401,6 @@
                         }
                     })
                 }
-
             })
     }
 </script>

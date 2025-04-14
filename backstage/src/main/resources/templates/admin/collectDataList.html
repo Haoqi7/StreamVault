@@ -43,28 +43,39 @@
 				<div class="row">
 					<div class="col-lg-12">
 						<div class="card">
-							<div class="card-header">搜索</div>
+							<div class="card-header bg-light">
+								<div class="row align-items-center">
+									<div class="col">
+										<h5 class="card-title mb-0">搜索</h5>
+									</div>
+									<div class="col-auto">
+										<div class="btn-group">
+											<a class="btn btn-primary btn-sm searchData" href="#">
+												<i class="mdi mdi-magnify"></i> 搜索
+											</a>
+											<a class="btn btn-success btn-sm addCollect" href="#">
+												<i class="mdi mdi-plus"></i> 添加任务
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
 							<div class="card-body">
 								<form action="#!" method="post" class="form-horizontal form-search">
 									<div class="row">
 										<div class="col-md-4">
 											<div class="form-group">
-												<label class="w-120 pull-left control-label">平台：</label>
-												<div class="pull-left w-120-calc">
-													<select name="videoplatform" class="form-control videoplatform" id="type">
-														<option value="">所有</option>
-														<option value="哔哩">哔哩</option>
-														<option value="抖音">抖音</option>
-													</select>
-												</div>
+												<label class="control-label">平台</label>
+												<select name="videoplatform" class="form-control videoplatform" id="type">
+													<option value="">所有</option>
+													<option value="哔哩">哔哩</option>
+													<option value="抖音">抖音</option>
+												</select>
 											</div>
 										</div>
 									</div>
 								</form>
-								<a class="btn btn-primary m-r-5 searchData" href="#"><i class="mdi mdi-plus"></i>搜索</a>
-								<a class="btn btn-primary m-r-5 addCollect" href="#"><i class="mdi mdi-plus"></i>添加任务</a>
 							</div>
-
 						</div>
 					</div>
 				</div>
@@ -419,17 +430,64 @@
 						var list = record.content;
 						console.log(list);
 						for(var i = 0;i<list.length;i++){
+							// 解析originaladdress
+							var addressType = '';
+							var addressValue = '';
+							if(list[i].platform === '抖音') {
+								if(list[i].originaladdress.startsWith('post')) {
+									addressType = '作品';
+									addressValue = list[i].originaladdress.substring(4);
+								} else if(list[i].originaladdress.startsWith('like')) {
+									addressType = '喜欢';
+									addressValue = list[i].originaladdress.substring(4);
+								} else if(list[i].originaladdress.startsWith('recommend')) {
+									addressType = '首页推荐';
+									addressValue = list[i].originaladdress.substring(9);
+								} else if(list[i].originaladdress.startsWith('fav-')) {
+									addressType = '收藏夹';
+									var parts = list[i].originaladdress.split('-');
+									addressValue = parts[1] + ' (' + parts[2].substring(3) + ')';
+								}
+							} else {
+								addressType = '收藏夹';
+								addressValue = list[i].originaladdress;
+							}
+
+							// 任务状态样式
+							var statusClass = '';
+							var statusText = list[i].taskstatus;
+							switch(list[i].taskstatus) {
+								case '处理完成':
+									statusClass = 'text-success';
+									break;
+								case '已提交待处理':
+									statusClass = 'text-warning';
+									break;
+								case '已开始处理':
+									statusClass = 'text-info';
+									break;
+								default:
+									statusClass = 'text-secondary';
+							}
+
+							// 监控状态样式
+							var monitorClass = list[i].monitoring === 'Y' ? 'text-success' : 'text-secondary';
+							var monitorText = list[i].monitoring === 'Y' ? '已开启' : '未开启';
+
 							html +='<tr>'
 									+'<td title="'+list[i].id+'">'+list[i].id+'</td>'
 									+'<td title="'+list[i].taskname+'">'+textnone(list[i].taskname)+'</td>'
-									+'<td title="'+list[i].originaladdress+'">'+list[i].originaladdress+'</td>'
+									+'<td title="'+addressValue+'">'
+										+'<span class="badge badge-info">'+addressType+'</span> '
+										+'<small class="text-muted">'+addressValue+'</small>'
+									+'</td>'
 									+'<td title="'+list[i].platform+'">'+list[i].platform+'</td>'
-									+'<td title="'+list[i].monitoring+'">'+list[i].monitoring+'</td>'
-									+'<td title="'+list[i].taskstatus+'">'+list[i].taskstatus+'</td>'
-									+'<td title="'+list[i].count+'">'+list[i].count+'</td>'
-									+'<td title="'+list[i].carriedout+'">'+list[i].carriedout+'</td>'
-									+'<td title="'+list[i].createtime+'">'+list[i].createtime+'</td>'
-									+'<td title="'+list[i].endtime+'">'+list[i].endtime+'</td>'
+									+'<td><span class="'+monitorClass+'">'+monitorText+'</span></td>'
+									+'<td><span class="'+statusClass+'">'+statusText+'</span></td>'
+									+'<td>'+list[i].count+'</td>'
+									+'<td>'+list[i].carriedout+'</td>'
+									+'<td>'+list[i].createtime+'</td>'
+									+'<td>'+textnone(list[i].endtime)+'</td>'
 									+'<td>'
 									+'<div class="btn-group">'
 									+'<a data-id="'+list[i].id+'" class="btn btn-xs btn-default viewProcesses" href="#!" title="查看进程" data-toggle="tooltip">查看进程</a>'

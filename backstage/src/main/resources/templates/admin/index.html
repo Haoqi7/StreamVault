@@ -7,37 +7,150 @@
     <link href="../static/css/bootstrap.min.css" rel="stylesheet">
     <link href="../static/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="../static/css/style.min.css" rel="stylesheet">
+    <style>
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .video-card {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .video-cover {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 比例 */
+            overflow: hidden;
+        }
+        
+        .video-cover img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .video-info {
+            padding: 12px;
+        }
+        
+        .video-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            height: 40px;
+        }
+        
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .video-platform {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #f0f0f0;
+        }
+        
+        .video-time {
+            color: #999;
+        }
+        
+        .video-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .video-card:hover .video-play {
+            opacity: 1;
+        }
+        
+        .video-play i {
+            color: #fff;
+            font-size: 24px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 <div class="lyear-layout-web">
     <div class="lyear-layout-container">
-
         <div th:include="admin/include/common :: headermenu"> </div>
-        <!--页面主要内容-->
+        
         <main class="lyear-layout-content">
-
             <div class="container-fluid">
-
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="card">
-                            <div class="card-body">
-
-                                <div class="masonry-grid" data-provide="photoswipe">
-
+                            <div class="card-header bg-light">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h5 class="card-title mb-0">视频库</h5>
+                                    </div>
                                 </div>
-
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="video-grid" id="videoGrid">
+                                </div>
+                                <div class="loading" id="loading" style="display: none;">
+                                    <i class="mdi mdi-loading mdi-spin"></i> 加载中...
+                                </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
-
             </div>
-
         </main>
-        <!--End 页面主要内容-->
     </div>
 </div>
 
@@ -47,70 +160,101 @@
 <script type="text/javascript" src="../static/js/main.min.js"></script>
 <script src="../static/js/layer/layer.js" type="text/javascript"></script>
 <script>
-	var page = 1;
+    var page = 1;
+    var isLoading = false;
+    var hasMore = true;
+    
     $(function(){
         findList(page);
         
-		window.onscroll = ()=>{
-		  // 窗口高度
-		  var windowHeight = document.documentElement.clientHeight || document.body.clientHeight;
-			// 页面高度
-			var documentHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-			// 滚动条位置
-			var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-			if ((windowHeight + scrollTop + 2) >= documentHeight) {
-				page++;
-		 		findList(page);
-			}
-		}
-
-    });
-    function transferName(str){
-        var obj=str.lastIndexOf("/");
-        var filename = str.substr(obj+1);
-        var path = str.substr(0,obj);
-        return path+"/"+encodeURIComponent(filename);
-    }
-    function  playVideo(){
-        $('.masonry-item').unbind('click');
-        $('.masonry-item').click(function (){
-            var videourl = $(this).attr('data-video');
-            var html ="<video src='"+videourl+"' height='100%' width='100%' controls='controls'>"
-            layer.open({
-                type: 1,
-                skin: 'layui-layer-rim',
-                area: ['800px', '530px'],
-                content:html
-            });
-
-        })
-    }
-    function  findList(page){
-        var option = {
-            pageNo:page,
-            pageSize:25
-        }
-        $.post("/admin/api/findVideoDataList",option,
-            function(data,status){
-                console.log(data,status);
-                if(data.resCode==="000001"){
-                    var record = data.record;
-                    var html = "";
-                    var list = record.content;
-                    for(var i = 0;i<list.length;i++){
-                        html +='<a class="masonry-item" href="#" data-video="'+list[i].videounrealaddr+'">'
-                             +'<img src="'+list[i].videocover+'" alt="'+list[i].videoname+'">'
-                             +'</a>'
+        // 使用节流函数优化滚动事件
+        var throttleTimer;
+        $(window).scroll(function() {
+            if (throttleTimer) {
+                return;
+            }
+            
+            throttleTimer = setTimeout(function() {
+                if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
+                    if (!isLoading && hasMore) {
+                        page++;
+                        findList(page);
                     }
-
-                    $('.masonry-grid').append(html)
-                    playVideo();
                 }
-
-            })
+                throttleTimer = null;
+            }, 200);
+        });
+    });
+    
+    function formatTime(time) {
+        if(!time) return '';
+        return new Date(time).toLocaleString();
     }
-
-
+    
+    function playVideo(videoUrl) {
+        var html = "<video src='"+videoUrl+"' height='100%' width='100%' controls='controls'>";
+        layer.open({
+            type: 1,
+            skin: 'layui-layer-rim',
+            area: ['800px', '530px'],
+            content: html
+        });
+    }
+    
+    function findList(page) {
+        if(isLoading || !hasMore) return;
+        isLoading = true;
+        $('#loading').show();
+        
+        var option = {
+            pageNo: page,
+            pageSize: 25
+        }
+        
+        $.post("/admin/api/findVideoDataList", option, function(data, status) {
+            if(data.resCode === "000001") {
+                var list = data.record.content;
+                
+                // 检查是否还有更多数据
+                hasMore = list.length > 0 && !data.record.last;
+                
+                if(list.length > 0) {
+                    var html = "";
+                    for(var i = 0; i < list.length; i++) {
+                        html += '<div class="video-card" data-video="'+list[i].videounrealaddr+'">';
+                        html += '<div class="video-cover">';
+                        html += '<img src="'+list[i].videocover+'" alt="'+list[i].videoname+'">';
+                        html += '<div class="video-play"><i class="mdi mdi-play"></i></div>';
+                        html += '</div>';
+                        html += '<div class="video-info">';
+                        html += '<div class="video-title" title="'+list[i].videoname+'">'+list[i].videoname+'</div>';
+                        html += '<div class="video-meta">';
+                        html += '<span class="video-platform">'+list[i].videoplatform+'</span>';
+                        html += '<span class="video-time">'+formatTime(list[i].createtime)+'</span>';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                    
+                    // 使用requestAnimationFrame优化DOM操作
+                    requestAnimationFrame(function() {
+                        $('#videoGrid').append(html);
+                        
+                        // 绑定点击事件
+                        $('.video-card').off('click').on('click', function() {
+                            playVideo($(this).data('video'));
+                        });
+                    });
+                }
+            }
+            
+            isLoading = false;
+            $('#loading').hide();
+        }).fail(function() {
+            isLoading = false;
+            $('#loading').hide();
+        });
+    }
 </script>
 </body>
 </html>
