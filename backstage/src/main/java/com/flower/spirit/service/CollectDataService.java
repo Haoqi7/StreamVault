@@ -1,5 +1,8 @@
 package com.flower.spirit.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.flower.spirit.common.AjaxEntity;
@@ -32,6 +36,7 @@ import com.flower.spirit.entity.CollectDataEntity;
 import com.flower.spirit.entity.VideoDataEntity;
 import com.flower.spirit.utils.Aria2Util;
 import com.flower.spirit.utils.BiliUtil;
+import com.flower.spirit.utils.CommandUtil;
 import com.flower.spirit.utils.DateUtils;
 import com.flower.spirit.utils.DouUtil;
 import com.flower.spirit.utils.EmbyMetadataGenerator;
@@ -179,6 +184,7 @@ public class CollectDataService {
 					collectDataEntity.setCarriedout("0");  //归零
 					CollectDataEntity save = collectdDataDao.save(collectDataEntity);
 					//提交线程
+//					this.createDyData(save);
 					exec.execute(() -> {
 						try {
 							this.createDyData(save);
@@ -292,42 +298,80 @@ public class CollectDataService {
 		}
 		
 		logger.info("任务开始"+entity.getOriginaladdress());
-		JSONArray allDYData = this.getAllDYData(entity);
+		JSONArray allDYData = this.getDYData(entity);
+		System.out.println(allDYData.size());
 		
-		entity.setCount(String.valueOf(allDYData.size()));
-		entity.setTaskstatus("已开始处理");
-		collectdDataDao.save(entity);
-		
-		for(int i = 0;i<allDYData.size();i++) {
-//			System.out.println(allDYData.get(i));
-			logger.info(entity.getOriginaladdress()+"任务中第"+i+"个");
-			String status ="";
-			JSONObject aweme_detail = allDYData.getJSONObject(i);	
-//			System.out.println(aweme_detail);
-			String aweme_type = aweme_detail.getString("aweme_type");
-			String awemeId = aweme_detail.getString("aweme_id");
-			try {
-				if(aweme_type.equals("68")) {
-					status ="图集不支持下载";
-			 		Thread.sleep(2500);
-				    CollectDataDetailEntity collectDataDetailEntity = new CollectDataDetailEntity();
-				    collectDataDetailEntity.setDataid(entity.getId());
-				    collectDataDetailEntity.setVideoid(awemeId);
-				    collectDataDetailEntity.setOriginaladdress(awemeId);
-				    collectDataDetailEntity.setStatus(status);
-				    collectDataDetailEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
-				    collectDataDetailService.save(collectDataDetailEntity);
-				    //修改主体
-				    String carriedout = entity.getCarriedout() == null ?"1":String.valueOf(Integer.parseInt(entity.getCarriedout())+1);
-				    entity.setCarriedout(carriedout);
-				    collectdDataDao.save(entity);
-					continue;
+		if(allDYData!=null) {
+			entity.setCount(String.valueOf(allDYData.size()));
+			entity.setTaskstatus("已开始处理");
+			collectdDataDao.save(entity);
+			for(int i = 0;i<allDYData.size();i++) {
+//				System.out.println(allDYData.get(i));
+				logger.info(entity.getOriginaladdress()+"任务中第"+i+"个");
+				String status ="";
+				JSONObject aweme_detail = allDYData.getJSONObject(i);	
+				String awemeId = aweme_detail.getString("aweme_id");
+				String coveruri = "";
+				JSONArray cover = aweme_detail.getJSONArray("cover");
+				if(cover.size() >=2) {
+					coveruri = cover.getString(cover.size()-1);
+				}else {
+					coveruri = cover.getString(0);
 				}
-			} catch (Exception e) {
-				//异常了 没有type
-				status ="视频异常";
+				JSONArray jsonArray = aweme_detail.getJSONArray("video_play_addr");
+				String videoplay = "";
+				if(jsonArray.size() >=2) {
+					videoplay = jsonArray.getString(jsonArray.size()-1);
+				}else {
+					videoplay = jsonArray.getString(0);
+				}
+				String desc = aweme_detail.getString("desc");
+				
+
+				List<VideoDataEntity> findByVideoid = videoDataService.findByVideoid(awemeId);
+				if(findByVideoid.size()==0) {
+					 String filename = StringUtil.getFileName(desc, awemeId);
+					 String dir = FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), false, filename, taskname, null);
+					 String videofile = FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), false, filename, taskname, "mp4");
+					 String videounrealaddr = FileUtil.generateDir(false, Global.platform.douyin.name(), false, filename, taskname, "mp4");
+			         String coverunaddr =FileUtil.generateDir(false, Global.platform.douyin.name(), false, filename, taskname, "jpg");
+			         String dir2 = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
+			         logger.info("已使用批量下载,下载器类型为:"+Global.downtype);
+			         if(Global.downtype.equals("a2")) {
+				      	   Aria2Util.sendMessage(Global.a2_link,  Aria2Util.createDouparameter(videoplay, dir, filename+".mp4", Global.a2_token,Global.tiktokCookie));
+			         }
+			     	HashMap<String,String> header = new HashMap<String, String>();
+					header.put("User-Agent", DouUtil.ua);
+					header.put("cookie", Global.tiktokCookie);
+			         if(Global.downtype.equals("http")) {
+			        	//内置下载器
+						dir = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
+						videofile = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
+						HttpUtil.downloadFile(videoplay,  filename + ".mp4", videofile, header);
+			         }
+			         HttpUtil.downloadFile(coveruri,  filename + ".jpg", dir2, header);
+			         VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId,desc, desc, "抖音", coverunaddr,  FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, "mp4"),videounrealaddr,entity.getOriginaladdress());
+			         videoDataDao.save(videoDataEntity);
+			         
+					 if(Global.getGeneratenfo) {
+						Map<String, String> map = new HashMap<String, String>();
+						map.put("title", desc);
+						map.put("desc", desc);
+						map.put("upname", aweme_detail.getString("nickname"));
+						map.put("ctime", aweme_detail.getString("create_time"));
+						map.put("piclocal", filename + ".jpg");
+						map.put("upmid", aweme_detail.getString("uid"));
+						map.put("cid", awemeId);
+						EmbyMetadataGenerator.createFavoriteEpisodeDouNfo(map, dir, i+1,temporaryDirectory);
+					 }
+			 		 logger.info("下载流程结束");
+				}
+				if(status.equals("")) {
+					status =findByVideoid.size() == 0?"已完成":"已完成(未下载已存在)";
+				}
 		 		Thread.sleep(2500);
 			    CollectDataDetailEntity collectDataDetailEntity = new CollectDataDetailEntity();
+			    collectDataDetailEntity.setVideoname(desc);
 			    collectDataDetailEntity.setDataid(entity.getId());
 			    collectDataDetailEntity.setVideoid(awemeId);
 			    collectDataDetailEntity.setOriginaladdress(awemeId);
@@ -338,82 +382,11 @@ public class CollectDataService {
 			    String carriedout = entity.getCarriedout() == null ?"1":String.valueOf(Integer.parseInt(entity.getCarriedout())+1);
 			    entity.setCarriedout(carriedout);
 			    collectdDataDao.save(entity);
-				continue;
-				
+		 		
 			}
-			String coveruri = "";
-			JSONArray cover = aweme_detail.getJSONObject("video").getJSONObject("cover").getJSONArray("url_list");
-			if(cover.size() >=2) {
-				coveruri = cover.getString(cover.size()-1);
-			}else {
-				coveruri = cover.getString(0);
-			}
-			JSONArray jsonArray = aweme_detail.getJSONObject("video").getJSONObject("play_addr").getJSONArray("url_list");
-			String videoplay = "";
-			if(jsonArray.size() >=2) {
-				videoplay = jsonArray.getString(jsonArray.size()-1);
-			}else {
-				videoplay = jsonArray.getString(0);
-			}
-			String desc = aweme_detail.getString("desc");
-			
-
-			List<VideoDataEntity> findByVideoid = videoDataService.findByVideoid(awemeId);
-			if(findByVideoid.size()==0) {
-				 String filename = StringUtil.getFileName(desc, awemeId);
-				 String dir = FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), false, filename, taskname, null);
-				 String videofile = FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), false, filename, taskname, "mp4");
-				 String videounrealaddr = FileUtil.generateDir(false, Global.platform.douyin.name(), false, filename, taskname, "mp4");
-		         String coverunaddr =FileUtil.generateDir(false, Global.platform.douyin.name(), false, filename, taskname, "jpg");
-		         String dir2 = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
-		         logger.info("已使用批量下载,下载器类型为:"+Global.downtype);
-		         if(Global.downtype.equals("a2")) {
-			      	   Aria2Util.sendMessage(Global.a2_link,  Aria2Util.createDouparameter(videoplay, dir, filename+".mp4", Global.a2_token,Global.tiktokCookie));
-		         }
-		     	HashMap<String,String> header = new HashMap<String, String>();
-				header.put("User-Agent", DouUtil.ua);
-				header.put("cookie", Global.tiktokCookie);
-		         if(Global.downtype.equals("http")) {
-		        	//内置下载器
-					dir = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
-					videofile = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
-					HttpUtil.downloadFile(videoplay,  filename + ".mp4", videofile, header);
-		         }
-		         HttpUtil.downloadFile(coveruri,  filename + ".jpg", dir2, header);
-		         VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId,desc, desc, "抖音", coverunaddr,  FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, "mp4"),videounrealaddr,entity.getOriginaladdress());
-		         videoDataDao.save(videoDataEntity);
-		         
-				 if(Global.getGeneratenfo) {
-					Map<String, String> map = new HashMap<String, String>();
-					map.put("title", desc);
-					map.put("desc", desc);
-					map.put("upname", aweme_detail.getJSONObject("author").getString("nickname"));
-					map.put("ctime", aweme_detail.getString("create_time"));
-					map.put("piclocal", filename + ".jpg");
-					map.put("upmid", aweme_detail.getJSONObject("author").getString("uid"));
-					map.put("cid", awemeId);
-					EmbyMetadataGenerator.createFavoriteEpisodeDouNfo(map, dir, i+1,temporaryDirectory);
-				 }
-		 		 logger.info("下载流程结束");
-			}
-			if(status.equals("")) {
-				status =findByVideoid.size() == 0?"已完成":"已完成(未下载已存在)";
-			}
-	 		Thread.sleep(2500);
-		    CollectDataDetailEntity collectDataDetailEntity = new CollectDataDetailEntity();
-		    collectDataDetailEntity.setVideoname(desc);
-		    collectDataDetailEntity.setDataid(entity.getId());
-		    collectDataDetailEntity.setVideoid(awemeId);
-		    collectDataDetailEntity.setOriginaladdress(awemeId);
-		    collectDataDetailEntity.setStatus(status);
-		    collectDataDetailEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
-		    collectDataDetailService.save(collectDataDetailEntity);
-		    //修改主体
-		    String carriedout = entity.getCarriedout() == null ?"1":String.valueOf(Integer.parseInt(entity.getCarriedout())+1);
-		    entity.setCarriedout(carriedout);
-		    collectdDataDao.save(entity);
-	 		
 		}
+	
+
 		entity.setTaskstatus("处理完成");
 		entity.setEndtime(DateUtils.formatDateTime(new Date()));
 		collectdDataDao.save(entity);
@@ -421,7 +394,32 @@ public class CollectDataService {
 		logger.info("任务结束"+entity.getOriginaladdress());
 	}
 	
-
+	public JSONArray getDYData(CollectDataEntity entity) throws IOException {
+		String taskout=Global.apppath+"lot"+System.getProperty("file.separator")+entity.getId()+"_"+entity.getTaskname()+".json";
+		String sec_user_id = entity.getOriginaladdress().replaceAll("post", "").replaceAll("like", "");
+		if(entity.getOriginaladdress().contains("post")) {
+			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_post_videos", sec_user_id, null,taskout);
+			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
+				   JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
+				   Files.deleteIfExists(Paths.get(taskout));
+				   return jsonFromFile;
+			}
+		}
+		if(entity.getOriginaladdress().contains("like")) {
+			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_like_videos", sec_user_id, null,taskout);
+			System.out.println(f2cmd);
+			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
+				 JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
+				 Files.deleteIfExists(Paths.get(taskout));
+				 return jsonFromFile;
+			}
+		}
+		//删除文件
+		return null;
+	}
+	
+	
+	
 	public JSONArray getAllDYData(CollectDataEntity entity) throws Exception {
 		String api ="";
 		String sign = "aid=6383&sec_user_id=#uid#&count=35&max_cursor=#max_cursor#&cookie_enabled=true&platform=PC&downlink=10";
@@ -444,6 +442,7 @@ public class CollectDataService {
 		String apiaddt = api.replaceAll("#max_cursor#", max_cursor);
 		String xbogus = XbogusUtil.getXBogus(newsign);
 		apiaddt = apiaddt+"&X-Bogus="+xbogus;
+		System.out.println(apiaddt);
 		String httpget = DouUtil.httpget(apiaddt, Global.tiktokCookie);
 		JSONObject parseObject = JSONObject.parseObject(httpget);
 		JSONArray jsonArray = parseObject.getJSONArray("aweme_list");
@@ -457,5 +456,6 @@ public class CollectDataService {
 			return data;
 		}
 	}
+
 
 }

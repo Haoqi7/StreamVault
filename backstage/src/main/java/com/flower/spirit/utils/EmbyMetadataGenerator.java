@@ -69,7 +69,7 @@ public class EmbyMetadataGenerator {
 
     // 生成 tvshow.nfo（系列视频）
     public static void generateSeriesNfo(String title, String overview, String genre, String rating,
-            String outputPath, List<Map<String, String>> upInfoList, String cover, String ctime) {
+            String outputPath, List<Map<String, String>> upInfoList, String cover, String ctime,String p) {
         try {
             // 转换时间戳为年份和日期
             String year = "2025";
@@ -89,17 +89,17 @@ public class EmbyMetadataGenerator {
             nfoContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n");
             nfoContent.append("<!--created by spirit for KODI-->\n");
             nfoContent.append("<tvshow>\n");
-            nfoContent.append("    <title>bilibili收藏夹-" + title + "</title>\n");
+            nfoContent.append("    <title>收藏夹-" + title + "</title>\n");
             nfoContent.append("    <originaltitle>" + title + "</originaltitle>\n");
-            nfoContent.append("    <showtitle>bilibili收藏夹-" + title + "</showtitle>\n");
+            nfoContent.append("    <showtitle>收藏夹-" + title + "</showtitle>\n");
             nfoContent.append("    <sorttitle>" + title + "</sorttitle>\n");
             nfoContent.append("    <year>" + year + "</year>\n");
             nfoContent.append("    <top250>0</top250>\n");
             nfoContent.append("    <ratings/>\n");
             nfoContent.append("    <userrating>0</userrating>\n");
             nfoContent.append(
-                    "    <outline>" + (overview.isEmpty() ? "bilibili收藏夹-" + title : overview) + "</outline>\n");
-            nfoContent.append("    <plot>" + (overview.isEmpty() ? "bilibili收藏夹-" + title : overview) + "</plot>\n");
+                    "    <outline>" + (overview.isEmpty() ? "收藏夹-" + title : overview) + "</outline>\n");
+            nfoContent.append("    <plot>" + (overview.isEmpty() ? "收藏夹-" + title : overview) + "</plot>\n");
             nfoContent.append("    <tagline/>\n");
             nfoContent.append("    <runtime>0</runtime>\n");
             nfoContent.append("    <mpaa/>\n");
@@ -112,7 +112,7 @@ public class EmbyMetadataGenerator {
             nfoContent.append("    <status>Unknown</status>\n");
             nfoContent.append("    <watched>false</watched>\n");
             nfoContent.append("    <playcount/>\n");
-            nfoContent.append("    <studio>哔哩哔哩</studio>\n");
+            nfoContent.append("    <studio>"+p+"</studio>\n");
             nfoContent.append("    <country>中国</country>\n");
             if(cover!= null) {
                 nfoContent.append("    <thumb aspect=\"poster\">" + cover.replace('\\', '/') + "</thumb>\n");
@@ -354,7 +354,7 @@ public class EmbyMetadataGenerator {
             new File(outputPath).mkdirs();
 
             // 生成初始tvshow.nfo，不包含UP主信息
-            generateSeriesNfo(title, overview, genre, rating, outputPath, null, cover, ctime);
+            generateSeriesNfo(title, overview, genre, rating, outputPath, null, cover, ctime,"哔哩哔哩");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -371,7 +371,7 @@ public class EmbyMetadataGenerator {
             // 确保输出目录存在
             new File(outputPath).mkdirs();
             // 生成初始tvshow.nfo，不包含UP主信息
-            generateSeriesNfo(title, overview, genre, rating, outputPath, null, null, ctime);
+            generateSeriesNfo(title, overview, genre, rating, outputPath, null, null, ctime,"抖音");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -482,7 +482,7 @@ public class EmbyMetadataGenerator {
                     "        <profile>" + videoInfo.get("upmid") + "</profile>\n" +
                     "    </actor>\n" +
                     "    <id>" + videoInfo.get("cid") + "</id>\n" +
-                    "    <source>bilibili</source>\n" +
+                    "    <source>抖音</source>\n" +
                     "    <dateadded>" + dateadded + "</dateadded>\n" +
                     "</episodedetails>\n";
 

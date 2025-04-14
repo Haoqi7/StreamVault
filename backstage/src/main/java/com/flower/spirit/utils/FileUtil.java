@@ -2,13 +2,17 @@ package com.flower.spirit.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.flower.spirit.config.Global;
 
 @Component
@@ -307,6 +311,18 @@ public class FileUtil {
                 }
             }
         }
+    }
+    
+    public static JSONArray readJsonFromFile(String filePath) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        StringBuilder jsonContent = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            jsonContent.append(line);
+            System.out.println(line);
+        }
+        reader.close();
+        return JSON.parseArray(jsonContent.toString());
     }
     
 }

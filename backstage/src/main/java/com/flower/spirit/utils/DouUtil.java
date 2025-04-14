@@ -148,7 +148,7 @@ public class DouUtil {
 		 Map<String, String> res = new HashMap<String, String>();
 		 if(null !=Global.tiktokCookie && !"".equals(Global.tiktokCookie) ) {
 		
-			 String httpget = CommandUtil.f2cmd(Global.tiktokCookie,aweme_id);
+			 String httpget = CommandUtil.f2cmd(Global.tiktokCookie,aweme_id,"fetch_video",null,null,null);
 			 JSONObject data = JSONObject.parseObject(httpget);
 			 String coveruri = "";
 			 JSONArray cover = data.getJSONArray("cover");
