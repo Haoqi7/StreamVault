@@ -35,6 +35,7 @@ import com.flower.spirit.utils.EmbyMetadataGenerator;
 import com.flower.spirit.utils.FileUtil;
 import com.flower.spirit.utils.FileUtils;
 import com.flower.spirit.utils.HttpUtil;
+import com.flower.spirit.utils.JsonChunkParser;
 import com.flower.spirit.utils.Steamcmd;
 import com.flower.spirit.utils.StringUtil;
 import com.flower.spirit.utils.TikTokUtil;
@@ -134,37 +135,39 @@ public class AnalysisService {
 		try {
 			String dirtemp = FileUtil.generateDir(true, Global.platform.twitter.name(), true, null, null, null);
 			String exec = YtDlpUtil.exec(url,dirtemp,"twitter");
-			//已经下载完成了
-			JSONObject parseObject = JSONObject.parseObject(exec);
-			String filename = parseObject.getString("filename");
-			//先处理文件名
-//			System.out.println(filename);
-			String baseName = FilenameUtils.getBaseName(filename);
-			String baseNameNo = baseName.replaceAll("_", " ");
-			String filedoc = new File(filename).getParent();
-			String namefix = new File(new File(filename).getParent()).getName();  //先这个搞
-			String dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseName, null, null);
-			String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true, new File(new File(filename).getParent()).getName(), null, null);
-//			System.out.println(exec);
-//			String title = parseObject.getString("title");
-			String description = parseObject.getString("description");
-			String display_id = parseObject.getString("display_id");
-			String uploader = parseObject.getString("uploader");
-			String uploader_url = parseObject.getString("uploader_url");
-			String upload_date = parseObject.getString("upload_date");
-			String name = new File(filename).getName();
+			List<JSONObject> jsonObjects = JsonChunkParser.parseJsonObjects(exec);
+			for(int i =0;i<jsonObjects.size();i++) {
+				JSONObject parseObject = jsonObjects.get(i);
+				String filename = parseObject.getString("filename");
+				String baseName = FilenameUtils.getBaseName(filename);
+				String baseNameNo = baseName.replaceAll("_", " ");
+				String filedoc = new File(filename).getParent();
+				String namefix = new File(new File(filename).getParent()).getName();  //先这个搞
+				String dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseName, null, null);
+				String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true, new File(new File(filename).getParent()).getName(), null, null);
+//				System.out.println(exec);
+//				String title = parseObject.getString("title");
+				String description = parseObject.getString("description");
+				String display_id = parseObject.getString("display_id");
+				String uploader = parseObject.getString("uploader");
+				String uploader_url = parseObject.getString("uploader_url");
+				String upload_date = parseObject.getString("upload_date");
+				String name = new File(filename).getName();
 
-			String coverdb = dircos+baseName+".webp";
-			
-			String videodb = dircos+name;
-			
-			VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.twitter.name(),coverdb ,filename, videodb, url);
-			videoDataDao.save(videoDataEntity);
-			processHistoryService.saveProcess(saveProcess.getId(), url, platform);
-			if(Global.getGeneratenfo) {
-				EmbyMetadataGenerator.generateMetadata(namefix,upload_date.substring(0,4),description,"twitter",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
+				String coverdb = dircos+baseName+".webp";
+				
+				String videodb = dircos+name;
+				
+				VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.twitter.name(),coverdb ,filename, videodb, url);
+				videoDataDao.save(videoDataEntity);
+				processHistoryService.saveProcess(saveProcess.getId(), url, platform);
+				if(Global.getGeneratenfo) {
+					EmbyMetadataGenerator.generateMetadata(namefix,upload_date.substring(0,4),description,"twitter",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
+				}
+				sendNotify.sendNotifyData(namefix, url, platform);
 			}
-			sendNotify.sendNotifyData(namefix, url, platform);
+			//已经下载完成了
+
 //			return ;
 		} catch (Exception e) {
 
