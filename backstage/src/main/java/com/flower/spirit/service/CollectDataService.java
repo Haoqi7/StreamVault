@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.xml.bind.annotation.XmlElementDecl.GLOBAL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,7 +178,7 @@ public class CollectDataService {
 			if(null == Global.tiktokCookie || Global.tiktokCookie.equals("")) {
 				return new AjaxEntity(Global.ajax_uri_error, "此功能必须填写ck", null);
 			}
-			if(collectDataEntity.getOriginaladdress().contains("post") || collectDataEntity.getOriginaladdress().contains("like")) {
+			if(collectDataEntity.getOriginaladdress().startsWith("post") || collectDataEntity.getOriginaladdress().startsWith("like") || collectDataEntity.getOriginaladdress().startsWith("fav-") || collectDataEntity.getOriginaladdress().startsWith("recommend")) {
 				try {
 					//进线程前创建collectDataEntity
 					collectDataEntity.setTaskstatus("已提交待处理");
@@ -397,7 +400,7 @@ public class CollectDataService {
 	public JSONArray getDYData(CollectDataEntity entity) throws IOException {
 		String taskout=Global.apppath+"lot"+System.getProperty("file.separator")+entity.getId()+"_"+entity.getTaskname()+".json";
 		String sec_user_id = entity.getOriginaladdress().replaceAll("post", "").replaceAll("like", "");
-		if(entity.getOriginaladdress().contains("post")) {
+		if(entity.getOriginaladdress().startsWith("post")) {
 			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_post_videos", sec_user_id, null,taskout);
 			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
 				   JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
@@ -405,13 +408,35 @@ public class CollectDataService {
 				   return jsonFromFile;
 			}
 		}
-		if(entity.getOriginaladdress().contains("like")) {
+		if(entity.getOriginaladdress().startsWith("like")) {
 			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_like_videos", sec_user_id, null,taskout);
-			System.out.println(f2cmd);
 			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
 				 JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
 				 Files.deleteIfExists(Paths.get(taskout));
 				 return jsonFromFile;
+			}
+		}
+		if(entity.getOriginaladdress().startsWith("fav-")) {
+		    String startTag = "fav-";
+	        String endTag = "-fav";
+	        int startIndex = entity.getOriginaladdress().indexOf(startTag) + startTag.length();
+	        int endIndex = entity.getOriginaladdress().indexOf(endTag);
+	        String content = entity.getOriginaladdress().substring(startIndex, endIndex).trim();
+	        sec_user_id=sec_user_id.replaceAll(startTag+content+endTag, "");
+			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_collects_videos", null, content,taskout);
+			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
+				 JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
+				 Files.deleteIfExists(Paths.get(taskout));
+				 return jsonFromFile;
+			}
+		}
+		if(entity.getOriginaladdress().startsWith("recommend")) {
+			sec_user_id = entity.getOriginaladdress().replaceAll("recommend", "");
+			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_feed_videos", sec_user_id, null,taskout);
+			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
+				   JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
+				   Files.deleteIfExists(Paths.get(taskout));
+				   return jsonFromFile;
 			}
 		}
 		//删除文件
@@ -455,6 +480,17 @@ public class CollectDataService {
 			data.addAll(jsonArray);
 			return data;
 		}
+	}
+
+
+	public AjaxEntity loadDouFav(String uid) {
+		String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_collects", uid, null, null);
+        String startTag = "stream-vault-start-collects";
+        String endTag = "stream-vault-end-collects";
+        int startIndex = f2cmd.indexOf(startTag) + startTag.length();
+        int endIndex = f2cmd.indexOf(endTag);
+        String content = f2cmd.substring(startIndex, endIndex).trim();
+		return new AjaxEntity(Global.ajax_success,  content, "请求成功");
 	}
 
 

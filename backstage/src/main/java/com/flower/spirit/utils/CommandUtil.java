@@ -106,13 +106,8 @@ public class CommandUtil {
 
     public static String f2cmd(String cookie, String aid,String fuc,String uid,String cid,String out) {
 //        String cmd = "/opt/venv/bin/python3 /home/app/script/douyin.py --cookie \"" + cookie + "\" --aweme_id \""+ aid + "\"";
-//        String cmd ="/opt/venv/bin/python3 ";
-//        cmd=cmd+"/home/app/script/douyin.py ";
-        
-        String cmd ="python ";
-        cmd=cmd+"D:\\cursor-work\\spirit\\backstage\\src\\main\\docker\\buildx\\script\\douyin.py ";
-        
-        
+        String cmd ="/opt/venv/bin/python3 ";
+        cmd=cmd+"/home/app/script/douyin.py ";
         cmd=cmd+fuc+" ";
         cmd = cmd+"--cookie \""+cookie+"\""+" ";
         if(aid!= null) {
@@ -127,7 +122,7 @@ public class CommandUtil {
         if(out!= null) {
             cmd = cmd+"--output \""+out+"\" ";
          }	
-//        System.out.println(cmd);
+			/* System.out.println(cmd); */
         String result = CommandUtil.commandos(cmd);
         return result;
     }

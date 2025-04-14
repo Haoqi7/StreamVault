@@ -372,4 +372,9 @@ public class AdminController {
 	public AjaxEntity checkCookies() {
 		return cookiesConfigService.checkCookies();
 	}
+	
+	@GetMapping(value = "/loadDouFav")
+	public AjaxEntity loadDouFav(String uid) {
+		return collectDataService.loadDouFav(uid);
+	}
 } 

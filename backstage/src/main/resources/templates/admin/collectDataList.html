@@ -117,48 +117,100 @@
 	<!--    模态框 start-->
 	<div class="addCollectBox layui-form" style="display: none;padding: 20px;">
 		<input class="optionid" type="hidden">
-		<div class="layui-inline">
-			<label>任务名称</label>
-			<div class="layui-input-inline">
-				<input type="text" name="taskname"  autocomplete="off" class="taskname form-control">
+		<div class="card">
+			<div class="card-header">
+				<h4>添加收藏任务</h4>
 			</div>
-		</div>
-		<div class="layui-inline">
-			<label>来源平台</label>
-			<div class="layui-input-inline layui-show-xs-block">
-				<select class="platform form-control">
-					<option  value="哔哩">哔哩</option>
-					<option  value="抖音">抖音</option>
-				</select>
-			</div>
-		</div>
+			<div class="card-body">
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label>任务名称</label>
+							<input type="text" name="taskname" autocomplete="off" class="taskname form-control">
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<label>来源平台</label>
+							<select class="platform form-control" id="platformSelect">
+								<option value="哔哩">哔哩</option>
+								<option value="抖音">抖音</option>
+							</select>
+						</div>
+					</div>
+				</div>
 
-		<div class="layui-inline">
-			<label>收藏链接</label>
-			<div class="layui-input-inline">
-				<input  type="text" name="originaladdress"  autocomplete="off" class="originaladdress form-control">
+				<!-- 抖音类型选择 -->
+				<div class="row douyin-type" style="display: none;">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label>类型</label>
+							<select class="douyin-select form-control">
+								<option value="post">作品</option>
+								<option value="like">喜欢</option>
+								<option value="collect">收藏夹(仅自己)</option>
+								<!-- <option value="recommend">首页推荐(填写与自己cookie相符的userid)</option> -->
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label class="address-label">收藏链接</label>
+							<input type="text" name="originaladdress" autocomplete="off" class="originaladdress form-control" placeholder="请输入收藏夹ID">
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<label>是否开启监控</label>
+							<select class="monitoring form-control">
+								<option value="N">否</option>
+								<option value="Y">是</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<!-- 收藏夹选择 -->
+				<div class="layui-inline collect-list" style="display: none;">
+					<label>收藏夹</label>
+					<div class="layui-input-inline layui-show-xs-block">
+						<select class="collect-select form-control">
+							<option value="">加载中...</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="row mt-4">
+					<div class="col-md-12">
+						<button type="button" class="btn btn-primary submitCollect">保存信息</button>
+					</div>
+				</div>
+				<br/><br/><br/>
+				<div class="alert alert-info mt-4" role="alert">
+					<div class="bilibili-tip">
+						<strong>哔哩哔哩提示:</strong><br/>
+						只需要填写收藏夹ID<br/>
+						eg. https://www.bilibili.com/medialist/detail/ml12344  中只需要填写 12344
+					</div>
+					<div class="douyin-tip" style="display: none;">
+						<strong>抖音提示:</strong><br/>
+						1. 作品/喜欢页面 需要填写用户id<br/>
+						2. 如果是喜欢页面 请确认开放所有人可见<br/>
+						3. eg. https://www.douyin.com/user/12345   中只需要 123456<br/>
+						4. 如果获取作品 链接请填写 post12345<br/>
+						5. 如果获取喜欢 链接请填写 like12345<br/>
+						6. 如果ck 是这个账号的 则不强制所有人可见权限
+					</div>
+					<hr>
+					<small class="text-muted">
+						请注意监控按需开启 监控和本功能公用一个线程如果监控过多,会造成手动添加排队时间过长<br/>
+						该功能处于测试阶段,会有bug 但是我不知道
+					</small>
+				</div>
 			</div>
-		</div>
-		<div class="layui-inline">
-			<label>是否开启监控</label>
-			<div class="layui-input-inline layui-show-xs-block">
-				<select class="monitoring form-control">
-					<option  value="N">否</option>
-					<option  value="Y">是</option>
-				</select>
-			</div>
-		</div>
-		<div class="buttondiv " style=" padding-left: 10%; padding-top: 5%; "><button type="button" class="btn btn-primary submitCollect">保存信息</button></div>
-		<div style="font-size: 1.2rem;">
-			<br/>
-			注意:哔哩哔哩 只需要填写收藏夹ID<br/>
-			eg. https://www.bilibili.com/medialist/detail/ml12344  中只需要填写 12344<br/>
-			抖音  作品/喜欢页面 需要填写用户id 如果是喜欢页面 请确认开放所有人可见<br/>
-			eg. https://www.douyin.com/user/12345   中只需要 123456<br/>
-			如果获取作品 链接请填写 post12345<br/>
-			如果获取喜欢 链接请填写 like12345  如果ck 是这个账号的 则不强制所有人可见权限<br/>
-			请注意监控按需开启 监控和本功能公用一个线程如果监控过多,会造成手动添加排队时间过长<br/>
-			该功能处于测试阶段,会有bug 但是我不知道<br/>
 		</div>
 	</div>
 
@@ -175,24 +227,120 @@
 	$(function(){
 		findList(1);
 		addCollect();
-		submitCollect();
 		$('.searchData').click(function () {
 			findList(1)
 		})
 
-	});
-	function submitCollect(){
+		// 平台选择切换
+		$('#platformSelect').change(function(){
+			var platform = $(this).val();
+			if(platform === '抖音') {
+				$('.douyin-type').show();
+				$('.douyin-tip').show();
+				$('.bilibili-tip').hide();
+				$('.address-label').parent().parent().show(); // 显示用户ID输入框
+				$('.address-label').text('用户ID');
+				$('.originaladdress').attr('placeholder', '请输入用户ID');
+			} else {
+				$('.douyin-type').hide();
+				$('.collect-list').hide();
+				$('.douyin-tip').hide();
+				$('.bilibili-tip').show();
+				$('.address-label').parent().parent().show(); // 显示用户ID输入框
+				$('.address-label').text('收藏链接');
+				$('.originaladdress').attr('placeholder', '请输入收藏夹ID');
+			}
+		});
+
+		// 抖音类型选择切换
+		$('.douyin-select').change(function(){
+			var type = $(this).val();
+			if(type === 'collect') {
+				$('.collect-list').show();
+				$('.address-label').parent().parent().hide(); // 隐藏用户ID输入框
+				// 清空收藏夹列表
+				$('.collect-select').html('<option value="">加载中...</option>');
+				// 直接调用加载收藏夹
+				loadCollectList();
+			} else {
+				$('.collect-list').hide();
+				$('.address-label').parent().parent().show(); // 显示用户ID输入框
+				$('.address-label').text('用户ID');
+				$('.originaladdress').attr('placeholder', '请输入用户ID');
+			}
+		});
+
+		// 加载收藏夹函数
+		function loadCollectList() {
+			// 显示加载中
+			var loading = layer.load(2);
+			
+			// 调用接口获取收藏夹列表
+			$.ajax({
+				url: '/admin/api/loadDouFav',
+				type: 'GET',
+				success: function(res){
+					layer.close(loading);
+					if(res.resCode === "000001") {
+						var html = '<option value="">请选择收藏夹</option>';
+						try {
+							// 使用正则匹配collects_id和collects_name
+							var regex = /"collects_id":\s*(\d+),\s*"collects_name":\s*"([^"]+)"/g;
+							var match;
+							while ((match = regex.exec(res.message)) !== null) {
+								// match[1]是collects_id, match[2]是collects_name
+								html += '<option value="'+match[1]+'">'+match[2]+'</option>';
+							}
+							$('.collect-select').html(html);
+						} catch(e) {
+							console.error(e);
+							layer.msg('解析收藏夹数据失败');
+						}
+					} else {
+						layer.msg(res.message || '获取收藏夹失败');
+					}
+				},
+				error: function(){
+					layer.close(loading);
+					layer.msg('网络错误');
+				}
+			});
+		}
+
+		// 提交表单时处理值
 		$('.submitCollect').click(function(){
-			var option ={
-				platform:$('.platform').val(),
-				originaladdress:$('.originaladdress').val(),
-				monitoring:$('.monitoring').val(),
-				taskname:$('.taskname').val()
+			var platform = $('.platform').val();
+			var originaladdress = $('.originaladdress').val();
+			
+			// 如果是抖音,根据类型拼接值
+			if(platform === '抖音') {
+				var type = $('.douyin-select').val();
+				if(type === 'post') {
+					originaladdress = 'post' + originaladdress;
+				} else if(type === 'like') {
+					originaladdress = 'like' + originaladdress;
+				} else if(type === 'recommend') {
+					originaladdress = 'recommend' + originaladdress;
+				} else if(type === 'collect') {
+					var collectId = $('.collect-select').val();
+					if(!collectId) {
+						layer.msg('请选择收藏夹');
+						return;
+					}
+					originaladdress = 'fav-' + collectId;
+				}
+			}
+			
+			var option = {
+				platform: platform,
+				originaladdress: originaladdress,
+				monitoring: $('.monitoring').val(),
+				taskname: $('.taskname').val()
 			};
+			
 			layer.load();
-			$.post("/admin/api/submitCollectData",option,function(data,status){
-				console.log(data);
-				if(data.resCode =="000001"){
+			$.post("/admin/api/submitCollectData", option, function(data,status){
+				if(data.resCode == "000001"){
 					layer.closeAll();
 					layer.alert(data.message,function(){
 						window.location.reload();
@@ -202,8 +350,8 @@
 					layer.alert(data.message);
 				}
 			})
-		})
-	}
+		});
+	});
 	function addCollect(){
 		$('.addCollect').click(function(){
 			layer.open({

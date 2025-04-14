@@ -136,7 +136,10 @@ async def fetch_user_post_videos(cookie: str, uid: str, output_file: str):
         print("stream-vault-ok")
 
 # 获取收藏夹名称及id
-async def fetch_user_collects(cookie: str, uid: str):
+async def fetch_user_collects(cookie: str):
+    # 设置日志级别为CRITICAL，只显示严重错误
+    logger.setLevel('CRITICAL')
+    
     kwargs = {
         "headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
@@ -161,10 +164,10 @@ async def fetch_user_collects(cookie: str, uid: str):
                     "collects_id": collect['collects_id'],
                     "collects_name": collect['collects_name']
                 })
-    print(json.dumps(all_collects, ensure_ascii=False))
+    print("stream-vault-start-collects",json.dumps(all_collects, ensure_ascii=False),"stream-vault-end-collects")
 
 # 获取收藏夹下的视频
-async def fetch_user_collects_videos(cookie: str, uid: str, cid: str, output_file: str):
+async def fetch_user_collects_videos(cookie: str, cid: str, output_file: str):
     kwargs = {
         "headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
@@ -178,10 +181,11 @@ async def fetch_user_collects_videos(cookie: str, uid: str, cid: str, output_fil
     setattr(handler, "enable_bark", False)
     all_videos = []
     async for collection_list in handler.fetch_user_collects_videos(
-        cid,
+        collects_id=cid,
         max_cursor=0,
         page_counts=10,
     ):
+        print(collection_list._to_raw())
         videos = collection_list._to_list()
         for video in videos:
             jsonres = {
@@ -197,6 +201,46 @@ async def fetch_user_collects_videos(cookie: str, uid: str, cid: str, output_fil
     
     if write_to_file(all_videos, output_file):
         print("stream-vault-ok")
+
+
+# 获取首页推荐
+async def fetch_user_feed_videos(cookie: str, sec_user_id: str, output_file: str):
+    print(sec_user_id)
+    kwargs = {
+        "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
+            "Referer": "https://www.douyin.com/",
+        },
+        "timeout": 10,
+        "cookie": cookie,
+        "proxies": {"http": None, "https": None},
+    }
+    handler = DouyinHandler(kwargs)
+    setattr(handler, "enable_bark", False)
+    all_videos = []
+    async for feed_list in handler.fetch_user_feed_videos(
+        sec_user_id,
+        max_cursor=0,
+        page_counts=10,
+        max_counts=20,
+    ):
+        print(feed_list._to_raw())
+        videos = feed_list._to_list()
+        for video in videos:
+            jsonres = {
+                "cover": [video["cover"]],
+                "aweme_id": video["aweme_id"],
+                "desc": video["desc"],
+                "video_play_addr": json.dumps(video["video_play_addr"]),
+                "nickname": video["nickname"],
+                "uid": video["uid"],
+                "create_time": video["create_time"]
+            }
+            all_videos.append(jsonres)
+    
+    if write_to_file(all_videos, output_file):
+        print("stream-vault-ok")
+
 
 # 主函数
 async def main():
@@ -224,14 +268,19 @@ async def main():
     #获取用户收藏夹
     fetch_user_collects_parser = subparsers.add_parser("fetch_user_collects", help="Fetch user_collects info from Douyin")
     fetch_user_collects_parser.add_argument("--cookie", type=str, required=True, help="Douyin cookie")
-    fetch_user_collects_parser.add_argument("--uid", type=str, required=True, help="User ID")
 
     #获取对应收藏夹的视频
     fetch_user_collects_videos_parser = subparsers.add_parser("fetch_user_collects_videos", help="Fetch user_collects_video info from Douyin")
     fetch_user_collects_videos_parser.add_argument("--cookie", type=str, required=True, help="Douyin cookie")
-    fetch_user_collects_videos_parser.add_argument("--uid", type=str, required=True, help="User ID")
     fetch_user_collects_videos_parser.add_argument("--cid", type=str, required=True, help="Collect ID")
     fetch_user_collects_videos_parser.add_argument("--output", type=str, required=True, help="Output file path")
+
+
+    # 获取首页推荐
+    fetch_user_feed_videos_parser = subparsers.add_parser("fetch_user_feed_videos", help="Fetch user_post info from Douyin")
+    fetch_user_feed_videos_parser.add_argument("--cookie", type=str, required=True, help="Douyin cookie")
+    fetch_user_feed_videos_parser.add_argument("--uid", type=str, required=True, help="User ID")
+    fetch_user_feed_videos_parser.add_argument("--output", type=str, required=True, help="Output file path")
 
     args = parser.parse_args()
     
@@ -242,9 +291,11 @@ async def main():
     if args.command == "fetch_user_post_videos":
         await fetch_user_post_videos(args.cookie, args.uid, args.output)
     if args.command == "fetch_user_collects":
-        await fetch_user_collects(args.cookie, args.uid)
+        await fetch_user_collects(args.cookie)
     if args.command == "fetch_user_collects_videos":
-        await fetch_user_collects_videos(args.cookie, args.uid, args.cid, args.output)
+        await fetch_user_collects_videos(args.cookie, args.cid, args.output)
+    if args.command == "fetch_user_feed_videos":
+        await fetch_user_feed_videos(args.cookie, args.uid, args.output)
 
 if __name__ == "__main__":
     asyncio.run(main())
