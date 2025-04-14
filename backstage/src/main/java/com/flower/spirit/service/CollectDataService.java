@@ -322,6 +322,13 @@ public class CollectDataService {
 					coveruri = cover.getString(0);
 				}
 				JSONArray jsonArray = aweme_detail.getJSONArray("video_play_addr");
+				Object videoPlayAddrObj = aweme_detail.get("video_play_addr");
+				if (!(videoPlayAddrObj instanceof JSONArray)) {
+				    continue;
+				}
+				if (jsonArray == null || jsonArray.isEmpty()) {
+				    continue;
+				}
 				String videoplay = "";
 				if(jsonArray.size() >=2) {
 					videoplay = jsonArray.getString(jsonArray.size()-1);

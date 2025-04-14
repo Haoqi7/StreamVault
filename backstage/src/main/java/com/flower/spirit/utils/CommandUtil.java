@@ -122,7 +122,7 @@ public class CommandUtil {
         if(out!= null) {
             cmd = cmd+"--output \""+out+"\" ";
          }	
-			/* System.out.println(cmd); */
+//		System.out.println(cmd); 
         String result = CommandUtil.commandos(cmd);
         return result;
     }
@@ -175,8 +175,4 @@ public class CommandUtil {
         }
     }
     
-    public static void main(String[] args) {
-		f2cmd("cookie", "aid", "fuc", "uid", "cid",null);
-	}
-
 }
