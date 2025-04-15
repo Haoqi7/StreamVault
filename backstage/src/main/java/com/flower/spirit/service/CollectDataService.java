@@ -319,7 +319,7 @@ public class CollectDataService {
 		logger.info("任务开始"+entity.getOriginaladdress());
 		JSONArray allDYData = this.getDYData(entity);
 //		System.out.println(allDYData.size());
-		
+		String risk="0";
 		if(allDYData!=null) {
 			entity.setCount(String.valueOf(allDYData.size()));
 			entity.setTaskstatus("已开始处理");
@@ -383,7 +383,12 @@ public class CollectDataService {
 			        	//内置下载器
 						dir = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
 						videofile = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
-						HttpUtil.downloadFileWithOkHttp(videoplay,  filename + ".mp4", videofile, header);
+						String downloadFileWithOkHttp = HttpUtil.downloadFileWithOkHttp(videoplay,  filename + ".mp4", videofile, header);
+						if(downloadFileWithOkHttp.equals("1")) {
+							logger.info(aweme_detail.toJSONString());
+							risk = "1";
+							break;
+						}
 			         }
 			         HttpUtil.downloadFileWithOkHttp(coveruri,  filename + ".jpg", dir2, header);
 			         VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId,desc, desc, "抖音", coverunaddr,  FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, "mp4"),videounrealaddr,entity.getOriginaladdress());
@@ -421,9 +426,10 @@ public class CollectDataService {
 		 		
 			}
 		}
-	
-
 		entity.setTaskstatus("处理完成");
+		if(risk.equals("1")) {
+			entity.setTaskstatus("可能触发风控本次已终止");
+		}
 		entity.setEndtime(DateUtils.formatDateTime(new Date()));
 		collectdDataDao.save(entity);
 		System.gc();

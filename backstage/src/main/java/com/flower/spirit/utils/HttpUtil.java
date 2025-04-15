@@ -539,14 +539,17 @@ public class HttpUtil {
         throw new IOException("下载失败，已重试多次: " + fileName);
     }
 
-    public static void downloadFileWithOkHttp(String urlStr, String fileName, String savePath,
+    public static String downloadFileWithOkHttp(String urlStr, String fileName, String savePath,
             Map<String, String> headers)
             throws IOException {
         if (urlStr == null || urlStr.isEmpty() || fileName == null || fileName.isEmpty() ||
                 savePath == null || savePath.isEmpty()) {
             throw new IllegalArgumentException("urlStr, fileName, savePath 不能为空");
         }
-
+        logger.info("----------------打印调试参数-------------------");
+        logger.info(urlStr);
+        logger.info(fileName);
+        logger.info("----------------打印调试参数-------------------");
         int maxRetries = 3;
         int retryCount = 0;
         long retryDelay = 5000;
@@ -582,12 +585,15 @@ public class HttpUtil {
 
                 Response response = client.newCall(requestBuilder.build()).execute();
                 if (!response.isSuccessful()) {
-                    throw new IOException("下载失败: " + response.code());
+                	//此处被风控了 更换另一个链接下载 如果另一个链接 还是这样 则终止本次下载
+                    logger.info("下载失败: " + response.code());
+                    logger.info(urlStr);
+                    return "1";
                 }
                 long fileLength = response.body().contentLength();
                 if (file.exists() && fileLength > 0 && file.length() == fileLength) {
                     logger.info("文件已存在且大小相同,跳过下载: {}", fileName);
-                    return;
+                    return "0";
                 }
 
                 try (BufferedInputStream bis = new BufferedInputStream(response.body().byteStream());
@@ -646,7 +652,7 @@ public class HttpUtil {
                     }
 
                     logger.info("文件下载完成: {}", fileName);
-                    return;
+                    return "0";
                 }
 
             } catch (SocketTimeoutException e) {
@@ -654,7 +660,7 @@ public class HttpUtil {
                 needRetry = true;
             } catch (IOException e) {
                 logger.error("下载出错: {}", e.getMessage(), e);
-                throw e;
+                return "1";
             } finally {
                 if (needRetry && file.exists()) {
                     file.delete();
@@ -670,7 +676,8 @@ public class HttpUtil {
             }
         }
 
-        throw new IOException("下载失败，已重试多次: " + fileName);
+        logger.error("下载失败，已重试多次: " + fileName);
+        return "1";
     }
 
 }

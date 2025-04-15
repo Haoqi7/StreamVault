@@ -32,7 +32,7 @@ public class BeanUtil{
                 field.setAccessible(true);
                 try {
                     //忽略null和空字符串
-                    if(field.get(source)!=null&&StringUtil.isNotBlank(field.get(source).toString()))
+                    if(field.get(source)!=null)
                     it.set(target, field.get(source));
                 } catch (IllegalAccessException e) {
                     

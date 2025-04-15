@@ -31,8 +31,8 @@ public class ConfigService {
 		
 		List<ConfigEntity> list =  configDao.findAll();
 		ConfigEntity configData = list.get(0);
-		BeanUtil.copyPropertiesIgnoreCase(configData, configEntity);
-		configDao.save(configEntity);
+		BeanUtil.copyPropertiesIgnoreCase(configEntity,configData);
+		configDao.save(configData);
 		Global.apptoken =configEntity.getApptoken();
 		if(configEntity.getGeneratenfo()!= null && configEntity.getGeneratenfo().equals("1")) {
 			Global.getGeneratenfo =  true;

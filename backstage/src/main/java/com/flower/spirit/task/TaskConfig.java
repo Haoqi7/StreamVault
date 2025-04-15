@@ -1,5 +1,6 @@
 package com.flower.spirit.task;
 
+import java.util.Date;
 import java.util.concurrent.*;
 
 import org.slf4j.Logger;
@@ -75,7 +76,9 @@ public class TaskConfig implements SchedulingConfigurer {
                     logger.error("读取配置出错，继续使用上一次的定时器规则：{}", cachedCron, e);
                 }
             }
-            return new CronTrigger(cachedCron).nextExecutionTime(triggerContext);
+            Date nextExecutionTime = new CronTrigger(cachedCron).nextExecutionTime(triggerContext);
+            logger.info("下一次定时任务执行时间为：{}", nextExecutionTime);
+            return nextExecutionTime;
         };
 
         taskRegistrar.addTriggerTask(task, trigger);

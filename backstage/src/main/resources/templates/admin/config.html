@@ -419,28 +419,16 @@
               option['apptoken'] = apptoken;
               option['openprocesshistory'] = openprocesshistory;
               option['generatenfo'] = generatenfo;
-              if(taskcron!=""){
-                  option['taskcron'] = taskcron;
-              }
+              option['taskcron'] = taskcron;
               var agenttype = $(".agenttype").val();
               var agentaddress = $(".agentaddress").val();
               var agentport = $(".agentport").val();
               var agentaccpass = $(".agentaccpass").val();
-              if(agenttype!=""){
-                  option['agenttype'] = agenttype;
-              }
-              if(agentaddress!=""){
-                  option['agentaddress'] = agentaddress;
-              }
-              if(agentport!=""){
-                  option['agentport'] = agentport;
-              }
-              if(agentaccpass!=""){
-                  option['agentaccpass'] = agentaccpass;
-              }
-              if(userAgent!=""){
-                  option['useragent'] = userAgent;
-              }
+              option['agenttype'] = agenttype;
+              option['agentaddress'] = agentaddress;
+              option['agentport'] = agentport;
+              option['agentaccpass'] = agentaccpass;
+              option['useragent'] = userAgent;
               $.post("/admin/api/saveConfig",option,function(data,status){
                   if(data.resCode =="000001"){
                       layer.closeAll();
