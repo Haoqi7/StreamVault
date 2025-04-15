@@ -313,7 +313,7 @@ public class AdminController {
 	 */
 	@PostMapping(value = "/submitCollectData")
 	public AjaxEntity submitCollectData(CollectDataEntity collectDataEntity,HttpServletRequest request) {
-		return collectDataService.submitCollectData(collectDataEntity);
+		return collectDataService.submitCollectData(collectDataEntity,"N");
 	}
 	//updateTikTokConfig
 	/**

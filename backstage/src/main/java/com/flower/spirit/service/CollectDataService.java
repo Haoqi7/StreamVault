@@ -52,7 +52,7 @@ import com.flower.spirit.utils.XbogusUtil;
 public class CollectDataService {
 	
 	
-	private ExecutorService exec = Executors.newFixedThreadPool(1);
+	private ExecutorService exec  = Executors.newSingleThreadExecutor(); 
 	
 	@Autowired
 	private CollectdDataDao collectdDataDao;
@@ -92,7 +92,7 @@ public class CollectDataService {
     		//开始执行
     		//删除以前的 记录
     		collectDataDetailService.deleteDataid(data.getId());
-    		this.submitCollectData(data);
+    		this.submitCollectData(data,"Y");
     	}
 		
     }
@@ -133,7 +133,7 @@ public class CollectDataService {
 	 * @param collectDataEntity
 	 * @return
 	 */
-	public AjaxEntity submitCollectData(CollectDataEntity collectDataEntity) {
+	public AjaxEntity submitCollectData(CollectDataEntity collectDataEntity,String monitor) {
 		if(null != collectDataEntity.getPlatform() && collectDataEntity.getPlatform().equals("哔哩") ) {
 			//必须授权ck
 			if(null == Global.bilicookies ||Global.bilicookies.equals("")) {
@@ -161,14 +161,22 @@ public class CollectDataService {
 				collectDataEntity.setCarriedout("0"); //归零
 				CollectDataEntity save = collectdDataDao.save(collectDataEntity);
 				//提交线程
-				exec.execute(() -> {
+				if(monitor.equals("N")) {
+					exec.execute(() -> {
+						try {
+							this.createBiliData(save, jsonArray,namepath);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					});
+				}else {
 					try {
 						this.createBiliData(save, jsonArray,namepath);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				});
-				return new AjaxEntity(Global.ajax_success, "已提交线程处理,如填错但线程已开启请重启容器解决", null);
+				}
+				return new AjaxEntity(Global.ajax_success, "已提交至线程,如填错请删除当前任务并重启容器解决", null);
 			}
 			return new AjaxEntity(Global.ajax_uri_error, "数据为空 请检查收藏ID", null);
 			
@@ -188,14 +196,22 @@ public class CollectDataService {
 					CollectDataEntity save = collectdDataDao.save(collectDataEntity);
 					//提交线程
 //					this.createDyData(save);
-					exec.execute(() -> {
+					if(monitor.equals("N")) {
+						exec.execute(() -> {
+							try {
+								this.createDyData(save);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						});
+					}else {
 						try {
 							this.createDyData(save);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-					});
-					return new AjaxEntity(Global.ajax_success, "已提交线程处理,如填错但线程已开启请重启容器解决", null);
+					}
+					return new AjaxEntity(Global.ajax_success, "已提交至线程,如填错请删除当前任务并重启容器解决", null);
 					
 				} catch (Exception e) {
 					logger.error("异常"+e.getMessage());
