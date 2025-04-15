@@ -383,9 +383,9 @@ public class CollectDataService {
 			        	//内置下载器
 						dir = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
 						videofile = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, null);
-						HttpUtil.downloadFile(videoplay,  filename + ".mp4", videofile, header);
+						HttpUtil.downloadFileWithOkHttp(videoplay,  filename + ".mp4", videofile, header);
 			         }
-			         HttpUtil.downloadFile(coveruri,  filename + ".jpg", dir2, header);
+			         HttpUtil.downloadFileWithOkHttp(coveruri,  filename + ".jpg", dir2, header);
 			         VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId,desc, desc, "抖音", coverunaddr,  FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, "mp4"),videounrealaddr,entity.getOriginaladdress());
 			         videoDataDao.save(videoDataEntity);
 			         

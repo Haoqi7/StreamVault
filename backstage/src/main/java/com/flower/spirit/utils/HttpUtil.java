@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
@@ -33,14 +34,17 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 /**
  * 这个方法中有大量遗弃方法不再调用
  */
 @SuppressWarnings("deprecation")
 public class HttpUtil {
-	
-	
-    private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class); 
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
 
     /**
      * web 端
@@ -284,7 +288,7 @@ public class HttpUtil {
             inputStream = conn.getInputStream();
             outputStream = new FileOutputStream(file);
             // 使用缓冲流复制数据
-            byte[] buffer = new byte[8192]; // 8KB 缓冲区
+            byte[] buffer = new byte[32 * 1024]; // 32KB 缓冲区
             int bytesRead;
             long totalRead = 0;
             long lastLogTime = System.currentTimeMillis();
@@ -432,7 +436,7 @@ public class HttpUtil {
     public static void downloadFile(String urlStr, String fileName, String savePath, Map<String, String> headers)
             throws IOException {
         if (urlStr == null || urlStr.isEmpty() || fileName == null || fileName.isEmpty() ||
-            savePath == null || savePath.isEmpty()) {
+                savePath == null || savePath.isEmpty()) {
             throw new IllegalArgumentException("urlStr, fileName, savePath 不能为空");
         }
         int maxRetries = 3;
@@ -510,9 +514,12 @@ public class HttpUtil {
                 throw e; // 非超时直接抛出
             } finally {
                 try {
-                    if (bos != null) bos.close();
-                    if (bis != null) bis.close();
-                    if (conn != null) conn.disconnect();
+                    if (bos != null)
+                        bos.close();
+                    if (bis != null)
+                        bis.close();
+                    if (conn != null)
+                        conn.disconnect();
                 } catch (IOException e) {
                     logger.error("关闭资源时出错: {}", e.getMessage(), e);
                 }
@@ -529,6 +536,140 @@ public class HttpUtil {
                 }
             }
         }
+        throw new IOException("下载失败，已重试多次: " + fileName);
+    }
+
+    public static void downloadFileWithOkHttp(String urlStr, String fileName, String savePath,
+            Map<String, String> headers)
+            throws IOException {
+        if (urlStr == null || urlStr.isEmpty() || fileName == null || fileName.isEmpty() ||
+                savePath == null || savePath.isEmpty()) {
+            throw new IllegalArgumentException("urlStr, fileName, savePath 不能为空");
+        }
+
+        int maxRetries = 3;
+        int retryCount = 0;
+        long retryDelay = 5000;
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
+                .build();
+
+        while (retryCount < maxRetries) {
+            File saveDir = new File(savePath);
+            File file = new File(saveDir, fileName);
+            long downloaded = 0;
+            long lastReadTime = System.currentTimeMillis();
+            boolean needRetry = false;
+
+            try {
+                if (!saveDir.exists()) {
+                    saveDir.mkdirs();
+                }
+
+                Request.Builder requestBuilder = new Request.Builder()
+                        .url(urlStr)
+                        .addHeader("Connection", "keep-alive");
+
+                if (headers != null) {
+                    for (Map.Entry<String, String> entry : headers.entrySet()) {
+                        requestBuilder.addHeader(entry.getKey(), entry.getValue());
+                    }
+                }
+
+                Response response = client.newCall(requestBuilder.build()).execute();
+                if (!response.isSuccessful()) {
+                    throw new IOException("下载失败: " + response.code());
+                }
+                long fileLength = response.body().contentLength();
+                if (file.exists() && fileLength > 0 && file.length() == fileLength) {
+                    logger.info("文件已存在且大小相同,跳过下载: {}", fileName);
+                    return;
+                }
+
+                try (BufferedInputStream bis = new BufferedInputStream(response.body().byteStream());
+                        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file))) {
+
+                    byte[] buffer = new byte[16 * 1024];
+                    int len;
+                    long startTime = System.currentTimeMillis();
+                    long lastProgressTime = startTime;
+                    long lastBytesRead = 0;
+
+                    while ((len = bis.read(buffer)) != -1) {
+                        bos.write(buffer, 0, len);
+                        downloaded += len;
+                        long currentTime = System.currentTimeMillis();
+                        lastReadTime = currentTime;
+
+                        if (fileLength > 0 && currentTime - lastProgressTime >= 15000) {
+                            int progress = (int) (downloaded * 100 / fileLength);
+
+                            // 计算平均速度
+                            double averageSpeed = (downloaded / 1024.0) /
+                                    Math.max(1, (currentTime - startTime) / 1000.0);
+
+                            // 计算实时速度
+                            double instantSpeed = ((downloaded - lastBytesRead) / 1024.0) /
+                                    Math.max(1, (currentTime - lastProgressTime) / 1000.0);
+
+                            // 计算剩余时间
+                            long remainingBytes = fileLength - downloaded;
+                            long remainingTime = averageSpeed > 0 ? (long) (remainingBytes / (averageSpeed * 1024)) : 0;
+
+                            logger.info("下载进度: {}%, 平均速度: {} KB/s, 实时速度: {} KB/s, 剩余时间: {} 秒, 文件: {}",
+                                    progress,
+                                    String.format("%.2f", averageSpeed),
+                                    String.format("%.2f", instantSpeed),
+                                    remainingTime,
+                                    fileName);
+
+                            lastProgressTime = currentTime;
+                            lastBytesRead = downloaded;
+
+                            if (instantSpeed < averageSpeed * 0.3 && averageSpeed > 0) {
+                                throw new SocketTimeoutException("下载速度严重下降");
+                            }
+                        }
+
+                        if (currentTime - lastReadTime > 30000) {
+                            throw new SocketTimeoutException("读取超时");
+                        }
+                    }
+
+                    bos.flush();
+                    if (fileLength > 0 && file.length() != fileLength) {
+                        throw new IOException("文件下载不完整");
+                    }
+
+                    logger.info("文件下载完成: {}", fileName);
+                    return;
+                }
+
+            } catch (SocketTimeoutException e) {
+                logger.warn("下载超时(第 {} 次重试): {}", retryCount + 1, fileName);
+                needRetry = true;
+            } catch (IOException e) {
+                logger.error("下载出错: {}", e.getMessage(), e);
+                throw e;
+            } finally {
+                if (needRetry && file.exists()) {
+                    file.delete();
+                }
+            }
+
+            retryCount++;
+            if (retryCount < maxRetries) {
+                try {
+                    Thread.sleep(retryDelay);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        }
+
         throw new IOException("下载失败，已重试多次: " + fileName);
     }
 

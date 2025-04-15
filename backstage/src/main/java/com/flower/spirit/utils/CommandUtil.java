@@ -108,7 +108,7 @@ public class CommandUtil {
 //        String cmd = "/opt/venv/bin/python3 /home/app/script/douyin.py --cookie \"" + cookie + "\" --aweme_id \""+ aid + "\"";
         String cmd ="/opt/venv/bin/python3 ";
         cmd=cmd+"/home/app/script/douyin.py ";
-        cmd=cmd+fuc+" ";
+    	cmd=cmd+fuc+" ";
         cmd = cmd+"--cookie \""+cookie+"\""+" ";
         if(aid!= null) {
         	cmd = cmd+"--aweme_id \""+aid+"\""+" ";

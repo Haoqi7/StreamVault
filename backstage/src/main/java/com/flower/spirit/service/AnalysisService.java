@@ -547,18 +547,18 @@ public class AnalysisService {
 					Aria2Util.createDouparameter(playApi, FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), true, filename, null, null),
 							filename + ".mp4", Global.a2_token, cookie));
 		}
+		HashMap<String,String> header = new HashMap<String, String>();
+		header.put("User-Agent", DouUtil.ua);
+		header.put("cookie", Global.tiktokCookie);
 		if (Global.downtype.equals("http")) {
 			// 内置下载器
-			HashMap<String,String> header = new HashMap<String, String>();
-			header.put("User-Agent", DouUtil.ua);
-			header.put("cookie", Global.tiktokCookie);
-			
 			videofile = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
-			HttpUtil.downloadFile(playApi,  filename + ".mp4", videofile, header);
+			HttpUtil.downloadFileWithOkHttp(playApi,  filename + ".mp4", videofile, header);
 		}
 		
 		String coverdir = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
-		HttpUtil.downLoadFromUrl(cover, coverfile,coverdir);
+//		HttpUtil.downloadFileWithOkHttp(cover, coverfile,coverdir);
+		HttpUtil.downloadFileWithOkHttp(cover,  coverfile, coverdir, header);
 		// 推送完成后建立历史资料 此处注意 a2 地址需要与spring boot 一致否则 无法打开视频
 		VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId, desc, desc, platform, coverunaddr, videofile,
 				videounrealaddr, originaladdress);
