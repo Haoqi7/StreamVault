@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.io.File;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -148,7 +148,12 @@ public class CollectDataService {
 			String namepath = object.getJSONObject("data").getString("title");
 			String temporaryDirectory =FileUtil.generateDir(true, Global.platform.bilibili.name(), false, null, namepath, null);
 			if(Global.getGeneratenfo) {
-				EmbyMetadataGenerator.createFavoriteNfo(infobili, temporaryDirectory);
+				//防止重复写问题
+				if (!(new File(temporaryDirectory + File.separator + "tvshow.nfo").exists())) {
+				    // 文件不存在
+					EmbyMetadataGenerator.createFavoriteNfo(infobili, temporaryDirectory);
+				}
+				
 			}
 			String api = "https://api.bilibili.com/x/v3/fav/resource/ids?media_id="+collectDataEntity.getOriginaladdress()+"&platform=web";
 			String httpGetBili = HttpUtil.httpGetBili(api, "UTF-8", Global.bilicookies);
@@ -313,7 +318,10 @@ public class CollectDataService {
 		//生成tvshow.nfo元数据
 		String temporaryDirectory =FileUtil.generateDir(true, Global.platform.douyin.name(), false, null, taskname, null);
 		if(Global.getGeneratenfo) {
-			EmbyMetadataGenerator.createFavoriteDouNfo(taskname, temporaryDirectory);
+			if (!(new File(temporaryDirectory + File.separator + "tvshow.nfo").exists())) {
+				EmbyMetadataGenerator.createFavoriteDouNfo(taskname, temporaryDirectory);
+			}
+			
 		}
 		
 		logger.info("任务开始"+entity.getOriginaladdress());
@@ -406,11 +414,12 @@ public class CollectDataService {
 						EmbyMetadataGenerator.createFavoriteEpisodeDouNfo(map, dir, i+1,temporaryDirectory);
 					 }
 			 		 logger.info("下载流程结束");
+			 		 Thread.sleep(5000);
+			 		 logger.info("等待五秒在继续下一个");
 				}
 				if(status.equals("")) {
 					status =findByVideoid.size() == 0?"已完成":"已完成(未下载已存在)";
 				}
-		 		Thread.sleep(2500);
 			    CollectDataDetailEntity collectDataDetailEntity = new CollectDataDetailEntity();
 			    collectDataDetailEntity.setVideoname(desc);
 			    collectDataDetailEntity.setDataid(entity.getId());
@@ -531,6 +540,5 @@ public class CollectDataService {
         String content = f2cmd.substring(startIndex, endIndex).trim();
 		return new AjaxEntity(Global.ajax_success,  content, "请求成功");
 	}
-
 
 }
