@@ -318,7 +318,7 @@ public class CollectDataService {
 		
 		logger.info("任务开始"+entity.getOriginaladdress());
 		JSONArray allDYData = this.getDYData(entity);
-		System.out.println(allDYData.size());
+//		System.out.println(allDYData.size());
 		
 		if(allDYData!=null) {
 			entity.setCount(String.valueOf(allDYData.size()));
@@ -339,6 +339,20 @@ public class CollectDataService {
 				}
 				JSONArray jsonArray = aweme_detail.getJSONArray("video_play_addr");
 				if (jsonArray == null || jsonArray.isEmpty()) {
+					//不支持
+					status ="图集不支持下载";
+			 		Thread.sleep(2500);
+				    CollectDataDetailEntity collectDataDetailEntity = new CollectDataDetailEntity();
+				    collectDataDetailEntity.setDataid(entity.getId());
+				    collectDataDetailEntity.setVideoid(awemeId);
+				    collectDataDetailEntity.setOriginaladdress(awemeId);
+				    collectDataDetailEntity.setStatus(status);
+				    collectDataDetailEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
+				    collectDataDetailService.save(collectDataDetailEntity);
+				    //修改主体
+				    String carriedout = entity.getCarriedout() == null ?"1":String.valueOf(Integer.parseInt(entity.getCarriedout())+1);
+				    entity.setCarriedout(carriedout);
+				    collectdDataDao.save(entity);
 				    continue;
 				}
 				String videoplay = "";

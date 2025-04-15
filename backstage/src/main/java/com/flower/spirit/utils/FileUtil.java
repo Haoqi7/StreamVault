@@ -319,7 +319,7 @@ public class FileUtil {
         String line;
         while ((line = reader.readLine()) != null) {
             jsonContent.append(line);
-            System.out.println(line);
+//            System.out.println(line);
         }
         reader.close();
         return JSON.parseArray(jsonContent.toString());
