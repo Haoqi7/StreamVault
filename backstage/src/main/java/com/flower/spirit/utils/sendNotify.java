@@ -91,9 +91,6 @@ public class sendNotify {
         try {
             String url = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + config.getQywxkey();
 
-            Map<String, Object> markdown = new HashMap<>();
-            markdown.put("content", "xxxx");
-
             Map<String, Object> body = new HashMap<>();
             Map<String, Object> text = new HashMap<>();
             text.put("content", title + "\n" + content);
@@ -170,32 +167,11 @@ public class sendNotify {
 
         try {
             String url = "https://open.feishu.cn/open-apis/bot/v2/hook/" + config.getFeishuKey();
-
-            Map<String, Object> card = new HashMap<>();
-            card.put("header", new HashMap<String, Object>() {
-                {
-                    put("title", new HashMap<String, Object>() {
-                        {
-                            put("content", title);
-                            put("tag", "plain_text");
-                        }
-                    });
-                }
-            });
-
-            card.put("elements", new Object[] {
-                    new HashMap<String, Object>() {
-                        {
-                            put("tag", "markdown");
-                            put("content", content);
-                        }
-                    }
-            });
-
             Map<String, Object> body = new HashMap<>();
-            body.put("msg_type", "interactive");
-            body.put("card", card);
-
+            Map<String, Object> text = new HashMap<>();
+            text.put("content", title + "\n" + content);
+            body.put("msgtype", "text");
+            body.put("text", text);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
