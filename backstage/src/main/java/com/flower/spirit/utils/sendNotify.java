@@ -169,9 +169,9 @@ public class sendNotify {
             String url = "https://open.feishu.cn/open-apis/bot/v2/hook/" + config.getFeishuKey();
             Map<String, Object> body = new HashMap<>();
             Map<String, Object> text = new HashMap<>();
-            text.put("content", title + "\n" + content);
-            body.put("msgtype", "text");
-            body.put("text", text);
+            text.put("text", title + "\n" + content);
+            body.put("msg_type", "text");
+            body.put("content", text);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 

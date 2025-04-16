@@ -97,6 +97,8 @@ public class Global {
 	
 	public static String useragent = null;
 	
+	public static String readonlytoken = null;
+	
 	public static NotifyConfigEntity notify;
 
 	@Value("${file.save}")

@@ -30,6 +30,8 @@ public class ConfigEntity implements Serializable {
 	
 	private String apptoken;
 	
+	private String readonlytoken;
+	
 	private String ipauth;
 	
 	private String openprocesshistory;
@@ -134,6 +136,14 @@ public class ConfigEntity implements Serializable {
 
 	public void setUseragent(String useragent) {
 		this.useragent = useragent;
+	}
+
+	public String getReadonlytoken() {
+		return readonlytoken;
+	}
+
+	public void setReadonlytoken(String readonlytoken) {
+		this.readonlytoken = readonlytoken;
 	}
 
 	

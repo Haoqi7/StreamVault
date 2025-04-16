@@ -50,6 +50,12 @@ public class ConfigService {
 		}else {
 			Global.useragent = null;
 		}
+		if(null!=configEntity.getReadonlytoken() && !"".equals(configEntity.getReadonlytoken())) {
+			Global.readonlytoken = configEntity.getReadonlytoken();
+		}else {
+			Global.readonlytoken = null;
+		}
+		
 		return new AjaxEntity(Global.ajax_option_success, "操作成功", configEntity);
 	}
 

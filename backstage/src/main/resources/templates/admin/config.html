@@ -66,31 +66,49 @@
 
                                 <form action="#" method="post" onsubmit="return false;">
                                     <input type="hidden" id="appid" class="appid" th:value="${config.id}" />
-                                    <div class="form-group">
-                                        <label>App token</label>
-                                        <input class="form-control" type="text" id="apptoken" name="apptoken" placeholder="apptoken" th:value="${config.apptoken}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>ip授权</label>
-                                        <input class="form-control" type="text" id="ipauth" name="ipauth" placeholder="目前没做">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>开启提交记录</label>
-                                            <select id="openprocesshistory" class="form-control openprocesshistory" name="openprocesshistory">
-                                                <option value="0"  th:selected="${config.openprocesshistory} eq '0'">否</option>
-                                                <option value="1"  th:selected="${config.openprocesshistory} eq '1'">是</option>
-                                            </select>
-                                    </div>
-                                     <div class="form-group">
-                                        <label>nfo元数据生成(测试)</label>
-                                            <select id="generatenfo" class="form-control openprocesshistory" name="generatenfo">
-                                                <option value="0"  th:selected="${config.generatenfo} eq '0'">否</option>
-                                                <option value="1"  th:selected="${config.generatenfo} eq '1'">是</option>
-                                            </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>监控定时器cron</label>
-                                        <input class="form-control" type="text" id="taskcron" name="taskcron" placeholder="默认0 0 0/3 * * ?  三小时一次" th:value="${config.taskcron}">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>App token</label>
+                                                <input class="form-control" type="text" id="apptoken" name="apptoken" placeholder="apptoken" th:value="${config.apptoken}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>只读Token</label>
+                                                <input class="form-control" type="text" id="readonlytoken" name="readonlytoken" placeholder="不能提交单链接只能访问" th:value="${config.readonlytoken}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>ip授权</label>
+                                                <input class="form-control" type="text" id="ipauth" name="ipauth" placeholder="目前没做">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>开启提交记录</label>
+                                                <select id="openprocesshistory" class="form-control openprocesshistory" name="openprocesshistory">
+                                                    <option value="0" th:selected="${config.openprocesshistory} eq '0'">否</option>
+                                                    <option value="1" th:selected="${config.openprocesshistory} eq '1'">是</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>nfo元数据生成(测试)</label>
+                                                <select id="generatenfo" class="form-control openprocesshistory" name="generatenfo">
+                                                    <option value="0" th:selected="${config.generatenfo} eq '0'">否</option>
+                                                    <option value="1" th:selected="${config.generatenfo} eq '1'">是</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>监控定时器cron</label>
+                                                <input class="form-control" type="text" id="taskcron" name="taskcron" placeholder="默认0 0 0/3 * * ?  三小时一次" th:value="${config.taskcron}">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="form-group">
                                         <label>userAgent</label>
@@ -240,7 +258,7 @@
                                         <select class="form-control" id="notifyChannel" onchange="changeChannel()">
                                             <option value="qywx">企业微信</option>
                                             <option value="dingding">钉钉(未测试)</option>
-                                            <option value="feishu">飞书(未测试)</option>
+                                            <option value="feishu">飞书</option>
                                         </select>
                                     </div>
                                     <div class="form-group qywx-config">
@@ -261,7 +279,7 @@
                                     <button type="button" class="btn btn-primary" onclick="saveNotifyConfig()">保存配置</button>
                                     <div class="form-group" >
                                     	<br/>该功能正在逐步适配中 目前已经支持单链接提交下载完成之后的推送通知<br/>
-                                    	目前仅测试了企业微信WebHook 群机器人 其他为测试<br/>
+                                    	目前仅测试了企业微信WebHook/飞书 群机器人 其他为测试<br/>
                                     	后续会添加收藏监控变动情况 cookie存活情况等<br/>
                                     	本处通知暂时不考虑aria2异步下载器中是否下载成功<br/>
                                     	本处通知优先适配HTTP下载的通知<br/>
@@ -424,11 +442,13 @@
               var agentaddress = $(".agentaddress").val();
               var agentport = $(".agentport").val();
               var agentaccpass = $(".agentaccpass").val();
+              var readonlytoken =$("#readonlytoken").val();
               option['agenttype'] = agenttype;
               option['agentaddress'] = agentaddress;
               option['agentport'] = agentport;
               option['agentaccpass'] = agentaccpass;
               option['useragent'] = userAgent;
+          c
               $.post("/admin/api/saveConfig",option,function(data,status){
                   if(data.resCode =="000001"){
                       layer.closeAll();
@@ -585,6 +605,7 @@
             if(userAgent!=""){
                 option['useragent'] = userAgent;
             }
+            option['readonlytoken'] = readonlytoken;
             $.post("/admin/api/saveConfig",option,function(data,status){
                 if(data.resCode =="000001"){
                     layer.closeAll();
@@ -606,11 +627,6 @@
         $(".qywx-config, .dingding-config, .feishu-config").hide();
         $("." + channel + "-config").show();
     }
-
-    // // 页面加载完成后自动获取配置
-    // $(document).ready(function() {
-    //     getNotifyConfig();
-    // });
 </script>
 </body>
 </html>

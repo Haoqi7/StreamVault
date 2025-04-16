@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -424,6 +426,13 @@ public class BiliUtil {
 
 	public static String findUrlAidOrBid(String url) {
 		String replace = "";
+		Pattern pattern = Pattern.compile("/video/(BV\\w+|av\\d+)", Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(url);
+		if (matcher.find()) {
+            String videoId = matcher.group(1);
+            return videoId;
+        }
+		//下边是旧代码  后续移除 理论无效
 		if (url.contains("http")) {
 			replace = url.replaceAll("http://", "").replaceAll("https://", "").replace("www.bilibili.com/video/", "");
 			int indexOf = replace.indexOf("/");
@@ -489,10 +498,7 @@ public class BiliUtil {
 	}
 
 	public static void main(String[] args) throws Exception {
-		// video/BV1mz4y1q7Pb
-		/// video/BV1qM4y1w716
-
-		String a2path = FileUtil.createTemporaryDirectory(Global.platform.bilibili.name(), Global.down_path);
-//		System.out.println(a2path);
+		String urlAidOrBid = findUrlAidOrBid("https://www.bilibili.com/video/BV19GoHYYEQH?spm_id_from=333.1007.tianma.6-2-20.click");
+		
 	}
 }

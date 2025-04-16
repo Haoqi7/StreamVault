@@ -87,6 +87,9 @@ public class AppConfig {
 		if(data.getGeneratenfo()!= null && data.getGeneratenfo().equals("1")) {
 			Global.getGeneratenfo =  true;
 		}
+		if(null!=data.getReadonlytoken() && !"".equals(data.getReadonlytoken())) {
+			Global.readonlytoken = data.getReadonlytoken();
+		}
 		if (data.getAgenttype() != null && !data.getAgenttype().trim().isEmpty() &&
 			    data.getAgentaddress() != null && !data.getAgentaddress().trim().isEmpty() &&
 			    data.getAgentport() != null && !data.getAgentport().trim().isEmpty()) {

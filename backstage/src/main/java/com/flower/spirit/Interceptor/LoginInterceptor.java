@@ -11,51 +11,64 @@ import org.springframework.web.servlet.ModelAndView;
 import com.flower.spirit.config.Global;
 import com.flower.spirit.entity.UserEntity;
 
+/**
+ * 
+ * <p>
+ * Title: LoginInterceptor
+ * </p>
+ * 
+ * <p>
+ * Description:登录拦截器
+ * </p>
+ * 
+ * @author QingFeng
+ * 
+ * @date 2020年8月14日
+ * 
+ */
+public class LoginInterceptor implements HandlerInterceptor {
 
+    private Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
 
+    @Override
+    public boolean preHandle(HttpServletRequest request,
+            HttpServletResponse response, Object handler) throws Exception {
 
-/**  
+        String uri = request.getRequestURI().toString();
+        UserEntity user = (UserEntity) request.getSession().getAttribute(Global.user_session_key);
 
-* <p>Title: LoginInterceptor</p>  
+        // 如果用户已登录，允许访问所有路径
+        if (user != null) {
+            return true;
+        }
 
-* <p>Description:登录拦截器 </p>  
+        // 资源路径：未登录时需要验证token
+        if (uri.startsWith("/resources") || uri.startsWith("/cos")) {
+            String apptoken = request.getParameter("apptoken");
+            // token为空或token不匹配时拒绝访问
+            if (apptoken == null || !(Global.apptoken.equals(apptoken) || Global.readonlytoken.equals(apptoken))) {
+                logger.warn("资源访问未授权: {}", uri);
+                response.sendRedirect("/admin/login");
+                return false;
+            }
+            return true;
+        }
+        // 其他路径：必须用户登录
+        else {
+            logger.warn("需要登录: {}", uri);
+            response.sendRedirect("/admin/login");
+            return false;
+        }
+    }
 
-* @author QingFeng  
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+            ModelAndView modelAndView) throws Exception {
+    }
 
-* @date 2020年8月14日  
-
-*/  
-public class LoginInterceptor implements HandlerInterceptor  {
-	
-	 private Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
-	
-	 @Override
-     public boolean preHandle(HttpServletRequest request,
-                              HttpServletResponse response, Object handler) throws Exception {
-
-         UserEntity user = (UserEntity)request.getSession().getAttribute(Global.user_session_key);
-         if(request.getRequestURI().toString().startsWith("/resources") || request.getRequestURI().toString().startsWith("/cos")){
-             String apptoken = request.getParameter("apptoken");
-             if (user == null && null ==apptoken && !Global.apptoken.equals(apptoken))  {
-                 response.sendRedirect("/admin/login");
-                 return false;
-             }
-         }else{
-             if (user == null)  {
-                 response.sendRedirect("/admin/login");
-                 return false;
-             }
-         }
-
-         return true;
-     }
-
-     @Override
-     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-     }
-
-     @Override
-     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-     }
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+            throws Exception {
+    }
 
 }
