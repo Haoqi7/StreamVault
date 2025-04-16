@@ -453,7 +453,7 @@
               option['agentport'] = agentport;
               option['agentaccpass'] = agentaccpass;
               option['useragent'] = userAgent;
-          c
+              option['readonlytoken'] = readonlytoken;
               $.post("/admin/api/saveConfig",option,function(data,status){
                   if(data.resCode =="000001"){
                       layer.closeAll();
@@ -610,6 +610,7 @@
             if(userAgent!=""){
                 option['useragent'] = userAgent;
             }
+            var readonlytoken =$("#readonlytoken").val();
             option['readonlytoken'] = readonlytoken;
             $.post("/admin/api/saveConfig",option,function(data,status){
                 if(data.resCode =="000001"){
