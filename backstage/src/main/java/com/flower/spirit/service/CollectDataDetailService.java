@@ -55,4 +55,8 @@ public class CollectDataDetailService {
 		collectdDataDetailDao.deleteByDataid(dataid);
 	}
 
+	public CollectDataDetailEntity findByVideoAndDataid(String videoid, Integer id) {
+		return collectdDataDetailDao.findByVideoidAndDataid(videoid,Integer.toString(id));
+	}
+
 }

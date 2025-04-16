@@ -45,6 +45,10 @@ public class CollectDataEntity   extends DataEntity<CollectDataEntity> implement
 	private String originaladdress;
 	
 	private String monitoring;   //是否监控
+	
+	private String lastCheckTime;
+	
+	private String lastid;
 
 	public Integer getId() {
 		return id;
@@ -133,6 +137,22 @@ public class CollectDataEntity   extends DataEntity<CollectDataEntity> implement
 
 	public void setMonitoring(String monitoring) {
 		this.monitoring = monitoring;
+	}
+
+	public String getLastCheckTime() {
+		return lastCheckTime;
+	}
+
+	public void setLastCheckTime(String lastCheckTime) {
+		this.lastCheckTime = lastCheckTime;
+	}
+
+	public String getLastid() {
+		return lastid;
+	}
+
+	public void setLastid(String lastid) {
+		this.lastid = lastid;
 	}
 	
 	
