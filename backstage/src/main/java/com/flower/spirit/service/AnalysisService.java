@@ -229,39 +229,39 @@ public class AnalysisService {
 		try {
 			String dirtemp = FileUtil.generateDir(true, Global.platform.youtube.name(), true, null, null, null);
 			String exec = YtDlpUtil.exec(youtube,dirtemp,"youtube");
-			
+			List<JSONObject> jsonObjects = JsonChunkParser.parseJsonObjects(exec);
+			for(int i =0;i<jsonObjects.size();i++) {
+				JSONObject parseObject = jsonObjects.get(i);
+				String filename = parseObject.getString("filename");
+				//先处理文件名
+//				System.out.println(filename);
+				String baseName = FilenameUtils.getBaseName(filename);
+				String baseNameNo = baseName.replaceAll("_", " ");
+				String filedoc = new File(filename).getParent();
+				String dir = FileUtil.generateDir(true, Global.platform.youtube.name(), true, baseName, null, null);
+				String namefix = new File(new File(filename).getParent()).getName();  //先这个搞
+				String dircos = FileUtil.generateDir(false, Global.platform.youtube.name(), true, new File(new File(filename).getParent()).getName(), null, null);
+//				System.out.println(exec);
+//				String title = parseObject.getString("title");
+				String description = parseObject.getString("description");
+				String display_id = parseObject.getString("display_id");
+				String uploader = parseObject.getString("uploader");
+				String uploader_url = parseObject.getString("uploader_url");
+				String upload_date = parseObject.getString("upload_date");
+				String name = new File(filename).getName();
 
-			//已经下载完成了
-			JSONObject parseObject = JSONObject.parseObject(exec);
-			String filename = parseObject.getString("filename");
-			//先处理文件名
-//			System.out.println(filename);
-			String baseName = FilenameUtils.getBaseName(filename);
-			String baseNameNo = baseName.replaceAll("_", " ");
-			String filedoc = new File(filename).getParent();
-			String dir = FileUtil.generateDir(true, Global.platform.youtube.name(), true, baseName, null, null);
-			String namefix = new File(new File(filename).getParent()).getName();  //先这个搞
-			String dircos = FileUtil.generateDir(false, Global.platform.youtube.name(), true, new File(new File(filename).getParent()).getName(), null, null);
-//			System.out.println(exec);
-//			String title = parseObject.getString("title");
-			String description = parseObject.getString("description");
-			String display_id = parseObject.getString("display_id");
-			String uploader = parseObject.getString("uploader");
-			String uploader_url = parseObject.getString("uploader_url");
-			String upload_date = parseObject.getString("upload_date");
-			String name = new File(filename).getName();
-
-			String coverdb = dircos+baseName+".webp";
-			
-			String videodb = dircos+name;
-			
-			VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.youtube.name(),coverdb ,filename, videodb, youtube);
-			videoDataDao.save(videoDataEntity);
-			processHistoryService.saveProcess(saveProcess.getId(), youtube, platform);
-			if(Global.getGeneratenfo) {
-				EmbyMetadataGenerator.generateMetadata(namefix,upload_date.substring(0,4),description,"youtube",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
+				String coverdb = dircos+baseName+".webp";
+				
+				String videodb = dircos+name;
+				
+				VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.youtube.name(),coverdb ,filename, videodb, youtube);
+				videoDataDao.save(videoDataEntity);
+				processHistoryService.saveProcess(saveProcess.getId(), youtube, platform);
+				if(Global.getGeneratenfo) {
+					EmbyMetadataGenerator.generateMetadata(namefix,upload_date.substring(0,4),description,"youtube",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
+				}
+				sendNotify.sendNotifyData(namefix, youtube, platform);
 			}
-			sendNotify.sendNotifyData(namefix, youtube, platform);
 //			return ;
 		} catch (Exception e) {
 			throw e;
