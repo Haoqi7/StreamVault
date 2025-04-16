@@ -309,22 +309,28 @@
         // 解析originaladdress
         var addressType = '';
         var addressValue = '';
+        var cc ="badge-info";
         if(item.videoplatform === '抖音') {
             if(item.originaladdress.startsWith('post')) {
+            	cc ="badge-primary";
                 addressType = '作品';
                 addressValue = item.originaladdress.substring(4);
             } else if(item.originaladdress.startsWith('like')) {
+            	cc ="badge-success";
                 addressType = '喜欢';
                 addressValue = item.originaladdress.substring(4);
             } else if(item.originaladdress.startsWith('recommend')) {
+            	cc ="badge-secondary";
                 addressType = '首页推荐';
                 addressValue = item.originaladdress.substring(9);
             } else if(item.originaladdress.startsWith('fav-')) {
+            	cc ="badge-danger";
                 addressType = '收藏夹';
                 var parts = item.originaladdress.split('-');
                 addressValue = parts[1] + ' (' + parts[2].substring(3) + ')';
             } else if(item.originaladdress.startsWith('https://v.douyin.com/')) {
-                addressType = '分享链接';
+            	cc ="badge-warning";
+            	addressType = '分享链接';
                 addressValue = item.originaladdress;
             }
         } else if(item.videoplatform === '哔哩') {
@@ -338,7 +344,7 @@
         html += '<div class="font-weight-bold text-truncate" title="'+item.videoname+'">'+item.videoname+'</div>';
         html += '<div class="small text-muted text-truncate" title="'+item.videodesc+'">'+item.videodesc+'</div>';
         html += '<div class="small">';
-        html += '<span class="badge badge-info">'+addressType+'</span> ';
+        html += '<span class="badge '+cc+'\">'+addressType+'</span> ';
         html += '<span class="text-muted">'+addressValue+'</span>';
         html += '</div>';
         html += '</div>';

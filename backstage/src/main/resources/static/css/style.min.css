@@ -4539,3 +4539,35 @@ body[data-theme='translucent'] .jconfirm {
 [data-sidebarbg*='color_'] .nav-drawer > .active > a:active {
     border-color: rgba(255, 255, 255, .35);
 }
+
+
+/* 自定义标签颜色方案 */
+.badge-info {
+    background-color: #5B8FF9 !important;
+    color: #ffffff !important;
+}
+
+.badge-primary {
+    background-color: #61DDAA !important;
+    color: #ffffff !important;
+}
+
+.badge-success {
+    background-color: #65789B !important;
+    color: #ffffff !important;
+}
+
+.badge-secondary {
+    background-color: #B37FEB !important;
+    color: #ffffff !important;
+}
+
+.badge-danger {
+    background-color: #F6BD16 !important;
+    color: #ffffff !important;
+}
+
+.badge-warning {
+    background-color: #78D3F8 !important;
+    color: #ffffff !important;
+}
