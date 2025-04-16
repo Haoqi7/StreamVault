@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.flower.spirit.config.Global;
 import com.flower.spirit.dao.FfmpegQueueDao;
 import com.flower.spirit.dao.FfmpegQueueDataDao;
+import com.flower.spirit.entity.CollectDataEntity;
 import com.flower.spirit.entity.FfmpegQueueDataEntity;
 import com.flower.spirit.entity.FfmpegQueueEntity;
 
@@ -497,8 +499,121 @@ public class BiliUtil {
 		return api;
 	}
 
-	public static void main(String[] args) throws Exception {
-		String urlAidOrBid = findUrlAidOrBid("https://www.bilibili.com/video/BV19GoHYYEQH?spm_id_from=333.1007.tianma.6-2-20.click");
-		
+	/**
+	 * 获取用户投稿视频
+	 * 
+	 * @param mid        用户ID
+	 * @param checkPoint 检查点信息，如果为null则获取全量
+	 * @return 视频列表
+	 */
+	public static JSONArray getVideos(String mid, CollectDataEntity entity) {
+		List<JSONObject> videos = new ArrayList<>();
+		getVideosRecursive(mid, "1", entity, videos);
+		JSONArray array = new JSONArray();
+		array.addAll(videos);
+		return array;
+	}
+
+	/**
+	 * 递归获取视频的具体实现
+	 */
+	private static void getVideosRecursive(String mid, String pn, CollectDataEntity entity, List<JSONObject> videos) {
+		TreeMap<String, Object> params = new TreeMap<>();
+		params.put("mid", mid);
+		params.put("ps", "30");
+		params.put("pn", pn);
+		params.put("order", "pubdate");
+
+		String wbiUrl = WbiUtil.buildWbiUrl(params);
+		if (wbiUrl == null) {
+			return;
+		}
+
+		String apiUrl = "https://api.bilibili.com/x/space/wbi/arc/search?" + wbiUrl;
+
+		try {
+			String response = HttpUtil.httpGetBili(apiUrl, "UTF-8", Global.bilicookies);
+			JSONObject json = JSONObject.parseObject(response);
+
+			if (json.getInteger("code") == 0) {
+				JSONObject data = json.getJSONObject("data");
+				JSONObject list = data.getJSONObject("list");
+				JSONArray vlist = list.getJSONArray("vlist");
+
+				if (vlist.size() == 0) {
+					return;
+				}
+
+				boolean hasNewVideos = false;
+				boolean foundCheckpoint = false;
+
+				// 添加视频
+				for (int i = 0; i < vlist.size(); i++) {
+					JSONObject video = vlist.getJSONObject(i);
+					String created = String.valueOf(video.getLongValue("created"));
+					String bvid = video.getString("bvid");
+
+					// 先检查是否找到检查点视频
+					if (entity != null && entity.getLastCheckTime() != null &&
+							created.equals(entity.getLastCheckTime()) &&
+							bvid.equals(entity.getLastid())) {
+						foundCheckpoint = true;
+						break;
+					}
+
+					// 如果没找到检查点，检查是否是新视频
+					boolean isNew = entity == null ||
+							entity.getLastCheckTime() == null ||
+							Long.parseLong(created) > Long.parseLong(entity.getLastCheckTime()) ||
+							(created.equals(entity.getLastCheckTime()) && !bvid.equals(entity.getLastid()));
+
+					if (isNew) {
+						videos.add(video);
+						hasNewVideos = true;
+					}
+				}
+
+				// 如果找到检查点视频，直接返回
+				if (foundCheckpoint) {
+					return;
+				}
+
+				// 降级方案：检查当前页最后一个视频的时间
+				JSONObject lastVideo = vlist.getJSONObject(vlist.size() - 1);
+				long pageLastTime = lastVideo.getLongValue("created");
+
+				// 如果当前页最后视频的时间早于检查点，说明不需要继续查找了
+				if (entity != null && entity.getLastCheckTime() != null &&
+						pageLastTime < Long.parseLong(entity.getLastCheckTime())) {
+					logger.info("未找到检查点视频，但根据时间戳判断已经超过检查点范围");
+					return;
+				}
+
+				// 检查是否需要获取下一页
+				if (hasNewVideos) {
+					int page = Integer.parseInt(pn);
+					int count = data.getJSONObject("page").getInteger("count");
+					int ps = data.getJSONObject("page").getInteger("ps");
+					int totalPages = (count + ps - 1) / ps;
+
+					if (page < totalPages) {
+						getVideosRecursive(mid, String.valueOf(page + 1), entity, videos);
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error("获取视频列表失败: {}", e.getMessage());
+		}
+	}
+
+	public static JSONArray ArcSearch(String mid, String pn, CollectDataEntity entity) {
+		JSONArray videos = getVideos(mid, entity);
+		if (videos != null && !videos.isEmpty()) {
+			String logMessage = entity == null ? String.format("获取到%d个视频", videos.size())
+					: String.format("发现%d个新投稿", videos.size());
+			logger.info(logMessage);
+			return videos;
+		}
+		return null;
 	}
 }
