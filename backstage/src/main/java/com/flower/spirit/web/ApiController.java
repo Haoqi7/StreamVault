@@ -1,6 +1,8 @@
 package com.flower.spirit.web;
 
 
+import java.util.Objects;
+
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -60,8 +62,8 @@ public class ApiController {
 	@RequestMapping("/findVideos")
 	public AjaxEntity findVideos(HttpServletRequest req,VideoDataEntity res) {
 		String token = req.getParameter("token");
-		if(null == token || !token.equals(Global.apptoken)) {
-			return new AjaxEntity(Global.ajax_uri_error, "app token 错误", null);
+		if (!(Objects.equals(token, Global.apptoken) || Objects.equals(token, Global.readonlytoken))) {
+		    return new AjaxEntity(Global.ajax_uri_error, "app token 错误", null);
 		}
 		return videoDataService.findPage(res);
 	}

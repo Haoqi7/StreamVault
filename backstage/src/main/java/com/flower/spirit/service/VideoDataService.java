@@ -53,12 +53,18 @@ public class VideoDataService {
 					CriteriaBuilder criteriaBuilder) {
 				Predicate predicate=criteriaBuilder.conjunction();
 				VideoDataEntity seachDate = (VideoDataEntity) res;
-				if(seachDate != null && StringUtil.isString(seachDate.getVideodesc())) {
-					predicate.getExpressions().add(criteriaBuilder.like(root.get("videodesc"), "%"+seachDate.getVideodesc()+"%"));
-				}
-				if(seachDate != null && StringUtil.isString(seachDate.getVideoname())) {
-					predicate.getExpressions().add(criteriaBuilder.like(root.get("videoname"), "%"+seachDate.getVideoname()+"%"));
-				}
+			    if (seachDate != null && StringUtil.isString(seachDate.getVideoname()) && StringUtil.isString(seachDate.getVideodesc())) {
+			        // 同时传入 videoname 和 videodesc，使用 OR 查询
+			        Predicate orPredicate = criteriaBuilder.or(
+			                criteriaBuilder.like(root.get("videoname"), "%" + seachDate.getVideoname() + "%"),
+			                criteriaBuilder.like(root.get("videodesc"), "%" + seachDate.getVideodesc() + "%")
+			        );
+			        predicate.getExpressions().add(orPredicate);
+			    } else if (seachDate != null && StringUtil.isString(seachDate.getVideoname())) {
+			        predicate.getExpressions().add(criteriaBuilder.like(root.get("videoname"), "%" + seachDate.getVideoname() + "%"));
+			    } else if (seachDate != null && StringUtil.isString(seachDate.getVideodesc())) {
+			        predicate.getExpressions().add(criteriaBuilder.like(root.get("videodesc"), "%" + seachDate.getVideodesc() + "%"));
+			    }
 				if(seachDate != null && StringUtil.isString(seachDate.getVideoplatform())) {
 					predicate.getExpressions().add(criteriaBuilder.like(root.get("videoplatform"), "%"+seachDate.getVideoplatform()+"%"));
 				}
