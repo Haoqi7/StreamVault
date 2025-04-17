@@ -30,3 +30,6 @@ buildNumber.properties
 /backstage/.settings/org.eclipse.jdt.apt.core.prefs
 /app/uniapp/spirit/unpackage
 /app/desktop/spirit-app/package-lock.json
+/app/desktop/StreamVault/package-lock.json
+/app/desktop/StreamVault/dist_electron/
+/app/desktop/StreamVault/node_modules/
