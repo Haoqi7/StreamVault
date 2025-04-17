@@ -33,3 +33,6 @@ buildNumber.properties
 /app/desktop/StreamVault/package-lock.json
 /app/desktop/StreamVault/dist_electron/
 /app/desktop/StreamVault/node_modules/
+/app/desktop/StreamVault-tauri/node_modules/
+/app/desktop/StreamVault-tauri/src-tauri/target/
+/app/desktop/StreamVault-tauri/src-tauri/Cargo.lock

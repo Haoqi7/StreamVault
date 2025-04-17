@@ -24,7 +24,10 @@ module.exports = defineConfig({
           artifactName: 'StreamVault-Portable-${version}.${ext}'
         },
         // 不创建安装程序
-        nsis: false
+        nsis: false,
+        compression: 'maximum',
+        asar:true,
+        publish:null
       }
     }
   }
