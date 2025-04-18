@@ -49,6 +49,8 @@ public class ConfigEntity implements Serializable {
 	private String agentaccpass;  //密码
 	
 	private String useragent;
+	
+	private String frontend; //video  nav
 
 	public Integer getId() {
 		return id;
@@ -144,6 +146,14 @@ public class ConfigEntity implements Serializable {
 
 	public void setReadonlytoken(String readonlytoken) {
 		this.readonlytoken = readonlytoken;
+	}
+
+	public String getFrontend() {
+		return frontend;
+	}
+
+	public void setFrontend(String frontend) {
+		this.frontend = frontend;
 	}
 
 	
