@@ -17,6 +17,8 @@
 > 3. 更多详细细节待补充，敬请期待。
 > 4. 所有配套客户端及源码可在 `app` 文件夹下找到
 > 5. 本项目相对于其他项目来说  使用的java语言  docker部署时建议添加内存限制  
+> 6. 本项目没有做项目拆分为多个仓库  所以本仓库包含 uniapp tauri electron java 浏览器扩展 每个平台源码  
+> 7. `backstage为后台服务端 java`  `app/uniapp  手机端源码`   `app/extend  浏览器扩展`  `app/desktop  桌面端客户端源码`
 
 
 ## ⚠️ 声明
