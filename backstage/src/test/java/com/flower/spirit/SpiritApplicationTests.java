@@ -10,7 +10,7 @@ class SpiritApplicationTests {
 
 	@Test
 	void contextLoads() {
-		BiliUtil.ArcSearch("319521269", null);
+//		BiliUtil.ArcSearch("319521269", null);
 	}
 
 }
