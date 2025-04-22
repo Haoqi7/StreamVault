@@ -43,20 +43,18 @@ public class WbiUtil {
 
         // 缓存不存在或已过期，重新获取
         try {
-            String navResponse = HttpUtil.httpGetBili("https://api.bilibili.com/x/web-interface/nav", "UTF-8",
-                    Global.bilicookies);
+            String navResponse = HttpUtil.httpGetBili("https://api.bilibili.com/x/web-interface/nav",
+                    Global.bilicookies,null,null);
             JSONObject json = JSONObject.parseObject(navResponse);
             if (json.getInteger("code") == 0) {
                 JSONObject data = json.getJSONObject("data");
                 JSONObject wbiImg = data.getJSONObject("wbi_img");
                 String imgUrl = wbiImg.getString("img_url");
                 String subUrl = wbiImg.getString("sub_url");
-
                 // 提取文件名中的字符串作为key
                 cachedImgKey = imgUrl.substring(imgUrl.lastIndexOf("/") + 1).split("\\.")[0];
                 cachedSubKey = subUrl.substring(subUrl.lastIndexOf("/") + 1).split("\\.")[0];
                 cacheDate = today;
-
                 return new String[] { cachedImgKey, cachedSubKey };
             }
         } catch (Exception e) {
@@ -142,11 +140,6 @@ public class WbiUtil {
     }
 
     public static void main(String[] args) {
-        String imgKey = "653657f524a547ac981ded72ea172057";
-        String subKey = "6e4909c702f846728e64f6007736a338";
-        String mixinKey = getMixinKey(imgKey, subKey);
-        System.out.println(mixinKey); // 72136226c6a73669787ee4fd02a74c27
-
         // 用TreeMap自动排序
         TreeMap<String, Object> map = new TreeMap<>();
         map.put("foo", "one one four");

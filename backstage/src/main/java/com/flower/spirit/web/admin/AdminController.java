@@ -377,4 +377,9 @@ public class AdminController {
 	public AjaxEntity loadDouFav(String uid) {
 		return collectDataService.loadDouFav(uid);
 	}
+	
+	@GetMapping(value = "/fixBiliFav")
+	public AjaxEntity fixBiliFav(String id) {
+		return collectDataService.fixBiliFav(id);
+	}
 } 

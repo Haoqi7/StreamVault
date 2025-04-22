@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -33,10 +34,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
+import com.flower.spirit.config.Global;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 /**
  * 这个方法中有大量遗弃方法不再调用
@@ -207,6 +210,48 @@ public class HttpUtil {
         }
         return response;
     }
+    
+    public static String httpGetBili(String url, String cookie,String origin,String referer ) {
+    	String ua = null!=Global.useragent && !"".equals(Global.useragent)?Global.useragent:"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36";
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)    // 连接超时
+                .readTimeout(5, TimeUnit.SECONDS)       // 读取超时
+                .build();
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url)
+                .get()
+                .header("User-Agent", ua);
+        if (origin != null && !origin.isEmpty()) {
+            requestBuilder.header("Origin", origin);
+        }
+        if (referer != null && !referer.isEmpty()) {
+            requestBuilder.header("Referer", referer);
+        }
+        if (cookie != null && !cookie.isEmpty()) {
+            requestBuilder.header("Cookie", cookie);
+        }
+        Request request = requestBuilder.build();
+        String responseStr = "";
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                System.err.println("请求出错: " + response.code() + " - " + response.message());
+            } else {
+                ResponseBody body = response.body();
+                if (body != null) {
+                    byte[] bytes = body.bytes(); 
+                    responseStr = new String(bytes, Charset.forName("UTF-8"));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("发生网络异常!");
+            e.printStackTrace();
+        }
+        return responseStr;
+    }
+    
+    
+    
+    
 
     /**
      * post请求

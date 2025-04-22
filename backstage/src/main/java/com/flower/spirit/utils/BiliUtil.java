@@ -530,11 +530,9 @@ public class BiliUtil {
 		}
 
 		String apiUrl = "https://api.bilibili.com/x/space/wbi/arc/search?" + wbiUrl;
-
 		try {
-			String response = HttpUtil.httpGetBili(apiUrl, "UTF-8", Global.bilicookies);
+			String response = HttpUtil.httpGetBili(apiUrl, Global.bilicookies,"https://space.bilibili.com","https://space.bilibili.com/"+mid);
 			JSONObject json = JSONObject.parseObject(response);
-
 			if (json.getInteger("code") == 0) {
 				JSONObject data = json.getJSONObject("data");
 				JSONObject list = data.getJSONObject("list");
@@ -543,7 +541,6 @@ public class BiliUtil {
 				if (vlist.size() == 0) {
 					return;
 				}
-
 				boolean hasNewVideos = false;
 				boolean foundCheckpoint = false;
 
@@ -591,6 +588,7 @@ public class BiliUtil {
 
 				// 检查是否需要获取下一页
 				if (hasNewVideos) {
+					Thread.sleep(5000);  //睡一会
 					int page = Integer.parseInt(pn);
 					int count = data.getJSONObject("page").getInteger("count");
 					int ps = data.getJSONObject("page").getInteger("ps");
@@ -606,7 +604,7 @@ public class BiliUtil {
 		}
 	}
 
-	public static JSONArray ArcSearch(String mid, String pn, CollectDataEntity entity) {
+	public static JSONArray ArcSearch(String mid, CollectDataEntity entity) {
 		JSONArray videos = getVideos(mid, entity);
 		if (videos != null && !videos.isEmpty()) {
 			String logMessage = entity == null ? String.format("获取到%d个视频", videos.size())

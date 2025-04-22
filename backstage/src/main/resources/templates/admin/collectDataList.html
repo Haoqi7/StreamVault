@@ -18,8 +18,28 @@
 			white-space: nowrap;
 			overflow: hidden;
 		}
-
-
+		th:nth-child(1) { width: 5%; }  /* 编号 */
+		th:nth-child(2) { width: 10%; } /* 任务名称 */
+		th:nth-child(3) { width: 15%; } /* 源地址 */
+		th:nth-child(4) { width: 5%; }  /* 来源平台 */
+		th:nth-child(5) { width: 5%; }  /* 是否监控 */
+		th:nth-child(6) { width: 8%; }  /* 任务状态 */
+		th:nth-child(7) { width: 5%; }  /* 总任务数 */
+		th:nth-child(8) { width: 5%; }  /* 已完成 */
+		th:nth-child(9) { width: 10%; } /* 提交时间 */
+		th:nth-child(10) { width: 10%; } /* 结束时间 */
+		th:nth-child(11) { width: 12%; } /* 操作 */
+		
+		.btn-group {
+			display: flex;
+			gap: 5px;
+		}
+		.btn-group .btn {
+			margin-right: 5px;
+		}
+		.btn-group .btn:last-child {
+			margin-right: 0;
+		}
 	</style>
 </head>
 
@@ -98,7 +118,7 @@
 											<th>是否监控</th>
 											<th>任务状态</th>
 											<th>总任务数</th>
-											<th>已完成的任务数</th>
+											<th>已完成</th>
 											<th>提交时间</th>
 											<th>结束时间</th>
 											<th>操作</th>
@@ -150,6 +170,20 @@
 						</div>
 					</div>
 				</div>
+
+				<!-- B站类型选择 -->
+				<div class="row bilibili-type" style="display: none;">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label>类型</label>
+							<select class="bilibili-select form-control">
+								<option value="arc">投稿</option>
+								<option value="fav">收藏夹</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
 
 				<!-- 抖音类型选择 -->
 				<div class="row douyin-type" style="display: none;">
@@ -205,6 +239,9 @@
 						<strong>哔哩哔哩提示:</strong><br/>
 						只需要填写收藏夹ID<br/>
 						eg. https://www.bilibili.com/medialist/detail/ml12344  中只需要填写 12344
+						如果是投稿  则只填用户id
+						eg. https://space.bilibili.com/xxxxx  中只需要填xxxx
+						同时B站逻辑中 未处理被风控命中 终止逻辑 所以会抛出异常  等待下一次监控继续执行
 					</div>
 					<div class="douyin-tip" style="display: none;">
 						<strong>抖音提示:</strong><br/>
@@ -247,7 +284,8 @@
 				$('.douyin-type').show();
 				$('.douyin-tip').show();
 				$('.bilibili-tip').hide();
-				$('.address-label').parent().parent().show(); // 显示用户ID输入框
+				$('.bilibili-type').hide();
+				$('.address-label').parent().parent().show();
 				$('.address-label').text('用户ID');
 				$('.originaladdress').attr('placeholder', '请输入用户ID');
 			} else {
@@ -255,11 +293,12 @@
 				$('.collect-list').hide();
 				$('.douyin-tip').hide();
 				$('.bilibili-tip').show();
-				$('.address-label').parent().parent().show(); // 显示用户ID输入框
+				$('.bilibili-type').show();
+				$('.address-label').parent().parent().show();
 				$('.address-label').text('收藏链接');
 				$('.originaladdress').attr('placeholder', '请输入收藏夹ID');
 			}
-		});
+		}).trigger('change');
 
 		// 抖音类型选择切换
 		$('.douyin-select').change(function(){
@@ -339,6 +378,14 @@
 					originaladdress = 'fav-' + collectId+"-fav";
 				}
 			}
+			if(platform === '哔哩') {
+				var type = $('.bilibili-select').val();
+				if(type === 'fav') {
+					originaladdress = 'bili-fav-' + originaladdress;
+				} else if(type === 'arc') {
+					originaladdress = 'bili-arc-' + originaladdress;
+				}
+			}
 			
 			var option = {
 				platform: platform,
@@ -410,6 +457,21 @@
 		}
 		return str;
 	}
+	function fixData(id){
+		layer.confirm("确定将数据格式调整为新版吗？", function(index){
+			$.get("/admin/api/fixBiliFav?id="+id,function(res){
+				if(res.resCode == "000001"){
+					layer.msg(res.message, function(){
+						window.location.reload();
+					});
+				} else {
+					layer.msg(res.message);
+				}
+			})
+		})
+	}
+	
+
 	function  findList(page){
 		var option = {
 			pageNo:page,
@@ -445,6 +507,18 @@
 									addressType = '收藏夹';
 									var parts = list[i].originaladdress.split('-');
 									addressValue = parts[1] + ' (' + parts[2].substring(3) + ')';
+								}
+							} else if(list[i].platform === '哔哩') {
+								if(list[i].originaladdress.startsWith('bili-fav-')) {
+									addressType = '收藏夹';
+									addressValue = list[i].originaladdress.substring(9);
+								} else if(list[i].originaladdress.startsWith('bili-arc-')) {
+									addressType = '投稿';
+									addressValue = list[i].originaladdress.substring(9);
+								} else {
+									// 旧数据格式
+									addressType = '收藏夹(旧格式)';
+									addressValue = list[i].originaladdress;
 								}
 							} else {
 								addressType = '收藏夹';
@@ -490,6 +564,8 @@
 									+'<div class="btn-group">'
 									+'<a data-id="'+list[i].id+'" class="btn btn-xs btn-default viewProcesses" href="#!" title="查看进程" data-toggle="tooltip">查看进程</a>'
 									+'<a data-id="'+list[i].id+'" class="btn btn-xs btn-default deleteProcesses" href="#!" title="删除" data-toggle="tooltip">删除</a>'
+									+(list[i].platform === '哔哩' && !list[i].originaladdress.startsWith('bili-fav-') && !list[i].originaladdress.startsWith('bili-arc-') ? 
+										'<a onclick="fixData('+list[i].id+')" data-id="'+list[i].id+'" class="btn btn-xs btn-warning fixData" href="#!" title="将数据格式调整为新版" data-toggle="tooltip">修复</a>' : '')
 									+'</div>'
 									+'</td></tr>'
 						}

@@ -9,8 +9,47 @@
         <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
         <link rel="stylesheet" href="/static/css/font.css">
         <link rel="stylesheet" href="/static/css/xadmin.css">
-        <script type="text/javascript" src="/static/lib/layui/layui.js" charset="utf-8"></script>
-        <script type="text/javascript" src="/static/js/xadmin.js"></script>
+        <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+        <style>
+            .form-container {
+                padding: 20px;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+            .form-title {
+                text-align: center;
+                margin-bottom: 30px;
+                color: #333;
+            }
+            .form-group {
+                margin-bottom: 25px;
+            }
+            .form-label {
+                font-weight: 500;
+                color: #555;
+            }
+            .form-input {
+                border-radius: 4px;
+                border: 1px solid #ddd;
+                padding: 8px 12px;
+                width: 100%;
+            }
+            .form-input:focus {
+                border-color: #1E9FFF;
+                box-shadow: 0 0 5px rgba(30,159,255,0.2);
+            }
+            .submit-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 16px;
+                margin-top: 20px;
+            }
+            .form-tip {
+                color: #999;
+                font-size: 12px;
+                margin-top: 5px;
+            }
+        </style>
         <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
         <!--[if lt IE 9]>
             <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
@@ -18,43 +57,40 @@
         <![endif]-->
     </head>
     <body>
-        <div class="layui-fluid">
-            <div class="layui-row">
-                <form class="layui-form">
-                    <div class="layui-form-item">
-                        <label for="L_email" class="layui-form-label">
-                            <span class="x-red">*</span>用户名</label>
-                        <div class="layui-input-inline">
-                            <input type="text" id="L_username" name="username" required="" lay-verify="username" autocomplete="off" class="layui-input"></div>
-                        <div class="layui-form-mid layui-word-aux">
-                            <span class="x-red">*</span>将会成为您唯一的登入名</div></div>
-                    <div class="layui-form-item">
-                        <label for="L_pass" class="layui-form-label">
-                            <span class="x-red">*</span>密码</label>
-                        <div class="layui-input-inline">
-                            <input type="password" id="L_password" name="password" required="" lay-verify="password" autocomplete="off" class="layui-input"></div>
-                        <div class="layui-form-mid layui-word-aux">6到16个字符</div></div>
-                    <div class="layui-form-item">
-                        <label for="L_repass" class="layui-form-label">
-                            <span class="x-red">*</span>确认密码</label>
-                        <div class="layui-input-inline">
-                            <input type="password" id="L_repassword" name="repassword" required="" lay-verify="repassword" autocomplete="off" class="layui-input"></div>
-                    </div>
-                    <div class="layui-form-item">
-                        <label for="L_repass" class="layui-form-label"></label>
-                        <button class="layui-btn" lay-filter="add" lay-submit="">增加</button></div>
-                </form>
-            </div>
+        <div class="form-container">
+            <h3 class="form-title">添加新用户</h3>
+            <form class="layui-form">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" id="L_username" name="username" required lay-verify="username" 
+                           autocomplete="off" class="form-input" placeholder="请输入用户名">
+                    <div class="form-tip">用户名将作为登录账号</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" id="L_password" name="password" required lay-verify="password" 
+                           autocomplete="off" class="form-input" placeholder="请输入密码">
+                    <div class="form-tip">密码长度6-16位</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">确认密码</label>
+                    <input type="password" id="L_repassword" name="repassword" required lay-verify="repassword" 
+                           autocomplete="off" class="form-input" placeholder="请再次输入密码">
+                </div>
+                <button class="layui-btn submit-btn" lay-filter="add" lay-submit>添加用户</button>
+            </form>
         </div>
-        <script>layui.use(['form', 'layer','jquery'],
+        <script type="text/javascript" src="/static/lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/static/js/xadmin.js"></script>
+        <script>
+            layui.use(['form', 'layer','jquery'],
             function() {
                 $ = layui.jquery;
                 var form = layui.form,
                 layer = layui.layer;
 
-                //自定义验证规则
                 form.verify({
-                    password: [/(.+){6,12}$/, '密码必须6到12位'],
+                    password: [/(.+){6,16}$/, '密码必须6到16位'],
                     repassword: function(value) {
                         if ($('#L_password').val() != $('#L_repassword').val()) {
                             return '两次密码不一致';
@@ -62,39 +98,31 @@
                     }
                 });
 
-                //监听提交
                 form.on('submit(add)',
                 function(data) {
-                    console.log(data);
-    	          	$.post("/admin/api/addUser",data.field,function(result){
-    	          		console.log(result)
-    	          		if(result.resCode ="000001"){
-    	              		layer.msg(result.message, {
-    	            			  shade: 0.01,
-    	            			  time:1500
-    	            		},function(){
-    	      					setTimeout(function(){
-    	                            xadmin.close();
-    	                            xadmin.father_reload();
-    	      					},1500)
-    	            		});
-    	          		}else{
-    	              		layer.msg(result.message, {
-    	            			  icon: "error",
-    	            			  shade: 0.01,
-    	            			  time:5
-    	            			  
-    	              		})
-    	          		}
-    	                
-    	            });
-    	          	
-
+                    $.post("/admin/api/addUser",data.field,function(result){
+                        if(result.resCode == "000001"){
+                            layer.msg(result.message, {
+                                shade: 0.01,
+                                time:1000
+                            },function(){
+                                setTimeout(function(){
+                                    xadmin.close();
+                                    xadmin.father_reload();
+                                },1000)
+                            });
+                        }else{
+                            layer.msg(result.message, {
+                                icon: "error",
+                                shade: 0.01,
+                                time:1000
+                            })
+                        }
+                    });
                     return false;
                 });
-
-            });</script>
-  
+            });
+        </script>
     </body>
 
 </html>

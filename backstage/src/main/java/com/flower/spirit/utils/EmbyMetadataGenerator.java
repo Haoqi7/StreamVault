@@ -344,7 +344,7 @@ public class EmbyMetadataGenerator {
 
             String title = data.getString("title");
             String overview = data.getString("intro");
-            String genre = "哔哩哔哩收藏夹";
+            String genre = "哔哩哔哩";
             String rating = "0.0";
             String outputPath = output;
             String cover = data.getString("cover"); // 已经是本地路径

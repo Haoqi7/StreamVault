@@ -334,8 +334,16 @@
                 addressValue = item.originaladdress;
             }
         } else if(item.videoplatform === '哔哩') {
-            addressType = '收藏夹';
-            addressValue = item.originaladdress;
+            if(item.originaladdress.startsWith('bili-fav-')) {
+                addressType = '收藏夹';
+                addressValue = item.originaladdress.substring(9);
+            } else if(item.originaladdress.startsWith('bili-arc-')) {
+                addressType = '投稿';
+                addressValue = item.originaladdress.substring(9);
+            } else {
+                addressType = '收藏夹';
+                addressValue = item.originaladdress;
+            }
         } else {
             addressType = '其他';
             addressValue = item.originaladdress;

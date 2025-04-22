@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -140,50 +141,17 @@ public class CollectDataService {
 				logger.info("必须填写bili ck,本次执行失败");
 				return new AjaxEntity(Global.ajax_uri_error, "必须填写bili ck", null);
 			}
-			//收藏夹 修改   支持 分类目录
-			String info = "https://api.bilibili.com/x/v3/fav/folder/info?media_id="+collectDataEntity.getOriginaladdress();
-			String infobili = HttpUtil.httpGetBili(info, "UTF-8", Global.bilicookies);
-			//收藏夹介绍
-			JSONObject object = JSONObject.parseObject(infobili);
-			String namepath = object.getJSONObject("data").getString("title");
-			String temporaryDirectory =FileUtil.generateDir(true, Global.platform.bilibili.name(), false, null, namepath, null);
-			if(Global.getGeneratenfo) {
-				//防止重复写问题
-				if (!(new File(temporaryDirectory + File.separator + "tvshow.nfo").exists())) {
-				    // 文件不存在
-					EmbyMetadataGenerator.createFavoriteNfo(infobili, temporaryDirectory);
-				}
-				
+			//判断类别
+			//执行不同的调度
+			if(collectDataEntity.getOriginaladdress().startsWith("bili-fav-")) {
+				return createBillFav(collectDataEntity, monitor);
 			}
-			String api = "https://api.bilibili.com/x/v3/fav/resource/ids?media_id="+collectDataEntity.getOriginaladdress()+"&platform=web";
-			String httpGetBili = HttpUtil.httpGetBili(api, "UTF-8", Global.bilicookies);
-			JSONArray jsonArray = JSONObject.parseObject(httpGetBili).getJSONArray("data");
-			if(jsonArray.size() >0) {
-				//进线程前创建collectDataEntity
-				collectDataEntity.setTaskstatus("已提交待处理");
-				collectDataEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
-				collectDataEntity.setCount(String.valueOf(jsonArray.size()));
-				collectDataEntity.setCarriedout("0"); //归零
-				CollectDataEntity save = collectdDataDao.save(collectDataEntity);
-				//提交线程
-				if(monitor.equals("N")) {
-					exec.execute(() -> {
-						try {
-							this.createBiliData(save, jsonArray,namepath);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					});
-				}else {
-					try {
-						this.createBiliData(save, jsonArray,namepath);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-				return new AjaxEntity(Global.ajax_success, "已提交至线程,如填错请删除当前任务并重启容器解决", null);
+			
+			if(collectDataEntity.getOriginaladdress().startsWith("bili-arc-")) {
+				return createBillArc(collectDataEntity, monitor);
 			}
-			return new AjaxEntity(Global.ajax_uri_error, "数据为空 请检查收藏ID", null);
+		
+			
 			
 			
 		}
@@ -238,7 +206,7 @@ public class CollectDataService {
 	 * @param json
 	 * @throws Exception
 	 */
-	public void createBiliData(CollectDataEntity entity,JSONArray json,String namepath) throws Exception {
+	public void createBiliData(CollectDataEntity entity,JSONArray json,String namepath,String vt) throws Exception {
 		entity.setTaskstatus("已开始处理");
 		collectdDataDao.save(entity);
 		for(int i = 0;i<json.size();i++) {
@@ -263,7 +231,7 @@ public class CollectDataService {
 						//封面down
 						VideoDataEntity videoDataEntity = new VideoDataEntity(findVideoStreaming.get("cid"),findVideoStreaming.get("title"), findVideoStreaming.get("desc"), "哔哩", codir+"/"+filename+".jpg", findVideoStreaming.get("video"),videounaddr,bvid);
 					    videoDataDao.save(videoDataEntity);
-					    logger.info("收藏"+(i+1)+"下载流程结束");
+					    logger.info(vt+(i+1)+"下载流程结束");
 					    
 						JSONObject owner =  JSONObject.parseObject(map.get("owner"));
 						String upface = owner.getString("face");
@@ -540,5 +508,147 @@ public class CollectDataService {
         String content = f2cmd.substring(startIndex, endIndex).trim();
 		return new AjaxEntity(Global.ajax_success,  content, "请求成功");
 	}
+	
+	public AjaxEntity createBillFav(CollectDataEntity collectDataEntity,String monitor) {
+		//收藏夹 修改   支持 分类目录
+		String newod = collectDataEntity.getOriginaladdress().replaceAll("bili-fav-", "");
+		String info = "https://api.bilibili.com/x/v3/fav/folder/info?media_id="+newod;
+		System.out.println(newod);
+		String infobili = HttpUtil.httpGetBili(info, "UTF-8", Global.bilicookies);
+		//收藏夹介绍
+		JSONObject object = JSONObject.parseObject(infobili);
+		String namepath = object.getJSONObject("data").getString("title");
+		String temporaryDirectory =FileUtil.generateDir(true, Global.platform.bilibili.name(), false, null, namepath, null);
+		if(Global.getGeneratenfo) {
+			//防止重复写问题
+			if (!(new File(temporaryDirectory + File.separator + "tvshow.nfo").exists())) {
+			    // 文件不存在
+				EmbyMetadataGenerator.createFavoriteNfo(infobili, temporaryDirectory);
+			}
+			
+		}
+		String api = "https://api.bilibili.com/x/v3/fav/resource/ids?media_id="+newod+"&platform=web";
+		String httpGetBili = HttpUtil.httpGetBili(api, "UTF-8", Global.bilicookies);
+		JSONArray jsonArray = JSONObject.parseObject(httpGetBili).getJSONArray("data");
+		if(jsonArray.size() >0) {
+			//进线程前创建collectDataEntity
+			collectDataEntity.setTaskstatus("已提交待处理");
+			collectDataEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
+			collectDataEntity.setCount(String.valueOf(jsonArray.size()));
+			collectDataEntity.setCarriedout("0"); //归零
+			CollectDataEntity save = collectdDataDao.save(collectDataEntity);
+			//提交线程
+			if(monitor.equals("N")) {
+				exec.execute(() -> {
+					try {
+						this.createBiliData(save, jsonArray,namepath,"收藏夹");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				});
+			}else {
+				try {
+					this.createBiliData(save, jsonArray,namepath,"收藏夹");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return new AjaxEntity(Global.ajax_success, "已提交至线程,如填错请删除当前任务并重启容器解决", null);
+		}
+		return new AjaxEntity(Global.ajax_uri_error, "数据为空 请检查收藏ID", null);
+	}
+	public AjaxEntity createBillArc(CollectDataEntity collectDataEntity,String monitor) {
+		String newod = collectDataEntity.getOriginaladdress().replaceAll("bili-arc-", "");
+		if(monitor.equals("N")) {
+			//此处为第一次提交  不是走定时器监控 
+			exec.execute(() -> {
+				try {
+					JSONArray arcSearch = BiliUtil.ArcSearch(newod, null); //先全量吧
+					if(null != arcSearch && arcSearch.size()>0) {
+						JSONObject ddd = arcSearch.getJSONObject(0);
+						String namepath = ddd.getString("author");
+						collectDataEntity.setTaskstatus("已提交待处理");
+						collectDataEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
+						collectDataEntity.setCount(String.valueOf(arcSearch.size()));
+						collectDataEntity.setCarriedout("0"); //归零
+						CollectDataEntity save = collectdDataDao.save(collectDataEntity);
+						
+						JSONObject infobili =  new JSONObject();
+						JSONObject data =  new JSONObject();
+						String cover = ddd.getJSONObject("meta").getString("cover");
+						data.put("title", namepath+"的投稿");
+						data.put("intro", namepath+"的投稿");
+						data.put("cover",cover);
+						data.put("ctime", DateUtils.getDate());
+						infobili.put("data", data);
+						//创建
+						String temporaryDirectory =FileUtil.generateDir(true, Global.platform.bilibili.name(), false, null, namepath, null);
+						if(Global.getGeneratenfo) {
+							//防止重复写问题
+							if (!(new File(temporaryDirectory + File.separator + "tvshow.nfo").exists())) {
+							    // 文件不存在
+								EmbyMetadataGenerator.createFavoriteNfo(infobili.toJSONString(), temporaryDirectory);
+							}
+						}
+						
+						
+						
+						this.createBiliData(save, arcSearch,namepath,"投稿");
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+		}else {
+			try {
+				JSONArray arcSearch = BiliUtil.ArcSearch(newod, null); //先全量吧
+				if(null != arcSearch && arcSearch.size()>0) {
+					JSONObject ddd = arcSearch.getJSONObject(0);
+					String namepath = ddd.getString("author");
+					collectDataEntity.setTaskstatus("已提交待处理");
+					collectDataEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
+					collectDataEntity.setCount(String.valueOf(arcSearch.size()));
+					collectDataEntity.setCarriedout("0"); //归零
+					CollectDataEntity save = collectdDataDao.save(collectDataEntity);
+					
+					JSONObject infobili =  new JSONObject();
+					JSONObject data =  new JSONObject();
+					String cover = ddd.getJSONObject("meta").getString("cover");
+					data.put("title", namepath+"的投稿");
+					data.put("intro", namepath+"的投稿");
+					data.put("cover",cover);
+					data.put("ctime", DateUtils.getDate());
+					infobili.put("data", data);
+					//创建
+					String temporaryDirectory =FileUtil.generateDir(true, Global.platform.bilibili.name(), false, null, namepath, null);
+					if(Global.getGeneratenfo) {
+						//防止重复写问题
+						if (!(new File(temporaryDirectory + File.separator + "tvshow.nfo").exists())) {
+						    // 文件不存在
+							EmbyMetadataGenerator.createFavoriteNfo(infobili.toJSONString(), temporaryDirectory);
+						}
+					}
+					
+					
+					this.createBiliData(save, arcSearch,namepath,"投稿");
+				}
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+		return new AjaxEntity(Global.ajax_success, "已提交至线程,如填错请删除当前任务并重启容器解决,页面可能需要等待15秒才会显示已经填的数据", null);
+	}
 
+
+	public AjaxEntity fixBiliFav(String id) {
+		Optional<CollectDataEntity> byId = collectdDataDao.findById(Integer.parseInt(id));
+		if(byId.isPresent()) {
+			CollectDataEntity collectDataEntity = byId.get();
+			String originaladdress = "bili-fav-"+collectDataEntity.getOriginaladdress();
+			collectDataEntity.setOriginaladdress(originaladdress);
+			collectdDataDao.save(collectDataEntity);
+			return new AjaxEntity(Global.ajax_success, "更新成功", null);
+		}
+		return new AjaxEntity(Global.ajax_uri_error, "数据异常", null);
+	}
 }
