@@ -111,7 +111,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>主页配置&nbsp;<a href="https://bd.kwaie.com" target="_blank" style="font-size: 12px;">播放主页DEMO</a></label>
+                                                <label>主页配置&nbsp;<a href="https://bd.kwaie.com" onclick="return confirmRedirect(this);" style="font-size: 12px;" title="该demo非本仓库提供">播放主页DEMO</a></label>
                                                  <select id="frontend" class="form-control frontend" name="frontend">
                                                     <option value="0" th:selected="${config.frontend} eq '0'">空白主页</option>
                                                     <option value="1" th:selected="${config.frontend} eq '1'" disabled>播放主页(下个版本)</option>
@@ -632,7 +632,12 @@
             })
         })
     }
-
+    function confirmRedirect(link) {
+        if (confirm("该demo非本仓库提供，是否继续跳转？")) {
+            window.open(link.href, '_blank');
+        }
+        return false;
+    }
     function changeChannel() {
         var channel = $("#notifyChannel").val();
         $(".qywx-config, .dingding-config, .feishu-config").hide();
