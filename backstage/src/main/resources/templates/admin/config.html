@@ -97,7 +97,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>nfo元数据生成(测试)</label>
-                                                <select id="generatenfo" class="form-control openprocesshistory" name="generatenfo">
+                                                <select id="generatenfo" class="form-control generatenfo" name="generatenfo">
                                                     <option value="0" th:selected="${config.generatenfo} eq '0'">否</option>
                                                     <option value="1" th:selected="${config.generatenfo} eq '1'">是</option>
                                                 </select>
@@ -107,6 +107,15 @@
                                             <div class="form-group">
                                                 <label>监控定时器cron</label>
                                                 <input class="form-control" type="text" id="taskcron" name="taskcron" placeholder="默认0 0 0/3 * * ?  三小时一次" th:value="${config.taskcron}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>主页配置&nbsp;<a href="https://bd.kwaie.com" target="_blank" style="font-size: 12px;">播放主页DEMO</a></label>
+                                                 <select id="frontend" class="form-control frontend" name="frontend">
+                                                    <option value="0" th:selected="${config.frontend} eq '0'">空白主页</option>
+                                                    <option value="1" th:selected="${config.frontend} eq '1'" disabled>播放主页(下个版本)</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -604,12 +613,8 @@
             option['apptoken'] = apptoken;
             option['openprocesshistory'] = openprocesshistory;
             option['generatenfo'] = generatenfo;
-            if(taskcron!=""){
-                option['taskcron'] = taskcron;
-            }
-            if(userAgent!=""){
-                option['useragent'] = userAgent;
-            }
+            option['taskcron'] = taskcron;
+            option['useragent'] = userAgent;
             var readonlytoken =$("#readonlytoken").val();
             option['readonlytoken'] = readonlytoken;
             $.post("/admin/api/saveConfig",option,function(data,status){
