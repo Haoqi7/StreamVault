@@ -117,7 +117,7 @@ async def fetch_user_post_videos(cookie: str, uid: str, output_file: str):
     setattr(handler, "enable_bark", False)
     all_videos = []
     async for aweme_data_list in handler.fetch_user_post_videos(
-        uid, 0,  20, 40
+        uid, 0, 0,  20, 40
     ):
         videos = aweme_data_list._to_list()
         for video in videos:
