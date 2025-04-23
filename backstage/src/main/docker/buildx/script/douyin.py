@@ -70,7 +70,7 @@ async def fetch_video(cookie: str, aweme_id: str):
     print(jsonres)
 
 # 获取用户点赞列表方法
-async def fetch_user_like_videos(cookie: str, uid: str, output_file: str):
+async def fetch_user_like_videos(cookie: str, uid: str, maxc: str, output_file: str):
     kwargs = {
         "headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
@@ -84,7 +84,7 @@ async def fetch_user_like_videos(cookie: str, uid: str, output_file: str):
     setattr(handler, "enable_bark", False)
     all_videos = []
     async for aweme_data_list in handler.fetch_user_like_videos(
-        uid, 0,  20, 40
+        uid, 0,  20, int(maxc)
     ):
         videos = aweme_data_list._to_list()
         for video in videos:
@@ -103,7 +103,7 @@ async def fetch_user_like_videos(cookie: str, uid: str, output_file: str):
         print("stream-vault-ok")
 
 # 获取用户视频发布列表方法
-async def fetch_user_post_videos(cookie: str, uid: str, output_file: str):
+async def fetch_user_post_videos(cookie: str, uid: str, maxc: str, output_file: str):
     kwargs = {
         "headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
@@ -117,7 +117,7 @@ async def fetch_user_post_videos(cookie: str, uid: str, output_file: str):
     setattr(handler, "enable_bark", False)
     all_videos = []
     async for aweme_data_list in handler.fetch_user_post_videos(
-        uid, 0, 0,  20, 40
+        uid, 0, 0,  20, int(maxc)
     ):
         videos = aweme_data_list._to_list()
         for video in videos:
@@ -155,7 +155,7 @@ async def fetch_user_collects(cookie: str):
     async for collection_list in handler.fetch_user_collects(
         max_cursor=0,
         page_counts=10,
-        max_counts=20,
+        max_counts=40,
     ):
         raw_data = collection_list._to_raw()
         if 'collects_list' in raw_data:
@@ -256,12 +256,14 @@ async def main():
     fetch_user_like_videos_parser = subparsers.add_parser("fetch_user_like_videos", help="Fetch user_like info from Douyin")
     fetch_user_like_videos_parser.add_argument("--cookie", type=str, required=True, help="Douyin cookie")
     fetch_user_like_videos_parser.add_argument("--uid", type=str, required=True, help="User ID")
+    fetch_user_like_videos_parser.add_argument("--maxc", type=str, required=True, help="maxc")
     fetch_user_like_videos_parser.add_argument("--output", type=str, required=True, help="Output file path")
 
     # 获取用户发布的作品
     fetch_user_post_videos_parser = subparsers.add_parser("fetch_user_post_videos", help="Fetch user_post info from Douyin")
     fetch_user_post_videos_parser.add_argument("--cookie", type=str, required=True, help="Douyin cookie")
     fetch_user_post_videos_parser.add_argument("--uid", type=str, required=True, help="User ID")
+    fetch_user_post_videos_parser.add_argument("--maxc", type=str, required=True, help="maxc")
     fetch_user_post_videos_parser.add_argument("--output", type=str, required=True, help="Output file path")
    
    
@@ -287,9 +289,9 @@ async def main():
     if args.command == "fetch_video":
         await fetch_video(args.cookie, args.aweme_id)
     if args.command == "fetch_user_like_videos":
-        await fetch_user_like_videos(args.cookie, args.uid, args.output)
+        await fetch_user_like_videos(args.cookie, args.uid ,args.maxc, args.output)
     if args.command == "fetch_user_post_videos":
-        await fetch_user_post_videos(args.cookie, args.uid, args.output)
+        await fetch_user_post_videos(args.cookie, args.uid ,args.maxc, args.output)
     if args.command == "fetch_user_collects":
         await fetch_user_collects(args.cookie)
     if args.command == "fetch_user_collects_videos":

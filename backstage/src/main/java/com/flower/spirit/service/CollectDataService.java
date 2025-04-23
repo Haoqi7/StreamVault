@@ -172,14 +172,14 @@ public class CollectDataService {
 					if(monitor.equals("N")) {
 						exec.execute(() -> {
 							try {
-								this.createDyData(save);
+								this.createDyData(save,"N");
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
 						});
 					}else {
 						try {
-							this.createDyData(save);
+							this.createDyData(save,"Y");
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -281,7 +281,7 @@ public class CollectDataService {
 	}
 	
 	
-	public void createDyData(CollectDataEntity entity) throws Exception {
+	public void createDyData(CollectDataEntity entity,String monitor) throws Exception {
 		String taskname = entity.getTaskname(); //任务名称 作为tvshou.nfo元数据
 		//生成tvshow.nfo元数据
 		String temporaryDirectory =FileUtil.generateDir(true, Global.platform.douyin.name(), false, null, taskname, null);
@@ -293,7 +293,7 @@ public class CollectDataService {
 		}
 		
 		logger.info("任务开始"+entity.getOriginaladdress());
-		JSONArray allDYData = this.getDYData(entity);
+		JSONArray allDYData = this.getDYData(entity,monitor);
 //		System.out.println(allDYData.size());
 		String risk="0";
 		if(allDYData!=null) {
@@ -413,11 +413,25 @@ public class CollectDataService {
 		logger.info("任务结束"+entity.getOriginaladdress());
 	}
 	
-	public JSONArray getDYData(CollectDataEntity entity) throws IOException {
+	public JSONArray getDYData(CollectDataEntity entity,String monitor) throws IOException {
 		String taskout=Global.apppath+"lot"+System.getProperty("file.separator")+entity.getId()+"_"+entity.getTaskname()+".json";
 		String sec_user_id = entity.getOriginaladdress().replaceAll("post", "").replaceAll("like", "");
+		int maxc = 80;
+
+		if ("N".equals(monitor)) {
+		    String omaxcur = entity.getOmaxcur();
+		    if (omaxcur != null) {
+		        maxc = Integer.parseInt(omaxcur);
+		    }
+		} else if ("Y".equals(monitor)) {
+		    String maxcur = entity.getMaxcur();
+		    if (maxcur != null) {
+		        maxc = Integer.parseInt(maxcur);
+		    }
+		}
+
 		if(entity.getOriginaladdress().startsWith("post")) {
-			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_post_videos", sec_user_id, null,taskout);
+			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_post_videos", sec_user_id,null,maxc,taskout);
 			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
 				   JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
 				   Files.deleteIfExists(Paths.get(taskout));
@@ -425,7 +439,7 @@ public class CollectDataService {
 			}
 		}
 		if(entity.getOriginaladdress().startsWith("like")) {
-			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_like_videos", sec_user_id, null,taskout);
+			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_like_videos", sec_user_id, null,maxc,taskout);
 			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
 				 JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
 				 Files.deleteIfExists(Paths.get(taskout));
@@ -439,7 +453,7 @@ public class CollectDataService {
 	        int endIndex = entity.getOriginaladdress().indexOf(endTag);
 	        String content = entity.getOriginaladdress().substring(startIndex, endIndex).trim();
 	        sec_user_id=sec_user_id.replaceAll(startTag+content+endTag, "");
-			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_collects_videos", null, content,taskout);
+			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_collects_videos", null, content,null,taskout);
 			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
 				 JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
 				 Files.deleteIfExists(Paths.get(taskout));
@@ -448,7 +462,7 @@ public class CollectDataService {
 		}
 		if(entity.getOriginaladdress().startsWith("recommend")) {
 			sec_user_id = entity.getOriginaladdress().replaceAll("recommend", "");
-			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_feed_videos", sec_user_id, null,taskout);
+			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_feed_videos", sec_user_id, null,null,taskout);
 			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
 				   JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
 				   Files.deleteIfExists(Paths.get(taskout));
@@ -500,7 +514,7 @@ public class CollectDataService {
 
 
 	public AjaxEntity loadDouFav(String uid) {
-		String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_collects", uid, null, null);
+		String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_collects", uid, null, null,null);
         String startTag = "stream-vault-start-collects";
         String endTag = "stream-vault-end-collects";
         int startIndex = f2cmd.indexOf(startTag) + startTag.length();

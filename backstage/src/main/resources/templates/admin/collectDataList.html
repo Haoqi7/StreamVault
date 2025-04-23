@@ -194,8 +194,19 @@
 								<option value="post">作品</option>
 								<option value="like">喜欢</option>
 								<option value="collect">收藏夹(仅自己)</option>
-								<!-- <option value="recommend">首页推荐(填写与自己cookie相符的userid)</option> -->
 							</select>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<label>本次最大获取数</label>
+							<input type="number" class="max-fetch form-control" placeholder="请输入本次最大获取数">
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<label>监控最大获取数</label>
+							<input type="number" class="monitor-max-fetch form-control" placeholder="请输入监控最大获取数">
 						</div>
 					</div>
 				</div>
@@ -393,6 +404,12 @@
 				monitoring: $('.monitoring').val(),
 				taskname: $('.taskname').val()
 			};
+			
+			// 如果是抖音，添加最大获取数参数
+			if(platform === '抖音') {
+				option.omaxcur = $('.max-fetch').val();
+				option.maxcur = $('.monitor-max-fetch').val();
+			}
 			
 			layer.load();
 			$.post("/admin/api/submitCollectData", option, function(data,status){

@@ -104,7 +104,7 @@ public class CommandUtil {
         return output.toString().trim();
     }
 
-    public static String f2cmd(String cookie, String aid,String fuc,String uid,String cid,String out) {
+    public static String f2cmd(String cookie, String aid,String fuc,String uid,String cid,Integer maxc,String out) {
 //        String cmd = "/opt/venv/bin/python3 /home/app/script/douyin.py --cookie \"" + cookie + "\" --aweme_id \""+ aid + "\"";
         String cmd ="/opt/venv/bin/python3 ";
         cmd=cmd+"/home/app/script/douyin.py ";
@@ -115,6 +115,9 @@ public class CommandUtil {
         }
         if(uid!= null) {
         	cmd = cmd+"--uid \""+uid+"\""+" ";
+        }
+        if(maxc!= null) {
+        	cmd = cmd+"--maxc \""+maxc+"\""+" ";
         }
         if(cid!= null) {
             cmd = cmd+"--cid \""+cid+"\" ";

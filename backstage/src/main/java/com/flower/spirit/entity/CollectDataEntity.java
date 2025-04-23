@@ -49,6 +49,10 @@ public class CollectDataEntity   extends DataEntity<CollectDataEntity> implement
 	private String lastCheckTime;
 	
 	private String lastid;
+	
+	private String maxcur;
+	
+	private String omaxcur;
 
 	public Integer getId() {
 		return id;
@@ -153,6 +157,22 @@ public class CollectDataEntity   extends DataEntity<CollectDataEntity> implement
 
 	public void setLastid(String lastid) {
 		this.lastid = lastid;
+	}
+
+	public String getMaxcur() {
+		return maxcur;
+	}
+
+	public void setMaxcur(String maxcur) {
+		this.maxcur = maxcur;
+	}
+
+	public String getOmaxcur() {
+		return omaxcur;
+	}
+
+	public void setOmaxcur(String omaxcur) {
+		this.omaxcur = omaxcur;
 	}
 	
 	
