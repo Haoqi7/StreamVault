@@ -620,7 +620,13 @@ public class CollectDataService {
 
 						JSONObject infobili = new JSONObject();
 						JSONObject data = new JSONObject();
-						String cover = ddd.getJSONObject("meta").getString("cover");
+						String cover = "";
+						try {
+							 cover = ddd.getJSONObject("meta").getString("cover");
+						} catch (Exception e) {
+							logger.error(ddd.toJSONString());
+						}
+						
 						data.put("title", namepath + "的投稿");
 						data.put("intro", namepath + "的投稿");
 						data.put("cover", cover);
@@ -653,12 +659,17 @@ public class CollectDataService {
 					collectDataEntity.setTaskstatus("已提交待处理");
 					collectDataEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
 					collectDataEntity.setCount(String.valueOf(arcSearch.size()));
-					collectDataEntity.setCarriedout("0"); // 归零
+//					collectDataEntity.setCarriedout("0"); // 归零
 					CollectDataEntity save = collectdDataDao.save(collectDataEntity);
 
 					JSONObject infobili = new JSONObject();
 					JSONObject data = new JSONObject();
-					String cover = ddd.getJSONObject("meta").getString("cover");
+					String cover = "";
+					try {
+						 cover = ddd.getJSONObject("meta").getString("cover");
+					} catch (Exception e) {
+						logger.error(ddd.toJSONString());
+					}
 					data.put("title", namepath + "的投稿");
 					data.put("intro", namepath + "的投稿");
 					data.put("cover", cover);
@@ -681,7 +692,7 @@ public class CollectDataService {
 				e2.printStackTrace();
 			}
 		}
-		return new AjaxEntity(Global.ajax_success, "已提交至线程,如填错请删除当前任务并重启容器解决,页面可能需要等待15秒才会显示已经填的数据", null);
+		return new AjaxEntity(Global.ajax_success, "已提交至线程,如填错请删除当前任务并重启容器解决,如果没有正在进行的任务,页面可能需要等待15秒才会显示已经填的数据,如果有正在进行的任务需要处理完之后才会处理本次提交.不要重复提交", null);
 	}
 
 	public AjaxEntity fixBiliFav(String id) {
