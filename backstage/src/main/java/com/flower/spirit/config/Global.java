@@ -76,6 +76,8 @@ public class Global {
 	public static String youtubecookies = "";
 
 	public static String twittercookies = "";
+	
+	public static String tasknexttime ="";
 
 	public static enum platform {
 		bilibili,

@@ -107,7 +107,6 @@ public class CommandUtil {
     public static String f2cmd(String cookie, String aid, String fuc, String uid, String cid, Integer maxc,
             String out) {
         StringBuilder cmd = new StringBuilder("/opt/venv/bin/python3 /home/app/script/douyin.py ");
-
         switch (fuc) {
             case "fetch_video":
                 cmd.append("fetch_video ")

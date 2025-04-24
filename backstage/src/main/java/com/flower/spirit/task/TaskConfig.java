@@ -14,9 +14,11 @@ import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
+import com.flower.spirit.config.Global;
 import com.flower.spirit.entity.ConfigEntity;
 import com.flower.spirit.service.CollectDataService;
 import com.flower.spirit.service.ConfigService;
+import com.flower.spirit.utils.DateUtils;
 
 @Component
 @EnableScheduling
@@ -77,7 +79,9 @@ public class TaskConfig implements SchedulingConfigurer {
                 }
             }
             Date nextExecutionTime = new CronTrigger(cachedCron).nextExecutionTime(triggerContext);
-            logger.info("下一次定时任务执行时间为：{}", nextExecutionTime);
+            String nextDateStr = DateUtils.formatDate(nextExecutionTime, "yyyy-MM-dd HH:mm:ss");
+            Global.tasknexttime = nextDateStr;
+            logger.info("下一次定时任务执行时间为：{}", nextDateStr);
             return nextExecutionTime;
         };
 
