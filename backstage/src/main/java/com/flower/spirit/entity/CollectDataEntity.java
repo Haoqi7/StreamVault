@@ -56,9 +56,9 @@ public class CollectDataEntity   extends DataEntity<CollectDataEntity> implement
 	
 	private String lastid;
 	
-	private String maxcur;
+	private Integer maxcur;
 	
-	private String omaxcur;
+	private Integer omaxcur;
 
 	public Integer getId() {
 		return id;
@@ -165,21 +165,23 @@ public class CollectDataEntity   extends DataEntity<CollectDataEntity> implement
 		this.lastid = lastid;
 	}
 
-	public String getMaxcur() {
+	public Integer getMaxcur() {
 		return maxcur;
 	}
 
-	public void setMaxcur(String maxcur) {
+	public void setMaxcur(Integer maxcur) {
 		this.maxcur = maxcur;
 	}
 
-	public String getOmaxcur() {
+	public Integer getOmaxcur() {
 		return omaxcur;
 	}
 
-	public void setOmaxcur(String omaxcur) {
+	public void setOmaxcur(Integer omaxcur) {
 		this.omaxcur = omaxcur;
 	}
+
+	
 	
 	
 	

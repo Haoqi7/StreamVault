@@ -452,15 +452,9 @@ public class CollectDataService {
 		int maxc = 80;
 
 		if ("N".equals(monitor)) {
-			String omaxcur = entity.getOmaxcur();
-			if (omaxcur != null) {
-				maxc = Integer.parseInt(omaxcur);
-			}
+			maxc = null!= entity.getOmaxcur() ?entity.getOmaxcur():80;
 		} else if ("Y".equals(monitor)) {
-			String maxcur = entity.getMaxcur();
-			if (maxcur != null) {
-				maxc = Integer.parseInt(maxcur);
-			}
+			maxc = null!= entity.getMaxcur() ?entity.getMaxcur():80;
 		}
 
 		if (entity.getOriginaladdress().startsWith("post")) {
@@ -613,7 +607,8 @@ public class CollectDataService {
 			// 此处为第一次提交 不是走定时器监控
 			exec.execute(() -> {
 				try {
-					JSONArray arcSearch = BiliUtil.ArcSearch(newod, collectDataEntity.getOmaxcur()); // 根据omaxcur获取数据
+					Integer maxc =null!=collectDataEntity.getOmaxcur()?collectDataEntity.getOmaxcur():300;
+					JSONArray arcSearch = BiliUtil.ArcSearch(newod, maxc); // 根据omaxcur获取数据
 					if (null != arcSearch && arcSearch.size() > 0) {
 						JSONObject ddd = arcSearch.getJSONObject(0);
 						String namepath = ddd.getString("author");
@@ -650,7 +645,8 @@ public class CollectDataService {
 			});
 		} else {
 			try {
-				JSONArray arcSearch = BiliUtil.ArcSearch(newod, collectDataEntity.getMaxcur()); // 根据maxcur获取数据
+				Integer maxc =null!=collectDataEntity.getMaxcur()?collectDataEntity.getMaxcur():300;
+				JSONArray arcSearch = BiliUtil.ArcSearch(newod, maxc); // 根据maxcur获取数据
 				if (null != arcSearch && arcSearch.size() > 0) {
 					JSONObject ddd = arcSearch.getJSONObject(0);
 					String namepath = ddd.getString("author");

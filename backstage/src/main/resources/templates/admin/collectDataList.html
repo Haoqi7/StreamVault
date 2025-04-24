@@ -438,15 +438,15 @@
 			
 			// 如果是抖音，添加最大获取数参数
 			if(platform === '抖音') {
-				option.omaxcur = $('.max-fetch').val();
-				option.maxcur = $('.monitor-max-fetch').val();
+				option.omaxcur = $('.douyin-type .max-fetch').val();
+				option.maxcur = $('.douyin-type .monitor-max-fetch').val();
 			}
 			// 如果是B站，添加最大获取数参数
 			if(platform === '哔哩') {
 				var type = $('.bilibili-select').val();
 				if(type === 'arc') {
-					option.omaxcur = $('.max-fetch').val();
-					option.maxcur = $('.monitor-max-fetch').val();
+					option.omaxcur = $('.bilibili-type .max-fetch').val();
+					option.maxcur = $('.bilibili-type .monitor-max-fetch').val();
 				}
 			}
 			

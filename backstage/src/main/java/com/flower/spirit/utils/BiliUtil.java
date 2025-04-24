@@ -512,7 +512,7 @@ public class BiliUtil {
 	 * @param maxcur 限制数量
 	 * @return 视频列表
 	 */
-	public static JSONArray getVideos(String mid, String maxcur) {
+	public static JSONArray getVideos(String mid, Integer maxcur) {
 		List<JSONObject> videos = new ArrayList<>();
 		getVideosRecursive(mid, "1", maxcur, videos);
 		JSONArray array = new JSONArray();
@@ -523,7 +523,7 @@ public class BiliUtil {
 	/**
 	 * 递归获取视频的具体实现
 	 */
-	private static void getVideosRecursive(String mid, String pn, String maxcur, List<JSONObject> videos) {
+	private static void getVideosRecursive(String mid, String pn, Integer maxcur, List<JSONObject> videos) {
 		TreeMap<String, Object> params = new TreeMap<>();
 		params.put("mid", mid);
 		params.put("ps", "30");
@@ -555,13 +555,13 @@ public class BiliUtil {
 					videos.add(video);
 
 					// 如果设置了maxcur且已达到限制,则停止获取
-					if (maxcur != null && videos.size() >= Integer.parseInt(maxcur)) {
+					if (maxcur != null && videos.size() >= maxcur) {
 						return;
 					}
 				}
 
 				// 检查是否需要获取下一页
-				if (maxcur == null || videos.size() < Integer.parseInt(maxcur)) {
+				if (maxcur == null || videos.size() < maxcur) {
 					Thread.sleep(5000); // 睡一会
 					int page = Integer.parseInt(pn);
 					int count = data.getJSONObject("page").getInteger("count");
@@ -578,7 +578,7 @@ public class BiliUtil {
 		}
 	}
 
-	public static JSONArray ArcSearch(String mid, String maxcur) {
+	public static JSONArray ArcSearch(String mid, Integer maxcur) {
 		JSONArray videos = getVideos(mid, maxcur);
 		if (videos != null && !videos.isEmpty()) {
 			String logMessage = maxcur == null ? String.format("获取到%d个视频", videos.size())
