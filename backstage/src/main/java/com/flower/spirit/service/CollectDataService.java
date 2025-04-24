@@ -285,7 +285,9 @@ public class CollectDataService {
 				Thread.sleep(2500);
 			}
 		}
-		sendNotify.sendMessage(videoaddcount, entity.getTaskname());
+		if(videoaddcount>0) {
+			sendNotify.sendMessage(videoaddcount, entity.getTaskname());
+		}
 		entity.setTaskstatus("处理完成");
 		entity.setEndtime(DateUtils.formatDateTime(new Date()));
 		collectdDataDao.save(entity);
@@ -434,7 +436,9 @@ public class CollectDataService {
 
 			}
 		}
-		sendNotify.sendMessage(videoaddcount, entity.getTaskname());
+		if(videoaddcount >0) {
+			sendNotify.sendMessage(videoaddcount, entity.getTaskname());
+		}
 		entity.setTaskstatus("处理完成");
 		if (risk.equals("1")) {
 			entity.setTaskstatus("可能触发风控本次已终止");
