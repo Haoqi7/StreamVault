@@ -28,6 +28,26 @@ public class sendNotify {
     public static final String CHANNEL_QYWX = "qywx"; // 企业微信
     public static final String CHANNEL_DINGDING = "dingding"; // 钉钉
     public static final String CHANNEL_FEISHU = "feishu"; // 飞书
+    
+    
+    /**
+     * 异步发送通知
+     */
+    public static void sendMessage(int count, String p) {
+    	if(Global.notify!= null) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    String title = "StreamVault任务完成通知";
+                    String contents = "任务"+p+"完成通知"+"\n"+"本次完成视频数量为:"+count+"\n"+"完成时间:"+DateUtils.getDate("yyyy-MM-dd HH:mm:ss");
+                    sendNotifyByChannel(title, contents, Global.notify);
+                } catch (Exception e) {
+                    logger.error("[异步通知] 发送失败: {}", e.getMessage());
+                }
+            });
+    	}
+
+    }
+    
 
     /**
      * 异步发送通知

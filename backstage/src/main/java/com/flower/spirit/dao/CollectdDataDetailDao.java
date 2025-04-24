@@ -19,7 +19,7 @@ public interface CollectdDataDetailDao extends PagingAndSortingRepository<Collec
 
 	public void deleteByDataid(Integer dataid);
 
-	public CollectDataDetailEntity findByVideoidAndDataid(String videoid, String string);
+	public List<CollectDataDetailEntity> findByVideoidAndDataid(String videoid, String string);
 
 	
 

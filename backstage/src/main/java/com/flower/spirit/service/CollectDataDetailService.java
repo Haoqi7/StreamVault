@@ -1,5 +1,7 @@
 package com.flower.spirit.service;
 
+import java.util.List;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -56,7 +58,12 @@ public class CollectDataDetailService {
 	}
 
 	public CollectDataDetailEntity findByVideoAndDataid(String videoid, Integer id) {
-		return collectdDataDetailDao.findByVideoidAndDataid(videoid,Integer.toString(id));
+		List<CollectDataDetailEntity> byVideoidAndDataid = collectdDataDetailDao.findByVideoidAndDataid(videoid,Integer.toString(id));
+		if (byVideoidAndDataid.isEmpty()) {
+			return null;
+		} else {
+			return byVideoidAndDataid.get(0);
+		}
 	}
 
 }

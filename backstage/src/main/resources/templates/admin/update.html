@@ -3,11 +3,120 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>工具说明</title>
+  <title>更新记录</title>
   <link href="../static/css/bootstrap.min.css" rel="stylesheet">
   <link href="../static/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="../static/css/style.min.css" rel="stylesheet">
- 
+  <!-- 添加 markdown 渲染库 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    .update-container {
+      padding: 20px;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin: 20px;
+      position: relative;
+      min-height: calc(100vh - 120px);
+    }
+    .content-container {
+      width: 100%;
+      height: calc(100vh - 180px);
+      overflow-y: auto;
+      padding: 20px;
+      background: #fff;
+    }
+    .loading-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    .loading-text {
+      color: #666;
+      font-size: 16px;
+    }
+    .error-container {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    .error-icon {
+      font-size: 48px;
+      color: #e74c3c;
+      margin-bottom: 15px;
+    }
+    .direct-link {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 8px 16px;
+      color: #fff;
+      background: #3498db;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    .direct-link:hover {
+      background: #2980b9;
+      text-decoration: none;
+      color: #fff;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* Markdown 样式 */
+    .markdown-body {
+      font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    .markdown-body h1 {
+      padding-bottom: .3em;
+      font-size: 2em;
+      border-bottom: 1px solid #eaecef;
+    }
+    .markdown-body h2 {
+      padding-bottom: .3em;
+      font-size: 1.5em;
+      border-bottom: 1px solid #eaecef;
+    }
+    .markdown-body h3 {
+      font-size: 1.25em;
+    }
+    .markdown-body ul {
+      padding-left: 2em;
+    }
+    .markdown-body li {
+      margin: 0.5em 0;
+    }
+    .markdown-body code {
+      padding: .2em .4em;
+      margin: 0;
+      font-size: 85%;
+      background-color: rgba(27,31,35,.05);
+      border-radius: 3px;
+    }
+    .markdown-body pre {
+      padding: 16px;
+      overflow: auto;
+      font-size: 85%;
+      line-height: 1.45;
+      background-color: #f6f8fa;
+      border-radius: 3px;
+    }
+  </style>
 </head>
 
 <body>
@@ -18,12 +127,31 @@
 
     <!--页面主要内容-->
     <main class="lyear-layout-content">
-		<br/>
-      	&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/lemon8866/StreamVault/blob/main/doc/updaterecords.md">点击跳转查看</a>
+      <div class="update-container">
+        <div class="content-container">
+          <div id="content" class="markdown-body"></div>
+          
+          <!-- 加载动画 -->
+          <div class="loading-container" id="loadingContainer">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">正在加载更新记录...</div>
+          </div>
 
+          <!-- 错误提示 -->
+          <div class="error-container" id="errorContainer">
+            <i class="mdi mdi-alert-circle error-icon"></i>
+            <h4>加载失败</h4>
+            <p>无法加载更新记录，请检查网络连接</p>
+            <a href="https://github.com/lemon8866/StreamVault/blob/main/doc/updaterecords.md" 
+               target="_blank" 
+               class="direct-link">
+              <i class="mdi mdi-open-in-new"></i> 在 GitHub 上查看
+            </a>
+          </div>
+        </div>
+      </div>
     </main>
     <!--End 页面主要内容-->
-
   </div>
 </div>
 
@@ -31,5 +159,56 @@
 <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../static/js/perfect-scrollbar.min.js"></script>
 <script type="text/javascript" src="../static/js/main.min.js"></script>
+<script>
+$(document).ready(function() {
+  var contentDiv = document.getElementById('content');
+  var loadingContainer = document.getElementById('loadingContainer');
+  var errorContainer = document.getElementById('errorContainer');
+  
+  // 使用镜像站点获取文件内容
+  var mirrors = [
+    'https://raw.fastgit.org/lemon8866/StreamVault/main/doc/updaterecords.md',
+    'https://raw.githubusercontent.com/lemon8866/StreamVault/main/doc/updaterecords.md'
+  ];
+  
+  function tryNextMirror(index) {
+    if (index >= mirrors.length) {
+      loadingContainer.style.display = 'none';
+      errorContainer.style.display = 'block';
+      return;
+    }
+
+    $.ajax({
+      url: mirrors[index],
+      method: 'GET',
+      success: function(content) {
+        try {
+          // 直接使用 marked 渲染 markdown
+          contentDiv.innerHTML = marked.parse(content);
+          loadingContainer.style.display = 'none';
+        } catch (e) {
+          console.error('Error parsing content:', e);
+          tryNextMirror(index + 1);
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error('Error fetching from mirror ' + mirrors[index] + ':', error);
+        tryNextMirror(index + 1);
+      }
+    });
+  }
+
+  // 开始尝试第一个镜像
+  tryNextMirror(0);
+
+  // 30秒超时检查
+  setTimeout(function() {
+    if (loadingContainer.style.display !== 'none') {
+      loadingContainer.style.display = 'none';
+      errorContainer.style.display = 'block';
+    }
+  }, 30000);
+});
+</script>
 </body>
 </html>

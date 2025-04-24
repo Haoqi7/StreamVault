@@ -18,47 +18,109 @@
         <![endif]-->
     <style>
         .layui-table-cell {
-            height: 100%;
-            max-width: 100%;
+            height: auto;
+            line-height: 20px;
+            padding: 8px;
+            position: relative;
+            box-sizing: border-box;
         }
-        .layui-table-fixed-r{
-        	display: none
+        .video-title {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #1e88e5;
+            cursor: pointer;
+        }
+        .video-title:hover {
+            color: #0d47a1;
+            text-decoration: underline;
+        }
+        .video-id {
+            color: #666;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .layui-table {
+            margin: 0;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+        .layui-table thead tr {
+            background-color: #fafafa;
+        }
+        .layui-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        .layui-table-header {
+            border-radius: 4px 4px 0 0;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+        .status-completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-pending {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        .status-error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .layui-table-tool {
+            background-color: transparent;
+            border: none;
+            padding: 0 0 10px 0;
+        }
+        .create-time {
+            color: #666;
+            font-size: 12px;
+        }
+        .tooltip-content {
+            display: none;
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            z-index: 999;
+            max-width: 300px;
+            word-wrap: break-word;
         }
     </style>
     </head>
     <body>
 		<input id="taskid" type="hidden" th:value="${taskid}"/> 
-        <div class="layui-fluid">
-            <div class="layui-row layui-col-space15">
-                <div class="layui-col-md12">
-                    <div class="layui-card">
-                    
-                    <div class="layui-card-body ">
-                            <form class="layui-form layui-col-space5">
-        
-                                <div class="layui-input-inline layui-show-xs-block">
-  									<select id="status">
-  										<option value="">请选择</option>
-  										<option value="已完成">已完成</option>
-  										<option value="未下载">未下载</option>
-  										<option value="不支持">不支持</option>
-                           			 </select>   
-                                </div>
-                                <div class="layui-input-inline layui-show-xs-block">
+        <div class="layui-fluid" style="padding: 10px;">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <form class="layui-form">
+                        <div class="layui-form-item" style="margin-bottom: 0;">
+                            <div class="layui-inline">
+                                <select id="status" lay-filter="status">
+                                    <option value="">全部状态</option>
+                                    <option value="已完成">已完成</option>
+                                    <option value="未下载">未下载</option>
+                                    <option value="不支持">不支持</option>
+                                </select>
+                            </div>
+                            <div class="layui-inline">
                                 <button type="button" class="layui-btn layui-btn-normal search">搜索</button>
-                                <button type="button" class="layui-btn layui-btn-normal initList">重置列表</button>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="layui-card-body layui-table-body layui-table-main">
-							<table class="layui-hide" id="projectList" lay-filter="projectList"></table>
-                        </div>
-                        <div class="layui-card-body ">
-                            <div class="page" id="page">
-         
+                                <button type="button" class="layui-btn layui-btn-primary initList">重置</button>
                             </div>
                         </div>
-                    </div>
+                    </form>
+                </div>
+                <div class="layui-card-body" style="padding-top: 0;">
+                    <table class="layui-hide" id="projectList" lay-filter="projectList"></table>
                 </div>
             </div>
         </div> 
@@ -125,11 +187,13 @@
     			  table.render({
     				id:'projectList',
     				elem: '#projectList',
-    				height: 700,
+    				height: 'full-100',
     				method:'post',
     				url: '/admin/api/findCollectDataDetail',
     				where: option,
     				limit:15,
+    				even: true,
+    				size: 'lg',
     				request: {
     				     pageName: 'pageNo',
     				     limitName: 'pageSize'
@@ -141,12 +205,23 @@
     			        last: false,
     			     },
     			     cols: [[ 
-    			    	 {field: 'id', title: 'ID', width:60},
-    			    	 {field: 'videoid', title: 'videoid', width:180},
-    			    	 {field: 'videoname', title: '视频名称', width:180},
-    			    	 {field: 'originaladdress', title: 'originaladdress', width:180},
-    			    	 {field: 'status', title: '状态', width:180},
-    			    	 {field: 'createtime', title: '提交时间', width:180},
+    			    	 {field: 'id', title: 'ID', width: 80, sort: true, align: 'center'},
+    			    	 {field: 'videoid', title: '视频ID', width: 160, templet: function(d){
+    			    		 return '<span class="video-id">' + d.videoid + '</span>';
+    			    	 }},
+    			    	 {field: 'videoname', title: '视频名称', minWidth: 300, templet: function(d){
+    			    		 return '<div class="video-title" lay-event="showTip">' + d.videoname + '</div>';
+    			    	 }},
+    			    	 {field: 'status', title: '状态', width: 120, align: 'center', templet: function(d){
+    			    		 var statusClass = '';
+    			    		 if(d.status === '已完成') statusClass = 'status-completed';
+    			    		 else if(d.status === '未下载') statusClass = 'status-pending';
+    			    		 else if(d.status === '不支持') statusClass = 'status-error';
+    			    		 return '<span class="status-badge ' + statusClass + '">' + d.status + '</span>';
+    			    	 }},
+    			    	 {field: 'createtime', title: '提交时间', width: 160, align: 'center', templet: function(d){
+    			    		 return '<span class="create-time">' + d.createtime + '</span>';
+    			    	 }}
     			     ]],
     			     title: '媒体表'	,
     			     parseData:function(res){
@@ -157,6 +232,25 @@
     			             "count": res.record.totalElements,
     			             "data": res.record.content
     			         };
+    			     },
+    			     done: function(){
+    			    	 // 添加鼠标悬停显示完整标题的功能
+    			    	 $('.video-title').hover(function(e){
+    			    		 var title = $(this).text();
+    			    		 var tooltip = $('<div class="tooltip-content">' + title + '</div>');
+    			    		 $('body').append(tooltip);
+    			    		 tooltip.css({
+    			    			 left: e.pageX + 10,
+    			    			 top: e.pageY + 10
+    			    		 }).fadeIn('fast');
+    			    	 }, function(){
+    			    		 $('.tooltip-content').remove();
+    			    	 }).mousemove(function(e){
+    			    		 $('.tooltip-content').css({
+    			    			 left: e.pageX + 10,
+    			    			 top: e.pageY + 10
+    			    		 });
+    			    	 });
     			     }
     			  });
     			  

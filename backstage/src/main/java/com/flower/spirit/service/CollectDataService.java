@@ -43,6 +43,7 @@ import com.flower.spirit.utils.FileUtil;
 import com.flower.spirit.utils.HttpUtil;
 import com.flower.spirit.utils.StringUtil;
 import com.flower.spirit.utils.XbogusUtil;
+import com.flower.spirit.utils.sendNotify;
 
 @Service
 public class CollectDataService {
@@ -84,7 +85,7 @@ public class CollectDataService {
 		for (CollectDataEntity data : list) {
 			// 开始执行
 			// 删除以前的 记录 2025/04/25 先不删了 想优化通知问题
-			 collectDataDetailService.deleteDataid(data.getId());
+//			 collectDataDetailService.deleteDataid(data.getId());
 			this.submitCollectData(data, "Y");
 		}
 
@@ -160,7 +161,7 @@ public class CollectDataService {
 					collectDataEntity.setTaskstatus("已提交待处理");
 					collectDataEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
 					collectDataEntity.setCount("0");
-					collectDataEntity.setCarriedout("0"); // 归零
+//					collectDataEntity.setCarriedout("0"); // 归零
 					CollectDataEntity save = collectdDataDao.save(collectDataEntity);
 					// 提交线程
 					// this.createDyData(save);
@@ -204,6 +205,7 @@ public class CollectDataService {
 	public void createBiliData(CollectDataEntity entity, JSONArray json, String namepath, String vt) throws Exception {
 		entity.setTaskstatus("已开始处理");
 		collectdDataDao.save(entity);
+		int videoaddcount =0;
 		for (int i = 0; i < json.size(); i++) {
 			JSONObject data = json.getJSONObject(i);
 			String bvid = data.getString("bvid");
@@ -215,6 +217,7 @@ public class CollectDataService {
 					String filename = StringUtil.getFileName(map.get("title"), map.get("cid"));
 					String cid = map.get("cid");
 					List<VideoDataEntity> findByVideoid = videoDataService.findByVideoid(cid);
+					//这里判断 视频库 是否存在 存在则不处理
 					if (findByVideoid.size() == 0) {
 						Map<String, String> findVideoStreaming = BiliUtil.findVideoStreamingNoData(map,
 								Global.bilicookies, map.get("quality"), namepath);
@@ -259,23 +262,30 @@ public class CollectDataService {
 				} else {
 					status = "视频异常下载失败";
 				}
-
+				//这里应该判断一下CollectDataDetailEntity记录是否存在 存在 则不处理  因为已经不预删除了
 				CollectDataDetailEntity collectDataDetailEntity = new CollectDataDetailEntity();
-				collectDataDetailEntity.setDataid(entity.getId());
-				collectDataDetailEntity.setVideoname(map.get("title"));
 				collectDataDetailEntity.setVideoid(map == null ? bvid : map.get("cid"));
-				collectDataDetailEntity.setOriginaladdress(bvid);
-				collectDataDetailEntity.setStatus(status);
-				collectDataDetailEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
-				collectDataDetailService.save(collectDataDetailEntity);
-				// 修改主体
-				String carriedout = entity.getCarriedout() == null ? "1"
-						: String.valueOf(Integer.parseInt(entity.getCarriedout()) + 1);
-				entity.setCarriedout(carriedout);
-				collectdDataDao.save(entity);
+				collectDataDetailEntity.setDataid(entity.getId());
+				CollectDataDetailEntity byVideoAndDataid = collectDataDetailService.findByVideoAndDataid(collectDataDetailEntity.getVideoid(), collectDataDetailEntity.getDataid());
+				if(byVideoAndDataid== null) {
+					collectDataDetailEntity.setVideoname(map.get("title"));
+					collectDataDetailEntity.setOriginaladdress(bvid);
+					collectDataDetailEntity.setStatus(status);
+					collectDataDetailEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
+					collectDataDetailService.save(collectDataDetailEntity);
+					// 修改主体
+					String carriedout = entity.getCarriedout() == null ? "1"
+							: String.valueOf(Integer.parseInt(entity.getCarriedout()) + 1);
+					entity.setCarriedout(carriedout);
+					collectdDataDao.save(entity);
+					videoaddcount++;
+				}
+				
+
 				Thread.sleep(2500);
 			}
 		}
+		sendNotify.sendMessage(videoaddcount, entity.getTaskname());
 		entity.setTaskstatus("处理完成");
 		entity.setEndtime(DateUtils.formatDateTime(new Date()));
 		collectdDataDao.save(entity);
@@ -294,7 +304,7 @@ public class CollectDataService {
 			}
 
 		}
-
+		int videoaddcount = 0;
 		logger.info("任务开始" + entity.getOriginaladdress());
 		JSONArray allDYData = this.getDYData(entity, monitor);
 		// System.out.println(allDYData.size());
@@ -402,22 +412,29 @@ public class CollectDataService {
 				if (status.equals("")) {
 					status = findByVideoid.size() == 0 ? "已完成" : "已完成(未下载已存在)";
 				}
+				
+				//这里应该判断一下CollectDataDetailEntity记录是否存在 存在 则不处理  因为已经不预删除了
 				CollectDataDetailEntity collectDataDetailEntity = new CollectDataDetailEntity();
-				collectDataDetailEntity.setVideoname(desc);
 				collectDataDetailEntity.setDataid(entity.getId());
 				collectDataDetailEntity.setVideoid(awemeId);
-				collectDataDetailEntity.setOriginaladdress(awemeId);
-				collectDataDetailEntity.setStatus(status);
-				collectDataDetailEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
-				collectDataDetailService.save(collectDataDetailEntity);
-				// 修改主体
-				String carriedout = entity.getCarriedout() == null ? "1"
-						: String.valueOf(Integer.parseInt(entity.getCarriedout()) + 1);
-				entity.setCarriedout(carriedout);
-				collectdDataDao.save(entity);
+				CollectDataDetailEntity byVideoAndDataid = collectDataDetailService.findByVideoAndDataid(collectDataDetailEntity.getVideoid(), collectDataDetailEntity.getDataid());
+				if(byVideoAndDataid== null) {
+					collectDataDetailEntity.setVideoname(desc);
+					collectDataDetailEntity.setOriginaladdress(awemeId);
+					collectDataDetailEntity.setStatus(status);
+					collectDataDetailEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
+					collectDataDetailService.save(collectDataDetailEntity);
+					// 修改主体
+					String carriedout = entity.getCarriedout() == null ? "1"
+							: String.valueOf(Integer.parseInt(entity.getCarriedout()) + 1);
+					entity.setCarriedout(carriedout);
+					collectdDataDao.save(entity);
+					videoaddcount++;
+				}
 
 			}
 		}
+		sendNotify.sendMessage(videoaddcount, entity.getTaskname());
 		entity.setTaskstatus("处理完成");
 		if (risk.equals("1")) {
 			entity.setTaskstatus("可能触发风控本次已终止");
@@ -566,8 +583,8 @@ public class CollectDataService {
 			// 进线程前创建collectDataEntity
 			collectDataEntity.setTaskstatus("已提交待处理");
 			collectDataEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
-			collectDataEntity.setCount(String.valueOf(jsonArray.size()));
-			collectDataEntity.setCarriedout("0"); // 归零
+			collectDataEntity.setCount(String.valueOf(jsonArray.size()));  //收藏夹肯定是全量 这里无所谓  count怎么处理
+//			collectDataEntity.setCarriedout("0"); // 归零
 			CollectDataEntity save = collectdDataDao.save(collectDataEntity);
 			// 提交线程
 			if (monitor.equals("N")) {
@@ -602,8 +619,8 @@ public class CollectDataService {
 						String namepath = ddd.getString("author");
 						collectDataEntity.setTaskstatus("已提交待处理");
 						collectDataEntity.setCreatetime(DateUtils.formatDateTime(new Date()));
-						collectDataEntity.setCount(String.valueOf(arcSearch.size()));
-						collectDataEntity.setCarriedout("0"); // 归零
+						collectDataEntity.setCount(String.valueOf(arcSearch.size())); //这里不高了 就这样吧 count 不参考总数 参考Carriedout吧
+//						collectDataEntity.setCarriedout("0"); // 归零
 						CollectDataEntity save = collectdDataDao.save(collectDataEntity);
 
 						JSONObject infobili = new JSONObject();
