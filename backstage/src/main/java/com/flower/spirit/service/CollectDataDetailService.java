@@ -58,7 +58,7 @@ public class CollectDataDetailService {
 	}
 
 	public CollectDataDetailEntity findByVideoAndDataid(String videoid, Integer id) {
-		List<CollectDataDetailEntity> byVideoidAndDataid = collectdDataDetailDao.findByVideoidAndDataid(videoid,Integer.toString(id));
+		List<CollectDataDetailEntity> byVideoidAndDataid = collectdDataDetailDao.findByVideoidAndDataid(videoid,id);
 		if (byVideoidAndDataid.isEmpty()) {
 			return null;
 		} else {
