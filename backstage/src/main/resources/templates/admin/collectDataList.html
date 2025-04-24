@@ -311,7 +311,8 @@
 				$('.douyin-type').show();
 				$('.douyin-tip').show();
 				$('.bilibili-tip').hide();
-				$('.bilibili-type').show();
+				$('.bilibili-type').hide();
+				$('.bilibili-max-fetch').hide();
 				$('.address-label').parent().parent().show();
 				$('.address-label').text('用户ID');
 				$('.originaladdress').attr('placeholder', '请输入用户ID');
@@ -321,9 +322,11 @@
 				$('.douyin-tip').hide();
 				$('.bilibili-tip').show();
 				$('.bilibili-type').show();
+				$('.bilibili-max-fetch').hide();
 				$('.address-label').parent().parent().show();
 				$('.address-label').text('收藏链接');
 				$('.originaladdress').attr('placeholder', '请输入收藏夹ID');
+				$('.bilibili-select').trigger('change');
 			}
 		}).trigger('change');
 
@@ -332,11 +335,9 @@
 			var type = $(this).val();
 			if(type === 'arc') {
 				$('.bilibili-max-fetch').show();
-				$('.address-label').text('用户ID');
-				$('.originaladdress').attr('placeholder', '请输入用户ID');
+				$('.originaladdress').attr('placeholder', '请输入UP主ID');
 			} else {
 				$('.bilibili-max-fetch').hide();
-				$('.address-label').text('收藏链接');
 				$('.originaladdress').attr('placeholder', '请输入收藏夹ID');
 			}
 		}).trigger('change');
