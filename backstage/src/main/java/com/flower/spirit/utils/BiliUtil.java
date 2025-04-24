@@ -60,32 +60,35 @@ public class BiliUtil {
 	 * 
 	 */
 	public static Map<String, String> findVideoStreamingNoData(Map<String, String> videoDataInfo, String token,
-			String quality,String namepath) throws Exception {
+			String quality, String namepath) throws Exception {
 		String api = buildInterfaceAddress(videoDataInfo.get("aid"), videoDataInfo.get("cid"), token, quality);
 		String httpGetBili = HttpUtil.httpGetBili(api, "UTF-8", token);
 		JSONObject parseObject = JSONObject.parseObject(httpGetBili);
 		String filename = StringUtil.getFileName(videoDataInfo.get("title"), videoDataInfo.get("cid"));
 		if ((Integer.valueOf(Global.bilibitstream) >= 80 && quality.equals("1"))
 				|| parseObject.getJSONObject("data").containsKey("dash")) {
-			Map<String, String> processing = processing(parseObject, videoDataInfo, filename,namepath);
+			Map<String, String> processing = processing(parseObject, videoDataInfo, filename, namepath);
 			return processing;
 		}
 		String video = parseObject.getJSONObject("data").getJSONArray("durl").getJSONObject(0).getString("url");
 		if (Global.downtype.equals("http")) {
-			HttpUtil.downBiliFromUrl(video, filename + ".mp4",FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, namepath, null));
+			HttpUtil.downBiliFromUrl(video, filename + ".mp4",
+					FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, namepath, null));
 		}
 		if (Global.downtype.equals("a2")) {
-		
+
 			Aria2Util.sendMessage(Global.a2_link,
 					Aria2Util.createBiliparameter(
-							video, 
-							FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), false, filename, namepath, null),
+							video,
+							FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), false, filename,
+									namepath, null),
 							filename + ".mp4",
 							Global.a2_token));
 		}
-		videoDataInfo.put("video",FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, namepath, "mp4"));
+		videoDataInfo.put("video",
+				FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, namepath, "mp4"));
 		videoDataInfo.put("videoname", filename + ".mp4");
-//		System.out.println(videoDataInfo);
+		// System.out.println(videoDataInfo);
 		return videoDataInfo;
 	}
 
@@ -141,7 +144,7 @@ public class BiliUtil {
 
 				if (isDashFormat) {
 					// 处理DASH格式视频
-					processedVideo = processDashVideo(videoData, videoInfo, filename,null);
+					processedVideo = processDashVideo(videoData, videoInfo, filename, null);
 				} else {
 					// 处理普通格式视频
 					processedVideo = processNormalVideo(videoData, videoInfo, filename);
@@ -172,8 +175,8 @@ public class BiliUtil {
 	 * @throws Exception 处理过程中的异常
 	 */
 	private static Map<String, String> processDashVideo(JSONObject videoData, Map<String, String> videoInfo,
-			String filename,String fav) throws Exception {
-		return processing(videoData, videoInfo, filename,fav);
+			String filename, String fav) throws Exception {
+		return processing(videoData, videoInfo, filename, fav);
 	}
 
 	/**
@@ -197,7 +200,8 @@ public class BiliUtil {
 			HttpUtil.downBiliFromUrl(videoUrl, filename + ".mp4", targetDir);
 		} else if (Global.downtype.equals("a2")) {
 			// 使用Aria2下载
-			String targetDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), true, filename, null, null);
+			String targetDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), true, filename,
+					null, null);
 			Aria2Util.sendMessage(
 					Global.a2_link,
 					Aria2Util.createBiliparameter(videoUrl, targetDir, filename + ".mp4", Global.a2_token));
@@ -205,7 +209,7 @@ public class BiliUtil {
 
 		// 更新视频信息
 		Map<String, String> result = new HashMap<>(videoInfo);
-		result.put("video",FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4"));
+		result.put("video", FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4"));
 		result.put("videoname", filename + ".mp4");
 
 		return result;
@@ -220,7 +224,8 @@ public class BiliUtil {
 	 * @return 更新后的视频信息
 	 * @throws Exception 处理过程中可能的异常
 	 */
-	private static Map<String, String> processing(JSONObject videoData, Map<String, String> videoInfo, String filename,String fav)
+	private static Map<String, String> processing(JSONObject videoData, Map<String, String> videoInfo, String filename,
+			String fav)
 			throws Exception {
 		// 获取音视频流URL
 		JSONObject dashData = videoData.getJSONObject("data").getJSONObject("dash");
@@ -229,15 +234,15 @@ public class BiliUtil {
 
 		// 根据下载类型处理
 		if (Global.downtype.equals("http")) {
-			processHttpDownload(videoUrl, audioUrl, filename,fav);
+			processHttpDownload(videoUrl, audioUrl, filename, fav);
 		} else if (Global.downtype.equals("a2")) {
-			processAria2Download(videoUrl, audioUrl, videoInfo, filename,fav);
+			processAria2Download(videoUrl, audioUrl, videoInfo, filename, fav);
 		}
 
 		// 更新视频信息
 		Map<String, String> result = new HashMap<>(videoInfo);
-		
-		result.put("video",FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4"));
+
+		result.put("video", FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4"));
 		result.put("videoname", filename + ".mp4");
 
 		return result;
@@ -246,17 +251,16 @@ public class BiliUtil {
 	/**
 	 * 使用HTTP方式下载并处理DASH格式视频
 	 */
-	private static void processHttpDownload(String videoUrl, String audioUrl, String filename,String fav) throws Exception {
+	private static void processHttpDownload(String videoUrl, String audioUrl, String filename, String fav)
+			throws Exception {
 		// 创建临时目录
 		String tempDir = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, null);
-		String outputPath =  FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4");
-		
-		
-		if(fav != null) {
-			 tempDir = FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, fav, null);
-			 outputPath =  FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, fav, "mp4");
+		String outputPath = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4");
+
+		if (fav != null) {
+			tempDir = FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, fav, null);
+			outputPath = FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, fav, "mp4");
 		}
-		
 
 		// 确保目录存在
 		FileUtils.createDirectory(tempDir);
@@ -264,15 +268,15 @@ public class BiliUtil {
 		// 下载音视频文件
 		String videoFile = tempDir + File.separator + filename + "-video.m4s";
 		String audioFile = tempDir + File.separator + filename + "-audio.m4s";
-//		System.err.println(videoFile);
-//		System.err.println(audioFile);
+		// System.err.println(videoFile);
+		// System.err.println(audioFile);
 		HttpUtil.downBiliFromUrl(videoUrl, filename + "-video.m4s", tempDir);
 		HttpUtil.downBiliFromUrl(audioUrl, filename + "-audio.m4s", tempDir);
 
 		// 合并音视频文件
 		String ffmpegCmd = String.format("ffmpeg -i %s -i %s -c:v copy -c:a copy -f mp4 %s",
 				videoFile, audioFile, outputPath);
-//		System.out.println(ffmpegCmd);
+		// System.out.println(ffmpegCmd);
 		CommandUtil.command(ffmpegCmd);
 
 		// 清理临时文件
@@ -285,11 +289,13 @@ public class BiliUtil {
 	 * 使用Aria2方式下载DASH格式视频
 	 */
 	private static void processAria2Download(String videoUrl, String audioUrl, Map<String, String> videoInfo,
-			String filename,String fav) throws Exception {
+			String filename, String fav) throws Exception {
 		// 创建下载目录
-		String downloadDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), true, filename, null, null);
-		if(fav != null) {
-			downloadDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), false, filename, null, fav);
+		String downloadDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), true, filename,
+				null, null);
+		if (fav != null) {
+			downloadDir = FileUtil.generateDir(Global.down_path, Global.platform.bilibili.name(), false, filename, null,
+					fav);
 		}
 		// 发送下载任务
 		String videores = Aria2Util.sendMessage(Global.a2_link,
@@ -310,8 +316,8 @@ public class BiliUtil {
 		logger.info("高清视频使用DASH格式，提交到FFmpeg队列等待下载完成后合并");
 
 		// 临时目录和输出路径
-		String tempDir =  FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, null);
-		String outputPath=  FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4");
+		String tempDir = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, null);
+		String outputPath = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4");
 		// 保存队列信息
 		FfmpegQueueEntity ffmpegQueue = new FfmpegQueueEntity();
 		ffmpegQueue.setVideoid(videoInfo.get("cid"));
@@ -365,7 +371,7 @@ public class BiliUtil {
 		}
 		String serchPersion = HttpUtil.getSerchPersion(api, "UTF-8");
 		JSONObject videoData = JSONObject.parseObject(serchPersion);
-//		System.out.println(videoData);
+		// System.out.println(videoData);
 		if (videoData.getString("code").equals("0")) {
 			// 优化多集问题 从page 里取
 
@@ -431,10 +437,10 @@ public class BiliUtil {
 		Pattern pattern = Pattern.compile("/video/(BV\\w+|av\\d+)", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(url);
 		if (matcher.find()) {
-            String videoId = matcher.group(1);
-            return videoId;
-        }
-		//下边是旧代码  后续移除 理论无效
+			String videoId = matcher.group(1);
+			return videoId;
+		}
+		// 下边是旧代码 后续移除 理论无效
 		if (url.contains("http")) {
 			replace = url.replaceAll("http://", "").replaceAll("https://", "").replace("www.bilibili.com/video/", "");
 			int indexOf = replace.indexOf("/");
@@ -502,13 +508,13 @@ public class BiliUtil {
 	/**
 	 * 获取用户投稿视频
 	 * 
-	 * @param mid        用户ID
-	 * @param checkPoint 检查点信息，如果为null则获取全量
+	 * @param mid    用户ID
+	 * @param maxcur 限制数量
 	 * @return 视频列表
 	 */
-	public static JSONArray getVideos(String mid, CollectDataEntity entity) {
+	public static JSONArray getVideos(String mid, String maxcur) {
 		List<JSONObject> videos = new ArrayList<>();
-		getVideosRecursive(mid, "1", entity, videos);
+		getVideosRecursive(mid, "1", maxcur, videos);
 		JSONArray array = new JSONArray();
 		array.addAll(videos);
 		return array;
@@ -517,7 +523,7 @@ public class BiliUtil {
 	/**
 	 * 递归获取视频的具体实现
 	 */
-	private static void getVideosRecursive(String mid, String pn, CollectDataEntity entity, List<JSONObject> videos) {
+	private static void getVideosRecursive(String mid, String pn, String maxcur, List<JSONObject> videos) {
 		TreeMap<String, Object> params = new TreeMap<>();
 		params.put("mid", mid);
 		params.put("ps", "30");
@@ -531,7 +537,8 @@ public class BiliUtil {
 
 		String apiUrl = "https://api.bilibili.com/x/space/wbi/arc/search?" + wbiUrl;
 		try {
-			String response = HttpUtil.httpGetBili(apiUrl, Global.bilicookies,"https://space.bilibili.com","https://space.bilibili.com/"+mid);
+			String response = HttpUtil.httpGetBili(apiUrl, Global.bilicookies, "https://space.bilibili.com",
+					"https://space.bilibili.com/" + mid);
 			JSONObject json = JSONObject.parseObject(response);
 			if (json.getInteger("code") == 0) {
 				JSONObject data = json.getJSONObject("data");
@@ -541,61 +548,28 @@ public class BiliUtil {
 				if (vlist.size() == 0) {
 					return;
 				}
-				boolean hasNewVideos = false;
-				boolean foundCheckpoint = false;
 
 				// 添加视频
 				for (int i = 0; i < vlist.size(); i++) {
 					JSONObject video = vlist.getJSONObject(i);
-					String created = String.valueOf(video.getLongValue("created"));
-					String bvid = video.getString("bvid");
+					videos.add(video);
 
-					// 先检查是否找到检查点视频
-					if (entity != null && entity.getLastCheckTime() != null &&
-							created.equals(entity.getLastCheckTime()) &&
-							bvid.equals(entity.getLastid())) {
-						foundCheckpoint = true;
-						break;
+					// 如果设置了maxcur且已达到限制,则停止获取
+					if (maxcur != null && videos.size() >= Integer.parseInt(maxcur)) {
+						return;
 					}
-
-					// 如果没找到检查点，检查是否是新视频
-					boolean isNew = entity == null ||
-							entity.getLastCheckTime() == null ||
-							Long.parseLong(created) > Long.parseLong(entity.getLastCheckTime()) ||
-							(created.equals(entity.getLastCheckTime()) && !bvid.equals(entity.getLastid()));
-
-					if (isNew) {
-						videos.add(video);
-						hasNewVideos = true;
-					}
-				}
-
-				// 如果找到检查点视频，直接返回
-				if (foundCheckpoint) {
-					return;
-				}
-
-				// 降级方案：检查当前页最后一个视频的时间
-				JSONObject lastVideo = vlist.getJSONObject(vlist.size() - 1);
-				long pageLastTime = lastVideo.getLongValue("created");
-
-				// 如果当前页最后视频的时间早于检查点，说明不需要继续查找了
-				if (entity != null && entity.getLastCheckTime() != null &&
-						pageLastTime < Long.parseLong(entity.getLastCheckTime())) {
-					logger.info("未找到检查点视频，但根据时间戳判断已经超过检查点范围");
-					return;
 				}
 
 				// 检查是否需要获取下一页
-				if (hasNewVideos) {
-					Thread.sleep(5000);  //睡一会
+				if (maxcur == null || videos.size() < Integer.parseInt(maxcur)) {
+					Thread.sleep(5000); // 睡一会
 					int page = Integer.parseInt(pn);
 					int count = data.getJSONObject("page").getInteger("count");
 					int ps = data.getJSONObject("page").getInteger("ps");
 					int totalPages = (count + ps - 1) / ps;
 
 					if (page < totalPages) {
-						getVideosRecursive(mid, String.valueOf(page + 1), entity, videos);
+						getVideosRecursive(mid, String.valueOf(page + 1), maxcur, videos);
 					}
 				}
 			}
@@ -604,11 +578,11 @@ public class BiliUtil {
 		}
 	}
 
-	public static JSONArray ArcSearch(String mid, CollectDataEntity entity) {
-		JSONArray videos = getVideos(mid, entity);
+	public static JSONArray ArcSearch(String mid, String maxcur) {
+		JSONArray videos = getVideos(mid, maxcur);
 		if (videos != null && !videos.isEmpty()) {
-			String logMessage = entity == null ? String.format("获取到%d个视频", videos.size())
-					: String.format("发现%d个新投稿", videos.size());
+			String logMessage = maxcur == null ? String.format("获取到%d个视频", videos.size())
+					: String.format("获取到%d个视频(限制:%s)", videos.size(), maxcur);
 			logger.info(logMessage);
 			return videos;
 		}

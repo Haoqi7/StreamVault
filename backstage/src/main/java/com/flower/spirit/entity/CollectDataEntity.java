@@ -38,8 +38,14 @@ public class CollectDataEntity   extends DataEntity<CollectDataEntity> implement
 	
 	private String endtime;
 	
+	/**
+	 * 总任务数
+	 */
 	private String count;
 	
+	/**
+	 * 已经完成数
+	 */
 	private String carriedout;
 	
 	private String originaladdress;

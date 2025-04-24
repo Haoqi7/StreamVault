@@ -18,8 +18,8 @@
 			white-space: nowrap;
 			overflow: hidden;
 		}
-		th:nth-child(1) { width: 5%; }  /* 编号 */
-		th:nth-child(2) { width: 10%; } /* 任务名称 */
+		th:nth-child(1) { width: 3%; }  /* 编号 */
+		th:nth-child(2) { width: 12%; } /* 任务名称 */
 		th:nth-child(3) { width: 15%; } /* 源地址 */
 		th:nth-child(4) { width: 5%; }  /* 来源平台 */
 		th:nth-child(5) { width: 5%; }  /* 是否监控 */
@@ -186,6 +186,18 @@
 							</select>
 						</div>
 					</div>
+					<div class="col-md-6 bilibili-max-fetch" style="display: none;">
+						<div class="form-group">
+							<label>首次最大获取数</label>
+							<input type="number" class="max-fetch form-control" placeholder="请输入首次最大获取数">
+						</div>
+					</div>
+					<div class="col-md-6 bilibili-max-fetch" style="display: none;">
+						<div class="form-group">
+							<label>监控最大获取数</label>
+							<input type="number" class="monitor-max-fetch form-control" placeholder="请输入监控最大获取数">
+						</div>
+					</div>
 				</div>
 
 
@@ -203,8 +215,8 @@
 					</div>
 					<div class="col-md-6">
 						<div class="form-group">
-							<label>本次最大获取数</label>
-							<input type="number" class="max-fetch form-control" placeholder="请输入本次最大获取数">
+							<label>首次最大获取数</label>
+							<input type="number" class="max-fetch form-control" placeholder="请输入首次最大获取数">
 						</div>
 					</div>
 					<div class="col-md-6">
@@ -299,7 +311,7 @@
 				$('.douyin-type').show();
 				$('.douyin-tip').show();
 				$('.bilibili-tip').hide();
-				$('.bilibili-type').hide();
+				$('.bilibili-type').show();
 				$('.address-label').parent().parent().show();
 				$('.address-label').text('用户ID');
 				$('.originaladdress').attr('placeholder', '请输入用户ID');
@@ -310,6 +322,20 @@
 				$('.bilibili-tip').show();
 				$('.bilibili-type').show();
 				$('.address-label').parent().parent().show();
+				$('.address-label').text('收藏链接');
+				$('.originaladdress').attr('placeholder', '请输入收藏夹ID');
+			}
+		}).trigger('change');
+
+		// B站类型选择切换
+		$('.bilibili-select').change(function(){
+			var type = $(this).val();
+			if(type === 'arc') {
+				$('.bilibili-max-fetch').show();
+				$('.address-label').text('用户ID');
+				$('.originaladdress').attr('placeholder', '请输入用户ID');
+			} else {
+				$('.bilibili-max-fetch').hide();
 				$('.address-label').text('收藏链接');
 				$('.originaladdress').attr('placeholder', '请输入收藏夹ID');
 			}
@@ -413,6 +439,14 @@
 			if(platform === '抖音') {
 				option.omaxcur = $('.max-fetch').val();
 				option.maxcur = $('.monitor-max-fetch').val();
+			}
+			// 如果是B站，添加最大获取数参数
+			if(platform === '哔哩') {
+				var type = $('.bilibili-select').val();
+				if(type === 'arc') {
+					option.omaxcur = $('.max-fetch').val();
+					option.maxcur = $('.monitor-max-fetch').val();
+				}
 			}
 			
 			layer.load();
@@ -569,7 +603,19 @@
 
 							html +='<tr>'
 									+'<td title="'+list[i].id+'">'+list[i].id+'</td>'
-									+'<td title="'+list[i].taskname+'">'+textnone(list[i].taskname)+'</td>'
+									+'<td title="'+list[i].taskname+'">'
+										+textnone(list[i].taskname)
+										+'<br/><small class="text-muted">'
+										+(list[i].platform === '哔哩' && list[i].originaladdress.startsWith('bili-arc-') ? 
+											(list[i].omaxcur ? '首次:'+list[i].omaxcur : '首次:哔哩全量') + 
+											' | ' + 
+											(list[i].maxcur ? '监控:'+list[i].maxcur : '监控:哔哩全量') : 
+											list[i].platform === '抖音' ? 
+											(list[i].omaxcur ? '首次:'+list[i].omaxcur : '首次:DY80') + 
+											' | ' + 
+											(list[i].maxcur ? '监控:'+list[i].maxcur : '监控:DY80') : '')
+										+'</small>'
+									+'</td>'
 									+'<td title="'+addressValue+'">'
 										+'<span class="badge badge-info">'+addressType+'</span> '
 										+'<small class="text-muted">'+addressValue+'</small>'
