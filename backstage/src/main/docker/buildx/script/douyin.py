@@ -167,7 +167,7 @@ async def fetch_user_collects(cookie: str):
     print("stream-vault-start-collects",json.dumps(all_collects, ensure_ascii=False),"stream-vault-end-collects")
 
 # 获取收藏夹下的视频
-async def fetch_user_collects_videos(cookie: str, cid: str, output_file: str):
+async def fetch_user_collects_videos(cookie: str, cid: str, maxc:str, output_file: str):
     kwargs = {
         "headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0",
@@ -184,6 +184,7 @@ async def fetch_user_collects_videos(cookie: str, cid: str, output_file: str):
         collects_id=cid,
         max_cursor=0,
         page_counts=10,
+        max_counts=int(maxc)
     ):
         print(collection_list._to_raw())
         videos = collection_list._to_list()
@@ -275,6 +276,7 @@ async def main():
     fetch_user_collects_videos_parser = subparsers.add_parser("fetch_user_collects_videos", help="Fetch user_collects_video info from Douyin")
     fetch_user_collects_videos_parser.add_argument("--cookie", type=str, required=True, help="Douyin cookie")
     fetch_user_collects_videos_parser.add_argument("--cid", type=str, required=True, help="Collect ID")
+    fetch_user_collects_videos_parser.add_argument("--maxc", type=str, required=True, help="maxc")
     fetch_user_collects_videos_parser.add_argument("--output", type=str, required=True, help="Output file path")
 
 
@@ -295,7 +297,7 @@ async def main():
     if args.command == "fetch_user_collects":
         await fetch_user_collects(args.cookie)
     if args.command == "fetch_user_collects_videos":
-        await fetch_user_collects_videos(args.cookie, args.cid, args.output)
+        await fetch_user_collects_videos(args.cookie, args.cid ,args.maxc, args.output)
     if args.command == "fetch_user_feed_videos":
         await fetch_user_feed_videos(args.cookie, args.uid, args.output)
 

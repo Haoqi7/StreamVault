@@ -453,7 +453,7 @@ public class CollectDataService {
 	        int endIndex = entity.getOriginaladdress().indexOf(endTag);
 	        String content = entity.getOriginaladdress().substring(startIndex, endIndex).trim();
 	        sec_user_id=sec_user_id.replaceAll(startTag+content+endTag, "");
-			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_collects_videos", null, content,null,taskout);
+			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_collects_videos", null, content,maxc,taskout);
 			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
 				 JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
 				 Files.deleteIfExists(Paths.get(taskout));
@@ -462,7 +462,7 @@ public class CollectDataService {
 		}
 		if(entity.getOriginaladdress().startsWith("recommend")) {
 			sec_user_id = entity.getOriginaladdress().replaceAll("recommend", "");
-			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_feed_videos", sec_user_id, null,null,taskout);
+			String f2cmd = CommandUtil.f2cmd(Global.tiktokCookie, null, "fetch_user_feed_videos", sec_user_id, null,maxc,taskout);
 			if(null!=f2cmd && f2cmd.contains("stream-vault-ok")) {
 				   JSONArray jsonFromFile = FileUtil.readJsonFromFile(taskout);
 				   Files.deleteIfExists(Paths.get(taskout));

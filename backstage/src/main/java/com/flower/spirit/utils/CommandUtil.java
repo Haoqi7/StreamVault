@@ -14,8 +14,8 @@ import java.io.File;
 import com.flower.spirit.config.Global;
 
 public class CommandUtil {
-	
-	private static Logger logger = LoggerFactory.getLogger(CommandUtil.class);
+
+    private static Logger logger = LoggerFactory.getLogger(CommandUtil.class);
 
     static Pattern pattern = Pattern.compile("\"(.*?)\"");
 
@@ -104,37 +104,58 @@ public class CommandUtil {
         return output.toString().trim();
     }
 
-    public static String f2cmd(String cookie, String aid,String fuc,String uid,String cid,Integer maxc,String out) {
-//        String cmd = "/opt/venv/bin/python3 /home/app/script/douyin.py --cookie \"" + cookie + "\" --aweme_id \""+ aid + "\"";
-        String cmd ="/opt/venv/bin/python3 ";
-        cmd=cmd+"/home/app/script/douyin.py ";
-    	cmd=cmd+fuc+" ";
-        cmd = cmd+"--cookie \""+cookie+"\""+" ";
-        if(aid!= null) {
-        	cmd = cmd+"--aweme_id \""+aid+"\""+" ";
+    public static String f2cmd(String cookie, String aid, String fuc, String uid, String cid, Integer maxc,
+            String out) {
+        StringBuilder cmd = new StringBuilder("/opt/venv/bin/python3 /home/app/script/douyin.py ");
+
+        switch (fuc) {
+            case "fetch_video":
+                cmd.append("fetch_video ")
+                        .append("--cookie \"").append(cookie).append("\" ")
+                        .append("--aweme_id \"").append(aid).append("\"");
+                break;
+
+            case "fetch_user_like_videos":
+            case "fetch_user_post_videos":
+                cmd.append(fuc).append(" ")
+                        .append("--cookie \"").append(cookie).append("\" ")
+                        .append("--uid \"").append(uid).append("\" ")
+                        .append("--maxc \"").append(maxc).append("\" ")
+                        .append("--output \"").append(out).append("\"");
+                break;
+
+            case "fetch_user_collects":
+                cmd.append("fetch_user_collects ")
+                        .append("--cookie \"").append(cookie).append("\"");
+                break;
+
+            case "fetch_user_collects_videos":
+                cmd.append("fetch_user_collects_videos ")
+                        .append("--cookie \"").append(cookie).append("\" ")
+                        .append("--cid \"").append(cid).append("\" ")
+                        .append("--maxc \"").append(maxc).append("\" ")
+                        .append("--output \"").append(out).append("\"");
+                break;
+
+            case "fetch_user_feed_videos":
+                cmd.append("fetch_user_feed_videos ")
+                        .append("--cookie \"").append(cookie).append("\" ")
+                        .append("--uid \"").append(uid).append("\" ")
+                        .append("--output \"").append(out).append("\"");
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported function: " + fuc);
         }
-        if(uid!= null) {
-        	cmd = cmd+"--uid \""+uid+"\""+" ";
-        }
-        if(maxc!= null) {
-        	cmd = cmd+"--maxc \""+maxc+"\""+" ";
-        }
-        if(cid!= null) {
-            cmd = cmd+"--cid \""+cid+"\" ";
-        }
-        if(out!= null) {
-            cmd = cmd+"--output \""+out+"\" ";
-         }	
-//		System.out.println(cmd); 
-        String result = CommandUtil.commandos(cmd);
-        return result;
+
+        return CommandUtil.commandos(cmd.toString());
     }
 
     public static boolean deleteDirectory(String directoryPath) {
-//    	System.out.println(directoryPath);
-    	logger.error("[删除目录] 正在准备删除目录:"+directoryPath);
+        // System.out.println(directoryPath);
+        logger.error("[删除目录] 正在准备删除目录:" + directoryPath);
         if (directoryPath == null || directoryPath.trim().isEmpty()) {
-        	logger.error("[删除目录警告] 正在尝试删除空目录或根路径");
+            logger.error("[删除目录警告] 正在尝试删除空目录或根路径");
             return false;
         }
 
@@ -146,13 +167,13 @@ public class CommandUtil {
 
             // 验证目标路径是否在允许的目录下
             if (!canonicalPath.startsWith(saveFileCanonical)) {
-            	logger.error("[删除目录警告] 正在删除白名单外的目录"+saveFileCanonical);
+                logger.error("[删除目录警告] 正在删除白名单外的目录" + saveFileCanonical);
                 return false;
             }
 
             // 验证目录是否存在
             if (!directory.exists() || !directory.isDirectory()) {
-            	logger.error("[删除目录警告] 目标目录不存在");
+                logger.error("[删除目录警告] 目标目录不存在");
                 return false;
             }
 
@@ -169,7 +190,7 @@ public class CommandUtil {
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-            	logger.info("[删除目录输出] " + line);
+                logger.info("[删除目录输出] " + line);
             }
             return exitCode == 0;
         } catch (IOException | InterruptedException e) {
@@ -177,5 +198,5 @@ public class CommandUtil {
             return false;
         }
     }
-    
+
 }
