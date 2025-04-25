@@ -72,7 +72,7 @@ StreamVault（原名：spirit）是一个视频资源管理与下载平台，支
 | Twitter   | ✅     | 🔨             | 仅支持yt-dlp | 未来可支持其他 避免产生过多ts文件 还需要合并 麻烦 |
 | Instagram | ✅     | 🤔             | 仅支持yt-dlp | 未来可支持其他 避免产生过多ts文件 还需要合并 麻烦 |
 | TikTok    | 🔨     | 🤔             |              |                                                   |
-| 快手      | ✅     | 🤔             | HTTP/Aria2   | 未测试Aria2,同时如果出现captcha 自行去APP或web验证后在用 本处不处理captcha|
+| 快手      | ✅     | 🤔             | HTTP/Aria2   | 未测试Aria2,同时如果出现captcha 自行去APP或web验证后在测试 本处不处理captcha|
 | 微博      | 🤔     | 🤔             |              |                                                   |
 | 红薯      | 🤔     | 🤔             |              |                                                   |
 
