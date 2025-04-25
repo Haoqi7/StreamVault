@@ -3,6 +3,7 @@ package com.flower.spirit.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.flower.spirit.entity.CookiesConfigEntity;
 import com.flower.spirit.entity.NotifyConfigEntity;
 
 /**
@@ -73,9 +74,7 @@ public class Global {
 
 	public static String wallpaperid = "431960";
 
-	public static String youtubecookies = "";
-
-	public static String twittercookies = "";
+	public static CookiesConfigEntity cookie_manage;
 	
 	public static String tasknexttime ="";
 
@@ -85,7 +84,8 @@ public class Global {
 		tiktok,
 		youtube,
 		instagram,
-		twitter;
+		twitter,
+		kuaishou;
 	};
 
 	// 文件映射和保存路径

@@ -209,7 +209,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="card">
-                            <div class="card-header"><h4>抖音配置</h4></div>
+                            <div class="card-header"><h4>抖音/快手配置</h4></div>
                             <div class="card-body">
 
                                 <form action="#" method="post" onsubmit="return false;">
@@ -221,11 +221,22 @@
                                     <div class="form-group">
                                         <button class="btn btn-primary saveTikTokConfig" type="button">保存</button>
                                     </div>
-                                    <br>
-                                    <br>
                                     <a href="https://cookie-editor.com/">使用Cookie-Editor导出Header String</a></font>
                                     <br />
                                     也可以在抖音主页 F12 网络请求中 过滤get/user 请求 找到cookie 进行复制
+                                </form>
+                                <br />
+                                
+                                
+                                <form action="#" method="post" onsubmit="return false;">
+                                    <input type="hidden" class="cookiesid" th:value="${cookies.id}" />
+                                    <div class="form-group">
+                                        <label>快手Cookie(快手抖音必填)</label>
+                                        <input type="type" name="kuaishouCookie"  autocomplete="off" class="form-control kuaishouCookie" th:value="${cookies.kuaishouCookie}">
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-primary saveCookieConfig" type="button">保存</button>
+                                    </div>
                                 </form>
 
                             </div>
@@ -481,16 +492,9 @@
     function saveCookieConfig(){
         $('.saveCookieConfig').click(function(){
             var appid = $('.cookiesid').val();
-            var youtubecookies = $('.youtubecookies').val();
-            var twittercookies = $('.twittercookies').val();
             var option = {};
             option['id'] = appid;
-            if(youtubecookies != ""){
-                option['youtubecookies'] = youtubecookies;
-            }
-            if(twittercookies != ""){
-                option['twittercookies'] = twittercookies;
-            }
+            option['kuaishouCookie'] = $('.kuaishouCookie').val();
             $.post("/admin/api/updateCookie",option,function(data,status){
                 if(data.resCode =="000001"){
                     layer.closeAll();

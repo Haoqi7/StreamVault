@@ -48,6 +48,23 @@ public class sendNotify {
 
     }
     
+    /**
+     * 异步发送通知
+     */
+    public static void sendNotifyError(String link, String p,String message) {
+    	if(Global.notify!= null) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    String title = "StreamVault任务异常";
+                    String contents = "来源地址:" + link + "\n" + "归属平台:" + p+ "\n"+"异常原因:"+ message;
+                    sendNotifyByChannel(title, contents, Global.notify);
+                } catch (Exception e) {
+                    logger.error("[异步通知] 发送失败: {}", e.getMessage());
+                }
+            });
+    	}
+
+    }
 
     /**
      * 异步发送通知

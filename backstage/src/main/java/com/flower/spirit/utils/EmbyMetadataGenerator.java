@@ -243,7 +243,41 @@ public class EmbyMetadataGenerator {
         );
         System.out.println("元数据生成成功: " + title);
     }
-    
+    public static void createKuaiNfo(String upname,String upmid, String ctime, String cid, String title,
+            String desc, String pic,String out) {
+        String year = "";
+        try {
+            long timestamp = Long.parseLong(ctime);
+            java.util.Date date = new java.util.Date(timestamp * 1000L);
+            java.text.SimpleDateFormat yearFormat = new java.text.SimpleDateFormat("yyyy");
+            year = yearFormat.format(date);
+        } catch (Exception e) {
+            year = "2025"; // 默认年份
+        }
+        String overview = desc;
+        if (overview == null || overview.equals("-") || overview.trim().isEmpty()) {
+            overview = "由创作主【" + upname + "】上传的视频内容";
+        }
+        overview += "创作主：" + upname + "\rUID：" + upmid + "\r视频ID：" + cid;
+        String genre = "快手";
+        String director = upname;
+        // 设置actor为UP主
+        String actor = "快手"+upname;
+        // 获取输出路径（使用视频所在目录）
+        generateMetadata(
+        		title, // 标题
+                year, // 年份
+                overview, // 概述/描述
+                genre, // 类型
+                director, // 导演（UP主）
+                actor, // 演员（UP主）
+                out, // 输出路径
+                null, // UP主头像
+                upmid, // UP主ID
+                pic // 封面图片
+        );
+        System.out.println("元数据生成成功: " + title);
+    }
     
     public static void createBillNfo(String upname, String upface, String upmid, String ctime, String cid, String title,
             String desc, String pic,String out) {

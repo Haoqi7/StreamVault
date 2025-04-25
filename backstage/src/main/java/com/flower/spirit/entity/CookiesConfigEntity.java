@@ -26,6 +26,8 @@ public class CookiesConfigEntity implements Serializable{
 	private String youtubecookies;
 	
 	private String twittercookies;
+	
+	private String kuaishouCookie;
 
 	public Integer getId() {
 		return id;
@@ -49,6 +51,14 @@ public class CookiesConfigEntity implements Serializable{
 
 	public void setTwittercookies(String twittercookies) {
 		this.twittercookies = twittercookies;
+	}
+
+	public String getKuaishouCookie() {
+		return kuaishouCookie;
+	}
+
+	public void setKuaishouCookie(String kuaishouCookie) {
+		this.kuaishouCookie = kuaishouCookie;
 	}
 
 	

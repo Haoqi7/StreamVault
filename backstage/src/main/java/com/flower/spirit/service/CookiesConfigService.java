@@ -36,8 +36,7 @@ public class CookiesConfigService {
 	public AjaxEntity updateCookie(CookiesConfigEntity entity) {
 		// CookiesConfigEntity cookiesConfigEntity =
 		// cookiesConfigDao.findById(entity.getId()).get();
-		Global.youtubecookies = entity.getYoutubecookies();
-		Global.twittercookies = entity.getTwittercookies();
+		Global.cookie_manage =entity;
 		cookiesConfigDao.save(entity);
 		return new AjaxEntity(Global.ajax_success, "更新成功", null);
 

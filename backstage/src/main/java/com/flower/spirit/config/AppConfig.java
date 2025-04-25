@@ -78,11 +78,8 @@ public class AppConfig {
 		}
 		//新增cookies 配置信息
 		CookiesConfigEntity cookies = cookiesConfigService.getData();
-		if(cookies.getTwittercookies() != null && !cookies.getTwittercookies().equals("")) {
-			Global.youtubecookies  = cookies.getYoutubecookies();
-		}
-		if(cookies.getYoutubecookies() != null && !cookies.getYoutubecookies().equals("")) {
-			Global.twittercookies  = cookies.getTwittercookies();
+		if(null !=cookies) {
+			Global.cookie_manage =cookies;
 		}
 		if(data.getGeneratenfo()!= null && data.getGeneratenfo().equals("1")) {
 			Global.getGeneratenfo =  true;

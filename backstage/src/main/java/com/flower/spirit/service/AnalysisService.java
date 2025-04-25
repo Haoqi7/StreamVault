@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,8 @@ import com.flower.spirit.utils.FileUtil;
 import com.flower.spirit.utils.FileUtils;
 import com.flower.spirit.utils.HttpUtil;
 import com.flower.spirit.utils.JsonChunkParser;
+import com.flower.spirit.utils.KuaishouParser;
+import com.flower.spirit.utils.KuaishouParser.VideoInfo;
 import com.flower.spirit.utils.Steamcmd;
 import com.flower.spirit.utils.StringUtil;
 import com.flower.spirit.utils.TikTokUtil;
@@ -59,13 +62,13 @@ public class AnalysisService {
 	@Autowired
 	private ProcessHistoryService processHistoryService;
 
-	private ExecutorService steamcmd = Executors.newFixedThreadPool(1);
+//	private ExecutorService steamcmd = Executors.newFixedThreadPool(1);
 
-	private ExecutorService douyin = Executors.newFixedThreadPool(1);
+	private ExecutorService domestic = Executors.newFixedThreadPool(3);  //目前  d k使用这个exec
 
-	private ExecutorService bilibili = Executors.newFixedThreadPool(1);
+	private ExecutorService bilibili = Executors.newFixedThreadPool(2);
 
-	private ExecutorService ytdlp = Executors.newFixedThreadPool(5);
+	private ExecutorService ytdlp = Executors.newFixedThreadPool(3);
 
 	@Autowired
 	private FfmpegQueueDao ffmpegQueueDao;
@@ -91,12 +94,13 @@ public class AnalysisService {
 		String url = this.getUrl(video);
 		Map<String, Runnable> platformHandlers = new HashMap<>();
 		platformHandlers.put("哔哩", () -> executeTask(bilibili, () -> this.bilivideo(platform, url)));
-		platformHandlers.put("抖音", () -> executeTask(douyin, () -> this.dyvideo(platform, url)));
+		platformHandlers.put("抖音", () -> executeTask(domestic, () -> this.dyvideo(platform, url)));
 		platformHandlers.put("YouTube", () -> executeTask(ytdlp, () -> this.YouTube(platform, url)));
 //		platformHandlers.put("steam", () -> executeTask(steamcmd, () -> this.steamwork(video)));
 //		platformHandlers.put("tiktok", () -> executeTask(douyin, () -> this.tiktok(platform, url)));
 		platformHandlers.put("instagram", () -> executeTask(ytdlp, () -> this.instagram(platform, url)));
 		platformHandlers.put("twitter", () -> executeTask(ytdlp, () -> this.twitter(platform, url)));
+		platformHandlers.put("快手", () -> executeTask(domestic, () -> this.kuaishou(platform, url)));
 		// 获取并执行对应平台的处理逻辑
 		Runnable handler = platformHandlers.get(platform);
 		if (handler != null) {
@@ -104,6 +108,61 @@ public class AnalysisService {
 		} else {
 			logger.warn("不支持的平台类型: " + platform);
 		}
+	}
+
+	private void kuaishou(String platform, String url) {
+		logger.info("平台归属:"+platform);
+		if(null!=Global.cookie_manage && null!=Global.cookie_manage.getKuaishouCookie() && !"".equals(Global.cookie_manage.getKuaishouCookie())) {
+			ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, url, platform);
+			try {
+				VideoInfo video = KuaishouParser.parseVideo(url, Global.cookie_manage.getKuaishouCookie());
+				String title = video.getTitle();
+				String coverUrl = video.getCoverUrl();
+				String h265Url = video.getH265Url();
+				String videoId = video.getVideoId();
+				String author = video.getAuthor();
+				String upload_date = DateUtils.formatDateTime(new Date(video.getTimestamp()));
+				HashMap<String,String> header = new HashMap<String, String>();
+				String filename = StringUtil.getFileName(title, videoId);
+				String videofile = FileUtil.generateDir(Global.down_path, Global.platform.kuaishou.name(), true, filename, null, null);
+				String videounrealaddr = FileUtil.generateDir(false, Global.platform.kuaishou.name(), true, filename, null, "mp4");
+				String coverunaddr = FileUtil.generateDir(false, Global.platform.kuaishou.name(), true, filename, null, "jpg");
+				String coverfile = filename + ".jpg";
+				if (Global.downtype.equals("a2")) {
+					Aria2Util.sendMessage(Global.a2_link,
+							Aria2Util.createDouparameter(h265Url, FileUtil.generateDir(Global.down_path, Global.platform.kuaishou.name(), true, filename, null, null),
+									filename + ".mp4", Global.a2_token, Global.cookie_manage.getKuaishouCookie()));
+				}
+				header.put("User-Agent",KuaishouParser.USER_AGENT );
+				header.put("cookie", Global.cookie_manage.getKuaishouCookie());
+				if (Global.downtype.equals("http")) {
+					// 内置下载器
+					videofile = FileUtil.generateDir(true, Global.platform.kuaishou.name(), true, filename, null, null);
+					HttpUtil.downloadFileWithOkHttp(h265Url,  filename + ".mp4", videofile, header);
+				}
+				String coverdir = FileUtil.generateDir(true, Global.platform.kuaishou.name(), true, filename, null, null);
+				HttpUtil.downloadFileWithOkHttp(coverUrl,  coverfile, coverdir, header);
+				VideoDataEntity videoDataEntity = new VideoDataEntity(videoId, title, title, platform, coverunaddr, videofile,
+						videounrealaddr, url);
+				videoDataDao.save(videoDataEntity);
+				//生成元数据
+				if(Global.getGeneratenfo) {
+					EmbyMetadataGenerator.createKuaiNfo(author, author, upload_date, videoId, title, title, coverfile,videofile);
+				}
+				processHistoryService.saveProcess(saveProcess.getId(), url, platform);
+				videoDataDao.save(videoDataEntity);
+				sendNotify.sendNotifyData(title, url, platform);
+				logger.info("下载流程结束");
+				
+			} catch (IOException e) {
+				//失败
+				sendNotify.sendNotifyError(url, platform, e.getMessage());
+			}
+
+		}else {
+			logger.info(platform+"当前未设置cookie.本次提交无效");
+		}
+
 	}
 
 	/**
@@ -623,6 +682,9 @@ public class AnalysisService {
 		}
 		if (input.contains("steamcommunity.com")) {
 			return "steam";
+		}
+		if (input.contains(".kuaishou.com")) {
+			return "快手";
 		}
 		return URLUtil.urlAnalysis(input);
 	}
