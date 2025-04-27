@@ -109,6 +109,8 @@ public class Global {
 		private final String key, value; configInfo(String key, String value) { this.key = key; this.value = value; } public String getKey() { return key; } public String getValue() { return value; }
 
 	}
+	
+	public static String ytdlpmode = "0";
 
 	@Value("${file.save}")
 	public void setSavefile(String value) {

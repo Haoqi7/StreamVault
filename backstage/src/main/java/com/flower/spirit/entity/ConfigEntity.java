@@ -51,6 +51,8 @@ public class ConfigEntity implements Serializable {
 	private String useragent;
 	
 	private String frontend; //video  nav
+	
+	private String ytdlpmode;
 
 	public Integer getId() {
 		return id;
@@ -154,6 +156,14 @@ public class ConfigEntity implements Serializable {
 
 	public void setFrontend(String frontend) {
 		this.frontend = frontend;
+	}
+
+	public String getYtdlpmode() {
+		return ytdlpmode;
+	}
+
+	public void setYtdlpmode(String ytdlpmode) {
+		this.ytdlpmode = ytdlpmode;
 	}
 
 	

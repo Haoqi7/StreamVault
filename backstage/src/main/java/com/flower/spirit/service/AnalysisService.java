@@ -62,9 +62,9 @@ public class AnalysisService {
 	@Autowired
 	private ProcessHistoryService processHistoryService;
 
-//	private ExecutorService steamcmd = Executors.newFixedThreadPool(1);
+	// private ExecutorService steamcmd = Executors.newFixedThreadPool(1);
 
-	private ExecutorService domestic = Executors.newFixedThreadPool(3);  //目前  d k使用这个exec
+	private ExecutorService domestic = Executors.newFixedThreadPool(3); // 目前 d k使用这个exec
 
 	private ExecutorService bilibili = Executors.newFixedThreadPool(2);
 
@@ -96,8 +96,10 @@ public class AnalysisService {
 		platformHandlers.put("哔哩", () -> executeTask(bilibili, () -> this.bilivideo(platform, url)));
 		platformHandlers.put("抖音", () -> executeTask(domestic, () -> this.dyvideo(platform, url)));
 		platformHandlers.put("YouTube", () -> executeTask(ytdlp, () -> this.YouTube(platform, url)));
-//		platformHandlers.put("steam", () -> executeTask(steamcmd, () -> this.steamwork(video)));
-//		platformHandlers.put("tiktok", () -> executeTask(douyin, () -> this.tiktok(platform, url)));
+		// platformHandlers.put("steam", () -> executeTask(steamcmd, () ->
+		// this.steamwork(video)));
+		// platformHandlers.put("tiktok", () -> executeTask(douyin, () ->
+		// this.tiktok(platform, url)));
 		platformHandlers.put("instagram", () -> executeTask(ytdlp, () -> this.instagram(platform, url)));
 		platformHandlers.put("twitter", () -> executeTask(ytdlp, () -> this.twitter(platform, url)));
 		platformHandlers.put("快手", () -> executeTask(domestic, () -> this.kuaishou(platform, url)));
@@ -106,13 +108,61 @@ public class AnalysisService {
 		if (handler != null) {
 			handler.run();
 		} else {
-			logger.warn("不支持的平台类型: " + platform);
+			logger.info("不支持的平台类型: " + platform);
+			if (Global.ytdlpmode.equals("1")) {
+				// 此处交由ytdlp 全量操作,不建议使用
+				logger.info("已启动全量模式-全交由yt-dlp解析");
+				ytdlp.submit(() -> {
+					try {
+						processByYtdlp(url);
+					} catch (Exception e) {
+						logger.error("yt-dlp处理异常", e);
+					}
+				});
+			}
+
 		}
 	}
 
+	private void processByYtdlp(String url) {
+		// 先通过yt-dlp获取平台信息
+		String detectedPlatform = YtDlpUtil.getPlatform(url);
+		if(null!=detectedPlatform) {
+			logger.info("yt-dlp检测到平台: " + detectedPlatform);
+			ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, url, detectedPlatform);
+			try {
+				String exec = YtDlpUtil.exec(url,FileUtil.generateDir(true,detectedPlatform, true, null, null, null), detectedPlatform,false);
+				System.out.println(exec);
+				List<JSONObject> jsonObjects = JsonChunkParser.parseJsonObjects(exec);
+				for (int i = 0; i < jsonObjects.size(); i++) {
+					JSONObject parseObject = jsonObjects.get(i);
+					String filename = parseObject.getString("filename");
+					String baseName = FilenameUtils.getBaseName(filename);
+					String namefix = new File(new File(filename).getParent()).getName(); 
+					String dircos = FileUtil.generateDir(false, detectedPlatform, true,new File(new File(filename).getParent()).getName(), null, null);
+					String description = parseObject.getString("description");
+					String display_id = parseObject.getString("display_id");
+					String name = new File(filename).getName();
+					String coverdb = dircos + baseName + ".webp";
+					String videodb = dircos + name;
+					VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description,detectedPlatform, coverdb, filename, videodb, url);
+					videoDataDao.save(videoDataEntity);
+					processHistoryService.saveProcess(saveProcess.getId(), url, detectedPlatform);
+					sendNotify.sendNotifyData(namefix, url, detectedPlatform);
+				}
+			} catch (Exception e) {
+				logger.error("yt-dlp解析异常: " + e.getMessage(), e);
+			}
+			
+			
+		}
+
+	}
+
 	private void kuaishou(String platform, String url) {
-		logger.info("平台归属:"+platform);
-		if(null!=Global.cookie_manage && null!=Global.cookie_manage.getKuaishouCookie() && !"".equals(Global.cookie_manage.getKuaishouCookie())) {
+		logger.info("平台归属:" + platform);
+		if (null != Global.cookie_manage && null != Global.cookie_manage.getKuaishouCookie()
+				&& !"".equals(Global.cookie_manage.getKuaishouCookie())) {
 			ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, url, platform);
 			try {
 				VideoInfo video = KuaishouParser.parseVideo(url, Global.cookie_manage.getKuaishouCookie());
@@ -122,45 +172,53 @@ public class AnalysisService {
 				String videoId = video.getVideoId();
 				String author = video.getAuthor();
 				String upload_date = DateUtils.formatDateTime(new Date(video.getTimestamp()));
-				HashMap<String,String> header = new HashMap<String, String>();
+				HashMap<String, String> header = new HashMap<String, String>();
 				String filename = StringUtil.getFileName(title, videoId);
-				String videofile = FileUtil.generateDir(Global.down_path, Global.platform.kuaishou.name(), true, filename, null, null);
-				String videounrealaddr = FileUtil.generateDir(false, Global.platform.kuaishou.name(), true, filename, null, "mp4");
-				String coverunaddr = FileUtil.generateDir(false, Global.platform.kuaishou.name(), true, filename, null, "jpg");
+				String videofile = FileUtil.generateDir(Global.down_path, Global.platform.kuaishou.name(), true,
+						filename, null, null);
+				String videounrealaddr = FileUtil.generateDir(false, Global.platform.kuaishou.name(), true, filename,
+						null, "mp4");
+				String coverunaddr = FileUtil.generateDir(false, Global.platform.kuaishou.name(), true, filename, null,
+						"jpg");
 				String coverfile = filename + ".jpg";
 				if (Global.downtype.equals("a2")) {
 					Aria2Util.sendMessage(Global.a2_link,
-							Aria2Util.createDouparameter(h265Url, FileUtil.generateDir(Global.down_path, Global.platform.kuaishou.name(), true, filename, null, null),
+							Aria2Util.createDouparameter(h265Url,
+									FileUtil.generateDir(Global.down_path, Global.platform.kuaishou.name(), true,
+											filename, null, null),
 									filename + ".mp4", Global.a2_token, Global.cookie_manage.getKuaishouCookie()));
 				}
-				header.put("User-Agent",KuaishouParser.USER_AGENT );
+				header.put("User-Agent", KuaishouParser.USER_AGENT);
 				header.put("cookie", Global.cookie_manage.getKuaishouCookie());
 				if (Global.downtype.equals("http")) {
 					// 内置下载器
 					videofile = FileUtil.generateDir(true, Global.platform.kuaishou.name(), true, filename, null, null);
-					HttpUtil.downloadFileWithOkHttp(h265Url,  filename + ".mp4", videofile, header);
+					HttpUtil.downloadFileWithOkHttp(h265Url, filename + ".mp4", videofile, header);
 				}
-				String coverdir = FileUtil.generateDir(true, Global.platform.kuaishou.name(), true, filename, null, null);
-				HttpUtil.downloadFileWithOkHttp(coverUrl,  coverfile, coverdir, header);
-				VideoDataEntity videoDataEntity = new VideoDataEntity(videoId, title, title, platform, coverunaddr, videofile,
+				String coverdir = FileUtil.generateDir(true, Global.platform.kuaishou.name(), true, filename, null,
+						null);
+				HttpUtil.downloadFileWithOkHttp(coverUrl, coverfile, coverdir, header);
+				VideoDataEntity videoDataEntity = new VideoDataEntity(videoId, title, title, platform, coverunaddr,
+						videofile,
 						videounrealaddr, url);
 				videoDataDao.save(videoDataEntity);
-				//生成元数据
-				if(Global.getGeneratenfo) {
-					EmbyMetadataGenerator.createKuaiNfo(author, author, upload_date, videoId, title, title, coverfile,videofile);
+				// 生成元数据
+				if (Global.getGeneratenfo) {
+					EmbyMetadataGenerator.createKuaiNfo(author, author, upload_date, videoId, title, title, coverfile,
+							videofile);
 				}
 				processHistoryService.saveProcess(saveProcess.getId(), url, platform);
 				videoDataDao.save(videoDataEntity);
 				sendNotify.sendNotifyData(title, url, platform);
 				logger.info("下载流程结束");
-				
+
 			} catch (IOException e) {
-				//失败
+				// 失败
 				sendNotify.sendNotifyError(url, platform, e.getMessage());
 			}
 
-		}else {
-			logger.info(platform+"当前未设置cookie.本次提交无效");
+		} else {
+			logger.info(platform + "当前未设置cookie.本次提交无效");
 		}
 
 	}
@@ -193,19 +251,20 @@ public class AnalysisService {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, url, platform);
 		try {
 			String dirtemp = FileUtil.generateDir(true, Global.platform.twitter.name(), true, null, null, null);
-			String exec = YtDlpUtil.exec(url,dirtemp,"twitter");
+			String exec = YtDlpUtil.exec(url, dirtemp, "twitter",true);
 			List<JSONObject> jsonObjects = JsonChunkParser.parseJsonObjects(exec);
-			for(int i =0;i<jsonObjects.size();i++) {
+			for (int i = 0; i < jsonObjects.size(); i++) {
 				JSONObject parseObject = jsonObjects.get(i);
 				String filename = parseObject.getString("filename");
 				String baseName = FilenameUtils.getBaseName(filename);
 				String baseNameNo = baseName.replaceAll("_", " ");
 				String filedoc = new File(filename).getParent();
-				String namefix = new File(new File(filename).getParent()).getName();  //先这个搞
+				String namefix = new File(new File(filename).getParent()).getName(); // 先这个搞
 				String dir = FileUtil.generateDir(true, Global.platform.twitter.name(), true, baseName, null, null);
-				String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true, new File(new File(filename).getParent()).getName(), null, null);
-//				System.out.println(exec);
-//				String title = parseObject.getString("title");
+				String dircos = FileUtil.generateDir(false, Global.platform.twitter.name(), true,
+						new File(new File(filename).getParent()).getName(), null, null);
+				// System.out.println(exec);
+				// String title = parseObject.getString("title");
 				String description = parseObject.getString("description");
 				String display_id = parseObject.getString("display_id");
 				String uploader = parseObject.getString("uploader");
@@ -213,21 +272,23 @@ public class AnalysisService {
 				String upload_date = parseObject.getString("upload_date");
 				String name = new File(filename).getName();
 
-				String coverdb = dircos+baseName+".webp";
-				
-				String videodb = dircos+name;
-				
-				VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.twitter.name(),coverdb ,filename, videodb, url);
+				String coverdb = dircos + baseName + ".webp";
+
+				String videodb = dircos + name;
+
+				VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description,
+						Global.platform.twitter.name(), coverdb, filename, videodb, url);
 				videoDataDao.save(videoDataEntity);
 				processHistoryService.saveProcess(saveProcess.getId(), url, platform);
-				if(Global.getGeneratenfo) {
-					EmbyMetadataGenerator.generateMetadata(namefix,upload_date.substring(0,4),description,"twitter",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
+				if (Global.getGeneratenfo) {
+					EmbyMetadataGenerator.generateMetadata(namefix, upload_date.substring(0, 4), description, "twitter",
+							null, uploader, filedoc, null, uploader_url, dir + baseNameNo + ".webp");
 				}
 				sendNotify.sendNotifyData(namefix, url, platform);
 			}
-			//已经下载完成了
+			// 已经下载完成了
 
-//			return ;
+			// return ;
 		} catch (Exception e) {
 
 			// logger.error(youtube+"解析异常");
@@ -239,19 +300,20 @@ public class AnalysisService {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, url, platform);
 		try {
 			String dirtemp = FileUtil.generateDir(true, Global.platform.instagram.name(), true, null, null, null);
-			String exec = YtDlpUtil.exec(url,dirtemp,"instagram");
+			String exec = YtDlpUtil.exec(url, dirtemp, "instagram",true);
 			System.out.println(exec);
-			//已经下载完成了
+			// 已经下载完成了
 			JSONObject parseObject = JSONObject.parseObject(exec);
 			String filename = parseObject.getString("filename");
-			//先处理文件名
-//			System.out.println(filename);
+			// 先处理文件名
+			// System.out.println(filename);
 			String baseName = FilenameUtils.getBaseName(filename);
 			String baseNameNo = baseName.replaceAll("_", " ");
 			String filedoc = new File(filename).getParent();
-			String namefix = new File(new File(filename).getParent()).getName();  //先这个搞
+			String namefix = new File(new File(filename).getParent()).getName(); // 先这个搞
 			String dir = FileUtil.generateDir(true, Global.platform.instagram.name(), true, baseName, null, null);
-			String dircos = FileUtil.generateDir(false, Global.platform.instagram.name(), true, new File(new File(filename).getParent()).getName(), null, null);
+			String dircos = FileUtil.generateDir(false, Global.platform.instagram.name(), true,
+					new File(new File(filename).getParent()).getName(), null, null);
 			String description = parseObject.getString("description");
 			String display_id = parseObject.getString("display_id");
 			String uploader = parseObject.getString("uploader");
@@ -259,15 +321,17 @@ public class AnalysisService {
 			String upload_date = parseObject.getString("upload_date");
 			String name = new File(filename).getName();
 
-			String coverdb = dircos+baseName+".webp";
-			
-			String videodb = dircos+name;
-			
-			VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.instagram.name(),coverdb ,filename, videodb, url);
+			String coverdb = dircos + baseName + ".webp";
+
+			String videodb = dircos + name;
+
+			VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description,
+					Global.platform.instagram.name(), coverdb, filename, videodb, url);
 			videoDataDao.save(videoDataEntity);
 			processHistoryService.saveProcess(saveProcess.getId(), url, platform);
-			if(Global.getGeneratenfo) {
-				EmbyMetadataGenerator.generateMetadata(namefix,upload_date.substring(0,4),description,"instagram",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
+			if (Global.getGeneratenfo) {
+				EmbyMetadataGenerator.generateMetadata(namefix, upload_date.substring(0, 4), description, "instagram",
+						null, uploader, filedoc, null, uploader_url, dir + baseNameNo + ".webp");
 			}
 			sendNotify.sendNotifyData(namefix, url, platform);
 		} catch (Exception e) {
@@ -278,7 +342,8 @@ public class AnalysisService {
 
 	/**
 	 * 
-	 * 暂时不支持 其他下载了 统一由yt-dlp下载 避免产生较多的下载碎片 
+	 * 暂时不支持 其他下载了 统一由yt-dlp下载 避免产生较多的下载碎片
+	 * 
 	 * @param platform
 	 * @param youtube
 	 * @throws Exception
@@ -287,21 +352,22 @@ public class AnalysisService {
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, youtube, platform);
 		try {
 			String dirtemp = FileUtil.generateDir(true, Global.platform.youtube.name(), true, null, null, null);
-			String exec = YtDlpUtil.exec(youtube,dirtemp,"youtube");
+			String exec = YtDlpUtil.exec(youtube, dirtemp, "youtube",true);
 			List<JSONObject> jsonObjects = JsonChunkParser.parseJsonObjects(exec);
-			for(int i =0;i<jsonObjects.size();i++) {
+			for (int i = 0; i < jsonObjects.size(); i++) {
 				JSONObject parseObject = jsonObjects.get(i);
 				String filename = parseObject.getString("filename");
-				//先处理文件名
-//				System.out.println(filename);
+				// 先处理文件名
+				// System.out.println(filename);
 				String baseName = FilenameUtils.getBaseName(filename);
 				String baseNameNo = baseName.replaceAll("_", " ");
 				String filedoc = new File(filename).getParent();
 				String dir = FileUtil.generateDir(true, Global.platform.youtube.name(), true, baseName, null, null);
-				String namefix = new File(new File(filename).getParent()).getName();  //先这个搞
-				String dircos = FileUtil.generateDir(false, Global.platform.youtube.name(), true, new File(new File(filename).getParent()).getName(), null, null);
-//				System.out.println(exec);
-//				String title = parseObject.getString("title");
+				String namefix = new File(new File(filename).getParent()).getName(); // 先这个搞
+				String dircos = FileUtil.generateDir(false, Global.platform.youtube.name(), true,
+						new File(new File(filename).getParent()).getName(), null, null);
+				// System.out.println(exec);
+				// String title = parseObject.getString("title");
 				String description = parseObject.getString("description");
 				String display_id = parseObject.getString("display_id");
 				String uploader = parseObject.getString("uploader");
@@ -309,19 +375,21 @@ public class AnalysisService {
 				String upload_date = parseObject.getString("upload_date");
 				String name = new File(filename).getName();
 
-				String coverdb = dircos+baseName+".webp";
-				
-				String videodb = dircos+name;
-				
-				VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description, Global.platform.youtube.name(),coverdb ,filename, videodb, youtube);
+				String coverdb = dircos + baseName + ".webp";
+
+				String videodb = dircos + name;
+
+				VideoDataEntity videoDataEntity = new VideoDataEntity(display_id, baseName, description,
+						Global.platform.youtube.name(), coverdb, filename, videodb, youtube);
 				videoDataDao.save(videoDataEntity);
 				processHistoryService.saveProcess(saveProcess.getId(), youtube, platform);
-				if(Global.getGeneratenfo) {
-					EmbyMetadataGenerator.generateMetadata(namefix,upload_date.substring(0,4),description,"youtube",null,uploader,filedoc,null,uploader_url,dir+baseNameNo+".webp");
+				if (Global.getGeneratenfo) {
+					EmbyMetadataGenerator.generateMetadata(namefix, upload_date.substring(0, 4), description, "youtube",
+							null, uploader, filedoc, null, uploader_url, dir + baseNameNo + ".webp");
 				}
 				sendNotify.sendNotifyData(namefix, youtube, platform);
 			}
-//			return ;
+			// return ;
 		} catch (Exception e) {
 			throw e;
 			// logger.error(youtube+"解析异常");
@@ -360,8 +428,9 @@ public class AnalysisService {
 			}
 			videofile = FileUtil.createDirFile(FileUtil.uploadRealPath, ".mp4", filename,
 					Global.platform.tiktok.name());
-//			HttpUtil.downLoadFromUrl(cover, filename + ".jpg",
-//					FileUtil.createTemporaryDirectory(Global.platform.tiktok.name(), filename, Global.uploadRealPath) + "/");
+			// HttpUtil.downLoadFromUrl(cover, filename + ".jpg",
+			// FileUtil.createTemporaryDirectory(Global.platform.tiktok.name(), filename,
+			// Global.uploadRealPath) + "/");
 			VideoDataEntity videoDataEntity = new VideoDataEntity(awemeid, desc, desc, platform, coverunaddr, videofile,
 					videounrealaddr, url);
 			videoDataDao.save(videoDataEntity);
@@ -430,7 +499,8 @@ public class AnalysisService {
 					String filename = jsonObject.getString("file");
 					String previewname = jsonObject.getString("preview");
 					String title = jsonObject.getString("title");
-					String cosaddr = Global.savefile + "wallpaper/" + DateUtils.getDate("yyyy") + "/" + DateUtils.getDate("MM")
+					String cosaddr = Global.savefile + "wallpaper/" + DateUtils.getDate("yyyy") + "/"
+							+ DateUtils.getDate("MM")
 							+ "/" + wallpaperId;
 					VideoDataEntity videoDataEntity = new VideoDataEntity(wallpaperId, title, title, "wallpaper",
 							cosaddr + "/" + previewname, localapp + "/" + wallpaperId + "/" + filename,
@@ -494,10 +564,10 @@ public class AnalysisService {
 		logger.info("开始解析哔哩哔哩视频: {}", video);
 		ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, video, platform);
 		try {
-			
+
 			// 获取视频源信息
 			List<Map<String, String>> videoStreams = BiliUtil.findVideoStreaming(video, Global.bilicookies);
-//			System.out.println(videoStreams);
+			// System.out.println(videoStreams);
 			if (videoStreams == null || videoStreams.isEmpty()) {
 				logger.warn("未找到视频流信息: {}", video);
 				processHistoryService.saveProcess(saveProcess.getId(), video, platform);
@@ -510,36 +580,39 @@ public class AnalysisService {
 				String desc = videoInfo.get("desc");
 				String pic = videoInfo.get("pic");
 				String videoPath = videoInfo.get("video");
-				
+
 				if (cid == null || cid.isEmpty() || title == null || title.isEmpty()) {
 					logger.warn("视频信息不完整: cid={}, title={}", cid, title);
 					continue;
 				}
 				// 生成文件名和路径
 				String filename = StringUtil.getFileName(title, cid);
-				String dir = FileUtil.generateDir(true,  Global.platform.bilibili.name(), true, filename, null, null);
+				String dir = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, null);
 				String dbdir = FileUtil.generateDir(false, Global.platform.bilibili.name(), true, filename, null, null);
-				String coverunaddr =	FileUtil.generateDir(false, Global.platform.bilibili.name(), true, filename, null, "jpg");
-				String videounaddr =	FileUtil.generateDir(false, Global.platform.bilibili.name(), true, filename, null, "mp4");
+				String coverunaddr = FileUtil.generateDir(false, Global.platform.bilibili.name(), true, filename, null,
+						"jpg");
+				String videounaddr = FileUtil.generateDir(false, Global.platform.bilibili.name(), true, filename, null,
+						"mp4");
 				// 下载封面
 				try {
-					
-					HttpUtil.downBiliFromUrl(pic, filename + ".jpg",dir);
+
+					HttpUtil.downBiliFromUrl(pic, filename + ".jpg", dir);
 					logger.debug("封面下载完成: {}", filename);
 				} catch (Exception e) {
 					logger.warn("封面下载失败: {}, 原因: {}", filename, e.getMessage());
 				}
-				//单视频  生成nfo文件
-				//此处还要下载up 头像  获取owner
-				JSONObject owner =  JSONObject.parseObject(videoInfo.get("owner"));
+				// 单视频 生成nfo文件
+				// 此处还要下载up 头像 获取owner
+				JSONObject owner = JSONObject.parseObject(videoInfo.get("owner"));
 				String upface = owner.getString("face");
 				String upname = owner.getString("name");
 				String upmid = owner.getString("mid");
 				String ctime = videoInfo.get("ctime");
-				//下载up 头像  up头像不参与数据 只参与nfo
-				HttpUtil.downBiliFromUrl(upface, "upcover.jpg",dir);
-				if(Global.getGeneratenfo) {
-					EmbyMetadataGenerator.createBillNfo(upname,"upcover.jpg",upmid,ctime,cid,title,desc,filename+".jpg",dir);
+				// 下载up 头像 up头像不参与数据 只参与nfo
+				HttpUtil.downBiliFromUrl(upface, "upcover.jpg", dir);
+				if (Global.getGeneratenfo) {
+					EmbyMetadataGenerator.createBillNfo(upname, "upcover.jpg", upmid, ctime, cid, title, desc,
+							filename + ".jpg", dir);
 				}
 				// 建档
 				VideoDataEntity videoDataEntity = new VideoDataEntity(cid, title, desc, platform, coverunaddr,
@@ -566,20 +639,18 @@ public class AnalysisService {
 	 * @throws Exception
 	 */
 	public void dyvideo(String platform, String video) throws Exception {
-		if(null!=Global.tiktokCookie && !Global.tiktokCookie.equals("")) {
+		if (null != Global.tiktokCookie && !Global.tiktokCookie.equals("")) {
 			ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, video, platform);
 			Map<String, String> downVideo = DouUtil.downVideo(video);
 
 			this.putRecord(downVideo.get("awemeid"), downVideo.get("desc"), downVideo.get("videoplay"),
-					downVideo.get("cover"), platform, video, downVideo.get("type"), Global.tiktokCookie,downVideo);
+					downVideo.get("cover"), platform, video, downVideo.get("type"), Global.tiktokCookie, downVideo);
 			System.gc();
 			sendNotify.sendNotifyData(downVideo.get("desc"), video, platform);
 			processHistoryService.saveProcess(saveProcess.getId(), video, platform);
-		}else {
+		} else {
 			logger.info("抖音cookie未填 不处理");
 		}
-		
-	
 
 	}
 
@@ -591,39 +662,44 @@ public class AnalysisService {
 	 * @param playApi
 	 * @param cover
 	 * @param platform
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void putRecord(String awemeId, String desc, String playApi, String cover, String platform,
-			String originaladdress, String type, String cookie,Map<String, String> map) throws IOException {
+			String originaladdress, String type, String cookie, Map<String, String> map) throws IOException {
 		String filename = StringUtil.getFileName(desc, awemeId);
-		String videofile = FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), true, filename, null, null);
-		String videounrealaddr = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null, "mp4");
+		String videofile = FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), true, filename, null,
+				null);
+		String videounrealaddr = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null,
+				"mp4");
 		String coverunaddr = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null, "jpg");
 		String coverfile = filename + ".jpg";
 		logger.info("已使用f2库进行解析,下载器类型为:" + Global.downtype);
 		if (Global.downtype.equals("a2")) {
 			Aria2Util.sendMessage(Global.a2_link,
-					Aria2Util.createDouparameter(playApi, FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), true, filename, null, null),
+					Aria2Util.createDouparameter(playApi,
+							FileUtil.generateDir(Global.down_path, Global.platform.douyin.name(), true, filename, null,
+									null),
 							filename + ".mp4", Global.a2_token, cookie));
 		}
-		HashMap<String,String> header = new HashMap<String, String>();
+		HashMap<String, String> header = new HashMap<String, String>();
 		header.put("User-Agent", DouUtil.ua);
 		header.put("cookie", Global.tiktokCookie);
 		if (Global.downtype.equals("http")) {
 			// 内置下载器
 			videofile = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
-			HttpUtil.downloadFileWithOkHttp(playApi,  filename + ".mp4", videofile, header);
+			HttpUtil.downloadFileWithOkHttp(playApi, filename + ".mp4", videofile, header);
 		}
-		
+
 		String coverdir = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
-//		HttpUtil.downloadFileWithOkHttp(cover, coverfile,coverdir);
-		HttpUtil.downloadFileWithOkHttp(cover,  coverfile, coverdir, header);
+		// HttpUtil.downloadFileWithOkHttp(cover, coverfile,coverdir);
+		HttpUtil.downloadFileWithOkHttp(cover, coverfile, coverdir, header);
 		// 推送完成后建立历史资料 此处注意 a2 地址需要与spring boot 一致否则 无法打开视频
 		VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId, desc, desc, platform, coverunaddr, videofile,
 				videounrealaddr, originaladdress);
-		//生成元数据
-		if(Global.getGeneratenfo) {
-			EmbyMetadataGenerator.createDouNfo(map.get("nickname"), map.get("uid"), map.get("create_time"), awemeId, desc, desc, coverfile,videofile);
+		// 生成元数据
+		if (Global.getGeneratenfo) {
+			EmbyMetadataGenerator.createDouNfo(map.get("nickname"), map.get("uid"), map.get("create_time"), awemeId,
+					desc, desc, coverfile, videofile);
 		}
 		videoDataDao.save(videoDataEntity);
 		logger.info("下载流程结束");

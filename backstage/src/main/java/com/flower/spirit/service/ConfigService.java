@@ -55,6 +55,9 @@ public class ConfigService {
 		}else {
 			Global.readonlytoken = null;
 		}
+		if(null!=configEntity.getYtdlpmode() && !"".equals(configEntity.getYtdlpmode())) {
+			Global.ytdlpmode = configEntity.getYtdlpmode();
+		}
 		
 		return new AjaxEntity(Global.ajax_option_success, "操作成功", configEntity);
 	}

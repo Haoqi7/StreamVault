@@ -118,11 +118,22 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>YT-DLP模式<font style="font-size: 12px">(非内置 未适配 且不支持NFO 暂不接受非内置issues)</font></label>
+                                                <select id="ytdlpmode" class="form-control ytdlpmode" name="ytdlpmode">
+                                                    <option value="0" th:selected="${config.ytdlpmode} eq '0'">仅内置平台(youtube,x,twitter,ins)</option>
+                                                    <option value="1" th:selected="${config.ytdlpmode} eq '1'">优先内置备选全量ytdlp支持的地址</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
+                                    
                                     <div class="form-group">
                                         <label>userAgent</label>
                                         <input class="form-control" type="text" id="userAgent" name="userAgent" th:value="${config.useragent}" placeholder="传递给youtube  x 等平台 降低风控可能 不填则不传">
                                     </div>
+                                    
                                     <div class="form-group">
                                         <button class="btn btn-primary saveConfig" type="button">保存</button>
                                     </div>
@@ -621,6 +632,7 @@
             option['useragent'] = userAgent;
             var readonlytoken =$("#readonlytoken").val();
             option['readonlytoken'] = readonlytoken;
+            option['ytdlpmode'] = $("#ytdlpmode").val();
             $.post("/admin/api/saveConfig",option,function(data,status){
                 if(data.resCode =="000001"){
                     layer.closeAll();

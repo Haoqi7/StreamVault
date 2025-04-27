@@ -100,25 +100,25 @@
     <body>
 		<input id="taskid" type="hidden" th:value="${taskid}"/> 
         <div class="layui-fluid" style="padding: 10px;">
-            <div class="layui-card">
+                    <div class="layui-card">
                 <div class="layui-card-body">
                     <form class="layui-form">
                         <div class="layui-form-item" style="margin-bottom: 0;">
                             <div class="layui-inline">
                                 <select id="status" lay-filter="status">
                                     <option value="">全部状态</option>
-                                    <option value="已完成">已完成</option>
-                                    <option value="未下载">未下载</option>
-                                    <option value="不支持">不支持</option>
-                                </select>
-                            </div>
+  										<option value="已完成">已完成</option>
+  										<option value="未下载">未下载</option>
+  										<option value="不支持">不支持</option>
+                           			 </select>   
+                                </div>
                             <div class="layui-inline">
                                 <button type="button" class="layui-btn layui-btn-normal search">搜索</button>
                                 <button type="button" class="layui-btn layui-btn-primary initList">重置</button>
                             </div>
                         </div>
                     </form>
-                </div>
+                    </div>
                 <div class="layui-card-body" style="padding-top: 0;">
                     <table class="layui-hide" id="projectList" lay-filter="projectList"></table>
                 </div>
