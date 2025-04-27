@@ -130,7 +130,7 @@ public class AnalysisService {
 			ProcessHistoryEntity saveProcess = processHistoryService.saveProcess(null, url, detectedPlatform);
 			try {
 				String exec = YtDlpUtil.exec(url,FileUtil.generateDir(true,detectedPlatform, true, null, null, null), detectedPlatform,false);
-				System.out.println(exec);
+//				System.out.println(exec);
 				List<JSONObject> jsonObjects = JsonChunkParser.parseJsonObjects(exec);
 				for (int i = 0; i < jsonObjects.size(); i++) {
 					JSONObject parseObject = jsonObjects.get(i);
