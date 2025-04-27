@@ -223,7 +223,7 @@
                     for(var i = 0; i < list.length; i++) {
                         html += '<div class="video-card" data-video="'+list[i].videounrealaddr+'">';
                         html += '<div class="video-cover">';
-                        html += '<img src="'+list[i].videocover+'" alt="'+list[i].videoname+'">';
+                        html += '<img src="'+list[i].videocover+'" alt="'+list[i].videoname+'" onerror="this.src=\'/static/images/noimage.jpg\'">';
                         html += '<div class="video-play"><i class="mdi mdi-play"></i></div>';
                         html += '</div>';
                         html += '<div class="video-info">';

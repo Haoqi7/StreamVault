@@ -250,7 +250,8 @@
         if(url) {
             return '<div class="thumbnail-container">' +
                    '<img src="'+url+'" class="img-thumbnail" style="max-width: 80px; max-height: 60px;" ' +
-                   'onmouseenter="showPreview(this)" onmouseleave="hidePreview()">' +
+                   'onmouseenter="showPreview(this)" onmouseleave="hidePreview()" ' +
+                   'onerror="this.src=\'/static/images/noimage.jpg\'">' +
                    '</div>';
         }
         return '';
