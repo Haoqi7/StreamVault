@@ -102,6 +102,13 @@ public class Global {
 	public static String readonlytoken = null;
 	
 	public static NotifyConfigEntity notify;
+	
+	public static enum configInfo{
+		getSerchPersion("user-agent","Mozilla/5.0 (Linux; Android 14; Xiaomi 23127PN0CC Build/UKQ1.230917.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/123.0.6312.60 Mobile Safari/537.36"),
+		BiliDroid("User-Agent","Mozilla/5.0 BiliDroid/8.42.0 (bbcallen@gmail.com)");
+		private final String key, value; configInfo(String key, String value) { this.key = key; this.value = value; } public String getKey() { return key; } public String getValue() { return value; }
+
+	}
 
 	@Value("${file.save}")
 	public void setSavefile(String value) {

@@ -360,8 +360,8 @@ public class AnalysisService {
 			}
 			videofile = FileUtil.createDirFile(FileUtil.uploadRealPath, ".mp4", filename,
 					Global.platform.tiktok.name());
-			HttpUtil.downLoadFromUrl(cover, filename + ".jpg",
-					FileUtil.createTemporaryDirectory(Global.platform.tiktok.name(), filename, Global.uploadRealPath) + "/");
+//			HttpUtil.downLoadFromUrl(cover, filename + ".jpg",
+//					FileUtil.createTemporaryDirectory(Global.platform.tiktok.name(), filename, Global.uploadRealPath) + "/");
 			VideoDataEntity videoDataEntity = new VideoDataEntity(awemeid, desc, desc, platform, coverunaddr, videofile,
 					videounrealaddr, url);
 			videoDataDao.save(videoDataEntity);

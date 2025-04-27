@@ -149,8 +149,7 @@ public class HttpUtil {
         httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
         GetMethod getMethod = new GetMethod(url);
         getMethod.getParams().setParameter(HttpMethodParams.SO_TIMEOUT, 5000);
-        getMethod.getParams().setParameter("user-agent",
-                "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36");
+        getMethod.getParams().setParameter("user-agent",Global.configInfo.getSerchPersion.getValue());
         getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
         String response = "";
         try {
@@ -181,10 +180,8 @@ public class HttpUtil {
         GetMethod getMethod = new GetMethod(url);
 
         getMethod.getParams().setParameter(HttpMethodParams.SO_TIMEOUT, 5000);
-        getMethod.getParams().setParameter("user-agent",
-                "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36");
-        getMethod.addRequestHeader("user-agent",
-                "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36");
+        getMethod.getParams().setParameter("user-agent",Global.configInfo.getSerchPersion.getValue());
+        getMethod.addRequestHeader("user-agent",Global.configInfo.getSerchPersion.getValue());
         if (null != cookie && !cookie.equals("")) {
             getMethod.addRequestHeader("cookie", cookie);
         }
@@ -341,7 +338,7 @@ public class HttpUtil {
 
                 Request.Builder requestBuilder = new Request.Builder()
                         .url(urlStr)
-                        .addHeader("User-Agent", "Mozilla/5.0 BiliDroid/7.25.0 (bbcallen@gmail.com)")
+                        .addHeader("User-Agent", Global.configInfo.BiliDroid.getValue())
                         .addHeader("referer", "https://www.bilibili.com");
 
                 if (cookie != null && !cookie.isEmpty()) {
@@ -506,32 +503,7 @@ public class HttpUtil {
         }
     }
 
-    public static void downLoadFromUrl(String urlStr, String fileName, String savePath) {
-        try {
-            URL url = new URL(urlStr);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(5 * 1000);
-            conn.setRequestProperty("User-Agent",
-                    "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Mobile Safari/537.36");
-            InputStream input = conn.getInputStream();
-            byte[] getData = readInputStream(input);
-            File saveDir = new File(savePath);
-            if (!saveDir.exists()) {
-                FileUtils.createDirectory(savePath);
-            }
-            File file = new File(saveDir + File.separator + fileName);
-            FileOutputStream output = new FileOutputStream(file);
-            output.write(getData);
-            if (output != null) {
-                output.close();
-            }
-            if (input != null) {
-                input.close();
-            }
-        } catch (Exception e) {
 
-        }
-    }
 
     public static byte[] readInputStream(InputStream inputStream) throws IOException {
         byte[] buffer = new byte[10240];
