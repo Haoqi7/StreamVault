@@ -57,6 +57,24 @@ public class YtDlpUtil {
 		command.add("webp");
 		// command.add("%(title)s.%(ext)s");
 //		command.add("--restrict-filenames");
+		command.add("--no-restrict-filenames");
+		command.add("--windows-filenames");
+		
+		command.add("--replace-in-metadata");
+		command.add("title");
+		command.add("#");
+		command.add("_");
+		
+		command.add("--replace-in-metadata");
+		command.add("title");
+		command.add("\\?");
+		command.add("_");
+		
+		command.add("--replace-in-metadata");
+		command.add("title");
+		command.add("\\|");
+		command.add("_");
+
 		if (null != Global.useragent) {
 			command.add("--user-agent");
 			command.add(Global.useragent);
