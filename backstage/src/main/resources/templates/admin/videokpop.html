@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>视频合并-StreamVault</title>
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="../static/css/style.min.css" rel="stylesheet">
+    <link href="../static/js/skin/laypage.css" rel="stylesheet">
+
+    <style>
+        table{
+            table-layout: fixed;
+        }
+        table td{
+            text-overflow:ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .timeline-container {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .timeline {
+            position: relative;
+            height: 30px;
+            background: #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .timeline-slider {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: red;
+            pointer-events: none;
+        }
+
+        .selection-area {
+            position: absolute;
+            height: 100%;
+            background: rgba(0, 123, 255, 0.3);
+            border: 1px solid #007bff;
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        .video-preview {
+            margin-bottom: 15px;
+            background: #000;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .drag-handle {
+            position: absolute;
+            width: 12px;
+            height: 100%;
+            background: #007bff;
+            cursor: ew-resize;
+            opacity: 0.8;
+        }
+        
+        .start-handle {
+            left: 0;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .end-handle {
+            right: 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .selection-area {
+            position: absolute;
+            height: 100%;
+            background: rgba(0, 123, 255, 0.3);
+            border: none;
+        }
+        
+        .timeline {
+            position: relative;
+            height: 30px;
+            background: #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .transition-preview {
+            width: 100px;
+            height: 20px;
+            margin-top: 5px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .transition-preview.fade {
+            background: linear-gradient(to right, #f0f0f0, #007bff, #f0f0f0);
+        }
+
+        .transition-preview.slide {
+            background: linear-gradient(to right, #007bff, #f0f0f0);
+        }
+
+        .transition-preview.wipe {
+            background: linear-gradient(to right, #007bff 50%, #f0f0f0 50%);
+        }
+
+        .transition-preview.zoom {
+            background: radial-gradient(circle at center, #007bff, #f0f0f0);
+        }
+    </style>
+</head>
+
+<body>
+<div class="lyear-layout-web">
+
+    <div class="lyear-layout-container">
+
+        <!--左侧导航-->
+        <div th:include="admin/include/common :: headermenu"> </div>
+        <!--End 头部信息-->
+        <!--End 头部信息-->
+
+        <!--页面主要内容-->
+        <main class="lyear-layout-content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h5 class="card-title mb-0">合并列表</h5>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button class="btn btn-primary btn-sm" onclick="showAddMixModal()">
+                                            <i class="mdi mdi-plus"></i> 添加合并
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>合并名称</th>
+                                                <th>视频数量</th>
+                                                <th>创建时间</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="mixList">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加合并弹出层 -->
+            <div id="addMixContent" style="display: none; padding: 20px;">
+                <form id="mixForm">
+                    <div class="form-group">
+                        <label>合并名称 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="mixName" required placeholder="请输入合并名称">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>选择视频</label>
+                        <div class="selected-videos">
+                            <table class="table" id="selectedVideosTable">
+                                <thead>
+                                    <tr>
+                                        <th>视频名称</th>
+                                        <th>时间段序号</th>
+                                        <th>开始时间(秒)</th>
+                                        <th>结束时间(秒)</th>
+                                        <th>转场效果</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <button type="button" class="btn btn-info btn-sm" onclick="showVideoSelector()">
+                                <i class="mdi mdi-plus"></i> 添加视频
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div class="text-right mt-3">
+                    <button type="button" class="btn btn-secondary" onclick="layer.closeAll()">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveMix()">保存</button>
+                </div>
+            </div>
+
+            <!-- 视频选择器弹出层 -->
+            <div id="videoSelectorContent" style="display: none; padding: 20px;">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <input type="text" class="form-control" id="videoSearchInput" placeholder="请输入视频名称或描述进行搜索...">
+                </div>
+                <div class="table-responsive">
+                    <table class="table" id="videoSelectorTable">
+                        <thead>
+                            <tr>
+                                <th>选择</th>
+                                <th>封面</th>
+                                <th>视频名称</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                
+                <!-- 添加视频预览和时间轴区域 -->
+                <div id="videoTimelineContainer" style="display: none;">
+                    <div class="video-preview">
+                        <video id="previewPlayer" width="100%" height="240" controls></video>
+                    </div>
+                    <div class="timeline-container">
+                        <div id="timeline" class="timeline">
+                            <div id="timelineSlider" class="timeline-slider"></div>
+                            <div id="selectionArea" class="selection-area"></div>
+                        </div>
+                        <div class="time-labels">
+                            <span id="startTimeLabel">00:00</span>
+                            <span id="endTimeLabel">00:00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-right mt-3">
+                    <button type="button" class="btn btn-secondary" onclick="layer.closeAll()">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="addSelectedVideo()">添加</button>
+                </div>
+            </div>
+
+            <!-- 在表格下方添加分页容器 -->
+            <div class="d-flex justify-content-center mt-3">
+                <div id="pager" class="pagination pagination-sm"></div>
+            </div>
+        </main>
+        <!--End 页面主要内容-->
+    </div>
+
+</div>
+
+<script type="text/javascript" src="../static/js/jquery.min.js"></script>
+<script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/js/perfect-scrollbar.min.js"></script>
+<script type="text/javascript" src="../static/js/main.min.js"></script>
+<script type="text/javascript" src="../static/js/laypage.js"></script>
+<script src="../static/js/layer/layer.js" type="text/javascript"></script>
+<script type="text/javascript">
+// 显示添加合并弹出层
+function showAddMixModal() {
+    layer.open({
+        type: 1,
+        title: '添加合并',
+        area: ['800px', '600px'],
+        content: $('#addMixContent'),
+        success: function() {
+            // 清空表单
+            $('#mixName').val('');
+            $('#selectedVideosTable tbody').empty();
+        }
+    });
+}
+
+function getImage(url) {
+    if(url) {
+        return '<div class="thumbnail-container">' +
+               '<img src="'+url+'" class="img-thumbnail" style="max-width: 80px; max-height: 60px;" ' +
+               'onmouseenter="showPreview(this)" onmouseleave="hidePreview()" ' +
+               'onerror="this.src=\'/static/images/noimage.jpg\'">' +
+               '</div>';
+    }
+    return '';
+}
+
+// 预览视频
+function previewVideo(e) {
+    var videourl = $(e).attr('data-video');
+    var html ="<video src='"+videourl+"' height='100%' width='100%' controls='controls'>"
+    layer.open({
+        type: 1,
+        skin: 'layui-layer-rim',
+        area: ['800px', '530px'],
+        content:html
+    });
+}
+
+// 修改时间轴相关变量
+let videoPlayer = null;
+let isDragging = false;
+let dragTarget = null; // 记录当前拖动的是开始点还是结束点
+let selectionStart = 0;
+let selectionEnd = 0;
+
+// 修改初始化时间轴函数
+function initializeTimeline() {
+    const timeline = $('#timeline');
+    const slider = $('#timelineSlider');
+    const selection = $('#selectionArea');
+    
+    // 添加开始和结束拖动点
+    if (!selection.find('.drag-handle').length) {
+        selection.append('<div class="drag-handle start-handle"></div>');
+        selection.append('<div class="drag-handle end-handle"></div>');
+    }
+
+    // 更新时间标签
+    function updateTimeLabels() {
+        $('#startTimeLabel').text(formatTime(selectionStart));
+        $('#endTimeLabel').text(formatTime(selectionEnd));
+    }
+    
+    // 格式化时间
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    // 时间轴点击事件
+    timeline.on('mousedown', function(e) {
+        if ($(e.target).hasClass('drag-handle')) return;
+        
+        const rect = this.getBoundingClientRect();
+        const pos = (e.clientX - rect.left) / rect.width;
+        const clickTime = pos * videoPlayer.duration;
+        
+        // 判断点击位置是否靠近现有的选择区域边界
+        const startDiff = Math.abs(clickTime - selectionStart);
+        const endDiff = Math.abs(clickTime - selectionEnd);
+        
+        if (startDiff < 1) { // 1秒的容差
+            dragTarget = 'start';
+        } else if (endDiff < 1) {
+            dragTarget = 'end';
+        } else {
+            // 新的选择
+            selectionStart = clickTime;
+            selectionEnd = clickTime;
+            dragTarget = 'end';
+        }
+        
+        isDragging = true;
+        updateSelection();
+    });
+    
+    // 拖动点事件
+    selection.find('.drag-handle').on('mousedown', function(e) {
+        e.stopPropagation();
+        isDragging = true;
+        dragTarget = $(this).hasClass('start-handle') ? 'start' : 'end';
+    });
+    
+    // 鼠标移动事件
+    $(document).on('mousemove', function(e) {
+        if (!isDragging) return;
+        
+        const rect = timeline[0].getBoundingClientRect();
+        const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const newTime = pos * videoPlayer.duration;
+        
+        if (dragTarget === 'start') {
+            selectionStart = Math.min(newTime, selectionEnd);
+        } else {
+            selectionEnd = Math.max(newTime, selectionStart);
+        }
+        
+        updateSelection();
+        // 更新视频当前时间
+        videoPlayer.currentTime = dragTarget === 'start' ? selectionStart : selectionEnd;
+    });
+    
+    // 鼠标释放事件
+    $(document).on('mouseup', function() {
+        isDragging = false;
+        dragTarget = null;
+    });
+    
+    // 更新选择区域
+    function updateSelection() {
+        const duration = videoPlayer.duration;
+        const start = (selectionStart / duration) * 100;
+        const end = (selectionEnd / duration) * 100;
+        
+        selection.css({
+            left: start + '%',
+            width: (end - start) + '%'
+        });
+        
+        updateTimeLabels();
+    }
+    
+    // 视频播放时更新滑块位置
+    videoPlayer.ontimeupdate = function() {
+        const pos = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+        slider.css('left', pos + '%');
+    };
+}
+
+// 修改添加视频函数
+function addSelectedVideo() {
+    var selectedRadio = $('input[name="selectedVideo"]:checked');
+    if(selectedRadio.length === 0) {
+        layer.msg('请选择一个视频');
+        return;
+    }
+
+    var videoId = selectedRadio.val();
+    var videoName = selectedRadio.data('name');
+    var startTime = Math.min(selectionStart, selectionEnd);
+    var endTime = Math.max(selectionStart, selectionEnd);
+
+    var html = '<tr data-video-id="'+videoId+'">';
+    html += '<td>'+videoName+'</td>';
+    html += '<td class="segment-no">1</td>';
+    html += '<td><input type="number" class="form-control form-control-sm start-time" value="'+Math.floor(startTime)+'" min="0"></td>';
+    html += '<td><input type="number" class="form-control form-control-sm end-time" value="'+Math.floor(endTime)+'" min="0"></td>';
+    html += '<td>';
+    html += '<select class="form-control form-control-sm transition-type">';
+    html += '<option value="none">无</option>';
+    html += '</select>';
+    html += '</td>';
+    html += '<td>';
+    html += '<button type="button" class="btn btn-danger btn-sm" onclick="$(this).closest(\'tr\').remove()">';
+    html += '<i class="mdi mdi-delete"></i>';
+    html += '</button>';
+    html += '</td>';
+    html += '</tr>';
+    
+    $('#selectedVideosTable tbody').append(html);
+
+    // 重置视频选择器状态
+    resetVideoSelector();
+    
+    // 关闭视频选择器弹出层
+    layer.close(window.currentVideoSelectorIndex);
+}
+
+// 添加重置视频选择器的函数
+function resetVideoSelector() {
+    // 取消选中的单选框
+    $('input[name="selectedVideo"]').prop('checked', false);
+    
+    // 隐藏视频预览和时间轴
+    $('#videoTimelineContainer').hide();
+    
+    // 重置视频播放器
+    if(videoPlayer) {
+        videoPlayer.pause();
+        videoPlayer.src = '';
+    }
+    
+    // 重置时间轴相关变量
+    selectionStart = 0;
+    selectionEnd = 0;
+    
+    // 重置时间轴UI
+    $('#timelineSlider').css('left', '0%');
+    $('#selectionArea').css({
+        left: '0%',
+        width: '0%'
+    });
+    
+    // 重置时间标签
+    $('#startTimeLabel').text('00:00');
+    $('#endTimeLabel').text('00:00');
+}
+
+// 修改视频选择事件
+function onVideoSelect(radio) {
+    const videoUrl = $(radio).closest('tr').find('button').attr('data-video');
+    const videoContainer = $('#videoTimelineContainer');
+    videoPlayer = document.getElementById('previewPlayer');
+    
+    // 显示视频预览和时间轴
+    videoContainer.show();
+    videoPlayer.src = videoUrl;
+    
+    // 重置选择区域和滑块
+    selectionStart = 0;
+    selectionEnd = 0;
+    $('#timelineSlider').css('left', '0%'); // 重置红色滑块位置
+    $('#selectionArea').css({ // 重置选择区域
+        left: '0%',
+        width: '0%'
+    });
+    
+    // 视频加载完成后初始化时间轴
+    videoPlayer.onloadedmetadata = function() {
+        initializeTimeline();
+        // 默认选择整个视频时长
+        selectionEnd = videoPlayer.duration;
+        updateSelection();
+        // 暂停视频并重置到开始位置
+        videoPlayer.currentTime = 0;
+        videoPlayer.pause();
+    };
+}
+
+// 更新选择区域的函数
+function updateSelection() {
+    const duration = videoPlayer.duration;
+    const start = (selectionStart / duration) * 100;
+    const end = (selectionEnd / duration) * 100;
+    
+    $('#selectionArea').css({
+        left: start + '%',
+        width: (end - start) + '%'
+    });
+    
+    $('#startTimeLabel').text(formatTime(selectionStart));
+    $('#endTimeLabel').text(formatTime(selectionEnd));
+}
+
+// 格式化时间的函数
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// 修改加载视频列表函数
+function loadVideoList(searchText) {
+    $.post('/admin/api/findVideoDataList', {
+        pageNo: 1,
+        pageSize: 100,
+        videoname: searchText,
+        videodesc: searchText
+    }, function(data) {
+        if(data.resCode === "000001") {
+            var html = "";
+            var list = data.record.content;
+            for(var i = 0; i < list.length; i++) {
+                html += '<tr>';
+                html += '<td><input type="radio" name="selectedVideo" value="'+list[i].id+'" data-name="'+list[i].videoname+'" onclick="onVideoSelect(this)" data-video="'+list[i].videounrealaddr+'"></td>';
+                html += '<td>'+getImage(list[i].videocover)+'</td>';
+                html += '<td>'+list[i].videoname+'</td>';
+                html += '<td>';
+                html += '<button type="button" class="btn btn-sm btn-info" data-video="'+list[i].videounrealaddr+'" onclick="previewVideo(this)">';
+                html += '<i class="mdi mdi-play"></i> 预览';
+                html += '</button>';
+                html += '</td>';
+                html += '</tr>';
+            }
+            $('#videoSelectorTable tbody').html(html);
+        } else {
+            layer.msg('获取视频列表失败');
+        }
+    });
+}
+
+// 显示视频选择器
+function showVideoSelector() {
+    // 绑定搜索输入框事件
+    $('#videoSearchInput').off('input').on('input', function() {
+        loadVideoList($(this).val());
+    });
+
+    layer.open({
+        type: 1,
+        title: '选择视频',
+        area: ['800px', '700px'],
+        content: $('#videoSelectorContent'),
+        success: function(layero, index) {
+            window.currentVideoSelectorIndex = index;
+            loadVideoList('');
+            $('#videoSearchInput').val('');
+            resetVideoSelector(); // 打开选择器时重置状态
+        }
+    });
+}
+
+// 修改保存合并函数
+function saveMix() {
+    // 验证合并名称
+    const mixName = $('#mixName').val().trim();
+    if (!mixName) {
+        layer.msg('请输入合并名称');
+        return;
+    }
+    
+    // 验证是否添加了视频片段
+    const segments = $('#selectedVideosTable tbody tr');
+    if (segments.length === 0) {
+        layer.msg('请至少添加一段视频');
+        return;
+    }
+
+    const mixData = {
+        mixName: mixName,
+        segments: []
+    };
+    
+    // 收集所有视频片段
+    segments.each(function(index) {
+        var videoId = $(this).data('video-id');
+        var videoName = $(this).find('td:first').text();
+        var segment = {
+            videoid: videoId,
+            videoname: videoName,
+            segmentNo: index + 1, // 重新计算序号，确保连续
+            startTime: parseFloat($(this).find('.start-time').val()),
+            endTime: parseFloat($(this).find('.end-time').val()),
+            transitionType: $(this).find('.transition-type').val()
+        };
+        mixData.segments.push(segment);
+    });
+    
+    // 使用JSON格式提交
+    $.ajax({
+        url: '/admin/api/saveMix',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(mixData),
+        success: function(response) {
+            if(response.resCode === "000001") {
+                layer.msg('保存成功');
+                layer.closeAll();
+                loadMixList();
+            } else {
+                layer.msg('保存失败: ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            layer.msg('请求失败: ' + error);
+        }
+    });
+}
+
+// 定义分页相关变量
+let currentPage = 1;
+const pageSize = 10;
+
+// 加载合并列表
+function loadMixList(page = 1) {
+    $.post('/admin/api/getMixList', {
+        pageNo: page,
+        pageSize: pageSize
+    }, function(response) {
+        if(response.resCode === "000001" && response.record) {
+            const data = response.record;
+            let html = '';
+            
+            // 检查data.content是否存在
+            if(data.content && Array.isArray(data.content)) {
+                // 渲染列表数据
+                data.content.forEach(mix => {
+                    html += '<tr>';
+                    html += '<td>'+mix.id+'</td>';
+                    html += '<td>'+(mix.mixName || '')+'</td>';
+                    html += '<td>'+(mix.segments ? mix.segments.length : 0)+'</td>';
+                    html += '<td>'+formatTime(mix.createTime)+'</td>';
+                    html += '<td><span class="badge badge-'+(mix.status === '完成' ? 'success' : 'warning')+'">'+mix.status+'</span></td>';
+                    html += '<td>';
+                    html += '<div class="btn-group btn-group-sm">';
+                    if(mix.status === '待处理') {
+                        html += '<button class="btn btn-primary" onclick="startMix('+mix.id+')">开始</button>';
+                    } else {
+                        html += '<button class="btn btn-info" onclick="previewMix('+mix.id+')">预览</button>';
+                    }
+                    html += '<button class="btn btn-danger" onclick="deleteMix('+mix.id+')">删除</button>';
+                    html += '</div>';
+                    html += '</td>';
+                    html += '</tr>';
+                });
+            }
+            
+            // 如果html为空（没有数据）显示提示
+            if(!html) {
+                html = '<tr><td colspan="6" class="text-center">暂无数据</td></tr>';
+                 // 弹出使用说明
+                layer.open({
+                    type: 1,
+                    title: '该提示仅在未使用的情况下弹出,请仔细阅读',
+                    area: ['700px', '600px'],  // 设置弹出层的大小
+                    content: '<div id="user-guide" style="padding:15px">'+
+                    '请仔细阅读以下说明，以确保正确使用本功能，并了解相关的注意事项：<br/><br/>'+ 
+                    '1. 该功能仅支持将视频裁剪合并，输出的帧率为 30 FPS。关于视频分辨率的处理可能不统一，因此请确保视频源的分辨率符合需求。<br/>'+
+                    '2. 合并过程可能会占用大量的设备 CPU 资源，虽然已加入限制，但仍可能影响设备性能。请在合并时关注系统负载，避免高负载带来的不适。<br/>'+
+                    '3. 该功能并不涉及复杂的视频编辑操作，仅限于视频合并。如果需要进行更复杂的视频处理操作（如剪辑、滤镜等），请考虑使用专业剪辑工具。<br/>'+
+                    '4. 如果任务正在进行中，容器重启将导致任务丢失。若发生此类情况，请手动删除并重新创建任务，或直接修改数据库中的任务状态。<br/>'+
+                    '5. 删除任务并不会删除已经生成的资源文件。如果你希望删除生成的视频文件，请前往“视频列表”并手动删除相关文件。<br/>'+
+                    '6. 如果你对本功能的实现有兴趣，相关代码可参考后端 `VideoMixService.startMix` 方法。<br/>'+
+                    '7. 同时本模块如果长时间运行任务可能会导致单链或者收藏无法获取到可用进程而导致进程排队等待。<br/>'+
+                    '8. 请注意，本功能不接受任何issues反馈问题。<br/>'+
+                    '9. 如果您有更好的实现 欢迎提交PR。<br/><br/>'+
+                    '<strong>建议您在使用时根据设备的性能和需求进行合理的操作，避免造成不必要的资源浪费或系统故障。</strong><br/><br/>'+
+                    '<strong>请确保在合并过程中没有其他高负载任务在运行</strong><br/>'+
+                    '如果您担心设备负载过大，建议直接前往专业的剪辑工具进行操作，以免影响设备的其他任务。<br/><br/>'+
+                	'</div>',
+
+                    btn: ['我知道了'],
+                    yes: function(index, layero) {
+                        layer.close(index);  // 关闭弹窗
+                    }
+                });
+            }
+            
+            $('#mixList').html(html);
+
+            // 只有在有数据时才渲染分页
+            if(data.totalPages > 0) {
+                laypage({
+                    cont: 'pager',
+                    pages: data.totalPages,
+                    curr: page,
+                    jump: function(obj, first) {
+                        if(!first) {
+                            loadMixList(obj.curr);
+                        }
+                    }
+                });
+            } else {
+                // 清空分页
+                $('#pager').empty();
+            }
+        } else {
+            // 显示空数据提示
+            $('#mixList').html('<tr><td colspan="6" class="text-center">暂无数据</td></tr>');
+            $('#pager').empty();
+            
+            // 如果是接口错误，显示错误信息
+            if(response.message) {
+                layer.msg('获取数据失败：' + response.message);
+            }
+        }
+    }).fail(function(xhr, status, error) {
+        $('#mixList').html('<tr><td colspan="6" class="text-center">暂无数据</td></tr>');
+        $('#pager').empty();
+        layer.msg('请求失败：' + error);
+    });
+}
+
+// 格式化时间的函数
+function formatTime(timestamp) {
+    if(!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.getFullYear() + '-' + 
+           String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+           String(date.getDate()).padStart(2, '0') + ' ' + 
+           String(date.getHours()).padStart(2, '0') + ':' + 
+           String(date.getMinutes()).padStart(2, '0') + ':' + 
+           String(date.getSeconds()).padStart(2, '0');
+}
+
+// 添加删除合并功能
+function deleteMix(id) {
+    layer.confirm('确定要删除这个合并吗？', {
+        btn: ['确定', '取消']
+    }, function() {
+        $.ajax({
+            url: '/admin/api/deleteMix?id='+id,
+            success: function(response) {
+                if(response.resCode === "000001") {
+                    layer.msg('删除成功');
+                    loadMixList(currentPage); // 重新加载当前页
+                } else {
+                    layer.msg('删除失败: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                layer.msg('请求失败: ' + error);
+            }
+        });
+    });
+}
+
+// 添加搜索功能（如果需要）
+function searchMix() {
+    currentPage = 1; // 重置到第一页
+    loadMixList(currentPage);
+}
+
+// 页面加载完成后执行
+$(function() {
+    loadMixList(currentPage);
+    
+    // 如果有搜索按钮，绑定搜索事件
+    // $('.searchBtn').click(function() {
+    //     searchMix();
+    // });
+});
+
+// 添加图片预览相关函数
+var previewTimer;
+var hideTimer;
+
+function showPreview(img) {
+    clearTimeout(hideTimer);
+    clearTimeout(previewTimer);
+    
+    previewTimer = setTimeout(function() {
+        var preview = document.getElementById('thumbnail-preview');
+        if (!preview) {
+            preview = document.createElement('div');
+            preview.id = 'thumbnail-preview';
+            preview.className = 'thumbnail-preview';
+            document.body.appendChild(preview);
+            
+            var overlay = document.createElement('div');
+            overlay.className = 'thumbnail-overlay';
+            overlay.id = 'thumbnail-overlay';
+            document.body.appendChild(overlay);
+        }
+        
+        var previewImg = preview.querySelector('img');
+        if (!previewImg) {
+            previewImg = document.createElement('img');
+            preview.appendChild(previewImg);
+        }
+        
+        previewImg.src = img.src;
+        preview.style.display = 'block';
+        document.getElementById('thumbnail-overlay').style.display = 'block';
+    }, 100);
+}
+
+function hidePreview() {
+    clearTimeout(previewTimer);
+    hideTimer = setTimeout(function() {
+        var preview = document.getElementById('thumbnail-preview');
+        var overlay = document.getElementById('thumbnail-overlay');
+        if (preview) preview.style.display = 'none';
+        if (overlay) overlay.style.display = 'none';
+    }, 100);
+}
+
+// 添加预览样式
+var style = document.createElement('style');
+style.textContent = `
+    .thumbnail-preview {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        display: none;
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        pointer-events: none;
+    }
+    
+    .thumbnail-preview img {
+        max-width: 400px;
+        max-height: 300px;
+    }
+    
+    .thumbnail-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        display: none;
+        pointer-events: none;
+    }
+`;
+document.head.appendChild(style);
+
+// 添加转场效果预览
+function previewTransition(select) {
+    var type = $(select).val();
+    var preview = $(select).closest('tr').find('.transition-preview');
+    
+    if(!preview.length) {
+        preview = $('<div class="transition-preview"></div>');
+        $(select).after(preview);
+    }
+    
+    // 根据转场类型显示预览效果
+    preview.removeClass().addClass('transition-preview ' + type);
+}
+
+// 添加开始合并函数
+function startMix(id) {
+    $.ajax({
+        url: '/admin/api/startMix?id='+id,
+        type: 'GET',
+        success: function(response) {
+            if(response.resCode === "000001") {
+                layer.msg('开始处理成功');
+                loadMixList(currentPage);
+            } else {
+                layer.msg('开始处理失败: ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            layer.msg('请求失败: ' + error);
+        }
+    });
+}
+</script>
+</body>
+</html>

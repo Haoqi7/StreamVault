@@ -167,4 +167,9 @@ public class PageController {
 		model.addAttribute("taskid", taskid);
 		return "admin/collectDataDetailList";
 	}
+	
+	@RequestMapping(value = "/videokpop")
+	public String videokpop() {
+		return "admin/videokpop";
+	}
 }

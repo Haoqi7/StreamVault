@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,6 +24,7 @@ import com.flower.spirit.entity.ProcessHistoryEntity;
 import com.flower.spirit.entity.TikTokConfigEntity;
 import com.flower.spirit.entity.UserEntity;
 import com.flower.spirit.entity.VideoDataEntity;
+import com.flower.spirit.entity.VideoMixEntity;
 import com.flower.spirit.service.BiliConfigService;
 import com.flower.spirit.service.CollectDataDetailService;
 import com.flower.spirit.service.CollectDataService;
@@ -35,6 +37,7 @@ import com.flower.spirit.service.SystemService;
 import com.flower.spirit.service.TikTokConfigService;
 import com.flower.spirit.service.UserService;
 import com.flower.spirit.service.VideoDataService;
+import com.flower.spirit.service.VideoMixService;
 
 
 /**
@@ -87,6 +90,9 @@ public class AdminController {
 	
 	@Autowired
 	private DouYinService douYinService;
+	
+	@Autowired
+	private VideoMixService videoMixService;
 	
 	/**  
 	
@@ -382,4 +388,25 @@ public class AdminController {
 	public AjaxEntity fixBiliFav(String id) {
 		return collectDataService.fixBiliFav(id);
 	}
+	
+	@PostMapping(value = "/getMixList")
+	public AjaxEntity getMixList(VideoMixEntity entity) {
+		return videoMixService.getMixList(entity);
+	}
+	
+	@PostMapping(value = "/saveMix")
+	public AjaxEntity saveMix(@RequestBody VideoMixEntity entity) {
+		return videoMixService.saveMix(entity);
+	}
+	
+	@GetMapping(value = "/deleteMix")
+	public AjaxEntity deleteMix(String id) {
+		return videoMixService.deleteMix(id);
+	}
+	
+	@GetMapping(value = "/startMix")
+	public AjaxEntity startMix(String id) {
+		return videoMixService.startMix(id);
+	}
+	
 } 
