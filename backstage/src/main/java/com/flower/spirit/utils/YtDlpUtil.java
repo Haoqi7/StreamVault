@@ -72,12 +72,11 @@ public class YtDlpUtil {
 			stringBuilder.append(line);
 		}
 		int exitCode = process.waitFor();
-		System.out.println("Command executed with exit code: " + exitCode);
+		logger.info("Command executed with exit code: " + exitCode);
 		String completeString = stringBuilder.toString();
 		if(exitCode!=0) {
-			 System.out.println(completeString);
+			logger.error(completeString);
 		}
-		
 		return completeString;
 	}
 
