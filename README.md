@@ -93,9 +93,7 @@ docker pull qingfeng2336/stream-vault
 
 # 运行容器
 docker run --name stream-vault -d -p 28083:28081 \
-  -v d:/home/spirit/log:/app/log \
-  -v d:/home/spirit/resources:/app/resources \
-  -v d:/home/spirit/db:/app/db \
+  -v d:/home/spirit:/app \
   -v d:/home/spirit/tmp:/tmp \
   qingfeng2336/stream-vault
 ```
