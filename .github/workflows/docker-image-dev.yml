@@ -1,4 +1,4 @@
-name: Build and Push Docker Image (Test)
+name: Build and Push Docker Image (Dev)
 
 on:
   workflow_dispatch:
@@ -23,11 +23,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push (Test Tag)
+      - name: Build and Push (Dev Tag)
         run: |
           docker buildx build \
             --platform linux/arm64,linux/amd64 \
-            -t qingfeng2336/stream-vault:test \
+            -t qingfeng2336/stream-vault:dev \
             --push \
-            -f ./backstage/src/main/docker/buildx/Dockerfile \
+            -f ./backstage/src/main/docker/buildx/Dockerfile.dev \
             ./backstage/src/main/docker/buildx
