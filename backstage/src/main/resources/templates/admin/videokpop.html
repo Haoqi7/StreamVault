@@ -680,8 +680,6 @@ function loadMixList(page = 1) {
                     html += '<div class="btn-group btn-group-sm">';
                     if(mix.status === '待处理') {
                         html += '<button class="btn btn-primary" onclick="startMix('+mix.id+')">开始</button>';
-                    } else {
-                        html += '<button class="btn btn-info" onclick="previewMix('+mix.id+')">预览</button>';
                     }
                     html += '<button class="btn btn-danger" onclick="deleteMix('+mix.id+')">删除</button>';
                     html += '</div>';

@@ -151,7 +151,7 @@ public class VideoMixService {
 
 							// 使用FFmpeg提取视频片段并统一为30fps
 							String ffmpegCmd = String.format(
-									"ffmpeg -y -i %s -ss %d -t %d -r 30 -c:v libx264 -crf 23 -preset medium -threads 2 -thread_type slice %s",
+									"ffmpeg -y -i %s -ss %d -t %d -r 30 -c:v libx264 -crf 23 -preset medium -threads 4 %s",
 									video.getVideoaddr(),
 									segment.getStartTime(),
 									segment.getEndTime() - segment.getStartTime(),
@@ -210,7 +210,7 @@ public class VideoMixService {
 					BufferedReader mergeErrorReader = null;
 					try {
 						String mergeCmd = String.format(
-								"ffmpeg -y -f concat -safe 0 -i %s -c copy -threads 2 %s",
+								"ffmpeg -y -f concat -safe 0 -i %s -c copy -threads 4 %s",
 								listFile,
 								outputFile);
 
