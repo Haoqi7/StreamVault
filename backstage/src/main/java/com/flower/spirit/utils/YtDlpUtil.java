@@ -75,7 +75,7 @@ public class YtDlpUtil {
 		command.add("\\|");
 		command.add("_");
 
-		if (null != Global.useragent) {
+		if (null != Global.useragent && !"".equals(Global.useragent)) {
 			command.add("--user-agent");
 			command.add(Global.useragent);
 		}
