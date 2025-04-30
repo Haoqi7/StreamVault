@@ -36,7 +36,7 @@ public class CookiesConfigService {
 	public AjaxEntity updateCookie(CookiesConfigEntity entity) {
 		// CookiesConfigEntity cookiesConfigEntity =
 		// cookiesConfigDao.findById(entity.getId()).get();
-		Global.cookie_manage =entity;
+		Global.cookie_manage = entity;
 		cookiesConfigDao.save(entity);
 		return new AjaxEntity(Global.ajax_success, "更新成功", null);
 
@@ -80,15 +80,18 @@ public class CookiesConfigService {
 			}
 
 			// 检查文件状态
-			File youtubeFile = new File(cookieDir, "youtube.txt");
-			File twitterFile = new File(cookieDir, "twitter.txt");
+			Map<String, Boolean> status = new HashMap<>();
 
-			boolean youtubeExists = youtubeFile.exists();
-			boolean twitterExists = twitterFile.exists();
-			Map<String, Boolean> status = new HashMap<String, Boolean>();
-			// 构建返回数据
-			status.put("youtube", youtubeExists);
-			status.put("twitter", twitterExists);
+			if (cookieDir.exists() && cookieDir.isDirectory()) {
+				File[] files = cookieDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".txt"));
+				if (files != null) {
+					for (File file : files) {
+						String platform = file.getName().replace(".txt", "");
+						status.put(platform, true);
+					}
+				}
+			}
+
 			return new AjaxEntity(Global.ajax_success, "检查完成", status);
 		} catch (Exception e) {
 			return new AjaxEntity(Global.ajax_uri_error, "检查失败: " + e.getMessage(), null);
@@ -96,4 +99,3 @@ public class CookiesConfigService {
 	}
 
 }
-

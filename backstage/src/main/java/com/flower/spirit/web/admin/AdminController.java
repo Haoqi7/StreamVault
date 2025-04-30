@@ -409,4 +409,9 @@ public class AdminController {
 		return videoMixService.startMix(id);
 	}
 	
+	@PostMapping(value = "/ytextractor")
+	public AjaxEntity ytextractor(VideoDataEntity enity) {
+		return configService.ytextractor(enity);
+	}
+	
 } 

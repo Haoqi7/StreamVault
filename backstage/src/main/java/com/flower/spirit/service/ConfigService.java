@@ -12,7 +12,9 @@ import com.flower.spirit.config.AppConfig;
 import com.flower.spirit.config.Global;
 import com.flower.spirit.dao.ConfigDao;
 import com.flower.spirit.entity.ConfigEntity;
+import com.flower.spirit.entity.VideoDataEntity;
 import com.flower.spirit.utils.BeanUtil;
+import com.flower.spirit.utils.YtDlpUtil;
 
 @Service
 public class ConfigService {
@@ -60,6 +62,14 @@ public class ConfigService {
 		}
 		
 		return new AjaxEntity(Global.ajax_option_success, "操作成功", configEntity);
+	}
+
+	public AjaxEntity ytextractor(VideoDataEntity enity) {
+		String detectedPlatform = YtDlpUtil.getPlatform(enity.getOriginaladdress());
+		if(detectedPlatform!= null) {
+			return new AjaxEntity(Global.ajax_success, "请求成功", detectedPlatform);
+		}
+		return new AjaxEntity(Global.ajax_uri_error, "请求失败,可能网络不支持或者yt-dlp不支持", null);
 	}
 
 }

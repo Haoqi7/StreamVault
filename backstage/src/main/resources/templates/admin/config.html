@@ -258,27 +258,35 @@
                     
                    <div class="col-md-6">
                         <div class="card">
-                            <div class="card-header"><h4>Cookie管理&nbsp;&nbsp;<font style="font-size: 12px"><a href="https://cookie-editor.com/">测试时使用Cookie-Editor</a></font></h4></div>
-                            <div class="card-body">
+                            <div class="card-header"><h4 style="margin: 0;">Cookie管理&nbsp;&nbsp;<font style="font-size: 12px"><a href="https://cookie-editor.com/">测试时使用Cookie-Editor</a></font></h4></div>
+                            <div class="card-body" style="padding: 10px;">
                                 <form action="#" method="post" onsubmit="return false;">
-                                    <div class="form-group">
-                                        <label>Cookie状态</label>
-                                        <div class="youtube-status">YouTube Cookie: 检查中...</div>
-                                        <div class="twitter-status">Twitter Cookie: 检查中...</div>
-                                        <button type="button" class="btn btn-info btn-sm" onclick="checkCookies()">刷新状态</button>
+                                    <div class="form-group" style="margin-bottom: 8px;">
+                                        <label style="margin-bottom: 2px;">Cookie状态</label>
+                                        <div id="cookie-status" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2px; font-size: 12px;"></div>
+                                        <button type="button" class="btn btn-info btn-sm" onclick="checkCookies()" style="padding: 2px 8px; margin-top: 2px;">刷新状态</button>
                                     </div>
-                                    <div class="form-group">
-                                        <label>导入Cookie</label>
-                                          <div class="form-group">
-	                                        <select class="form-control" id="cookiePlatform">
-	                                            <option value="youtube">YouTube</option>
-	                                            <option value="twitter">Twitter</option>
-	                                        </select>
-                                         </div>
-                                         <div class="form-group">
-                                        	<textarea class="form-control" id="cookieContent" rows="3" placeholder="请输入Netscape格式的Cookie内容,建议使用浏览器隐私模式获取的cookie,不然当你再去浏览对应平台时cookie会异常"></textarea>
-                                          </div>
-                                        <button type="button" class="btn btn-primary" onclick="writeCookies()">保存</button>
+                                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                        <div style="flex: 1;">
+                                            <label style="margin-bottom: 2px;">检测新平台</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="platformUrl" placeholder="输入平台URL" style="height: 30px; padding: 4px 8px;">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-info" type="button" onclick="detectPlatform()" style="height: 30px; padding: 4px 8px;">检测</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <label style="margin-bottom: 2px;">导入Cookie</label>
+                                            <select class="form-control" id="cookiePlatform" style="height: 30px; padding: 4px 8px;">
+                                                <option value="youtube">YouTube</option>
+                                                <option value="twitter">Twitter</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 8px;">
+                                        <textarea class="form-control" id="cookieContent" rows="2" placeholder="请输入Netscape格式的Cookie内容,建议使用浏览器隐私模式获取的cookie,不然当你再去浏览对应平台时cookie会异常" style="padding: 4px 8px;"></textarea>
+                                        <button type="button" class="btn btn-primary" onclick="writeCookies()" style="padding: 4px 8px; margin-top: 4px;">保存</button>
                                     </div>
                                 </form>
                             </div>
@@ -423,10 +431,14 @@
                 console.log(res);
                 if(res.resCode === '000001') {
                     var status = res.record;
-                    var youtube = status.youtube ? '存在' : '不存在';
-                    var twitter = status.twitter ? '存在' : '不存在';
-                    $('.youtube-status').text('YouTube Cookie: ' + youtube);
-                    $('.twitter-status').text('Twitter Cookie: ' + twitter);
+                    var statusHtml = '';
+                    for (var platform in status) {
+                        if (status[platform]) {
+                            statusHtml += '<div class="cookie-item" style="background: #e8f0fe; padding: 2px 8px; border-radius: 4px;">' + 
+                                        platform + ': 存在</div>';
+                        }
+                    }
+                    $('#cookie-status').html(statusHtml || '暂无Cookie');
                 } else {
                     layer.msg(res.message)
                 }
@@ -485,6 +497,7 @@
               option['agentaccpass'] = agentaccpass;
               option['useragent'] = userAgent;
               option['readonlytoken'] = readonlytoken;
+              option['ytdlpmode'] = $("#ytdlpmode").val();
               $.post("/admin/api/saveConfig",option,function(data,status){
                   if(data.resCode =="000001"){
                       layer.closeAll();
@@ -658,6 +671,42 @@
         var channel = $("#notifyChannel").val();
         $(".qywx-config, .dingding-config, .feishu-config").hide();
         $("." + channel + "-config").show();
+    }
+    function detectPlatform() {
+        var url = $('#platformUrl').val();
+        if(!url) {
+            layer.msg("请输入平台URL");
+            return;
+        }
+        var loadIndex = layer.load(1, {
+            shade: [0.1,'#fff']
+        });
+        $.ajax({
+            url: '/admin/api/ytextractor',
+            type: 'POST',
+            data: {
+                originaladdress: url
+            },
+            success: function(res) {
+                layer.close(loadIndex);
+                if(res.resCode === '000001') {
+                    layer.msg("检测成功");
+                    // 使用返回的record作为value值
+                    var option = new Option(res.record, res.record);
+                    $('#cookiePlatform').append(option);
+                    // 清空输入框
+                    $('#platformUrl').val('');
+                    // 自动选中新添加的平台
+                    $('#cookiePlatform').val(res.record);
+                } else {
+                    layer.msg("检测失败：" + res.message);
+                }
+            },
+            error: function() {
+                layer.close(loadIndex);
+                layer.msg("检测失败，请检查网络连接");
+            }
+        });
     }
 </script>
 </body>

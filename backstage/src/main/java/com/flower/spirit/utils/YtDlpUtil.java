@@ -37,6 +37,14 @@ public class YtDlpUtil {
 				command.add(twitterFile.getAbsolutePath());
 			}
 		}
+		
+		if(null!=p && !p.equals("twitter") && !p.equals("youtube")) {
+			File all = new File(cookieDir, p+".txt");
+			if (all.exists()) {
+				command.add("--cookies");
+				command.add(all.getAbsolutePath());
+			}
+		}
 
 		if (Global.proxyinfo != null) {
 			command.add("--proxy");
