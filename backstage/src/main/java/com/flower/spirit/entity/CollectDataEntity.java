@@ -59,6 +59,8 @@ public class CollectDataEntity   extends DataEntity<CollectDataEntity> implement
 	private Integer maxcur;
 	
 	private Integer omaxcur;
+	
+	private String generatenfo;
 
 	public Integer getId() {
 		return id;
@@ -179,6 +181,14 @@ public class CollectDataEntity   extends DataEntity<CollectDataEntity> implement
 
 	public void setOmaxcur(Integer omaxcur) {
 		this.omaxcur = omaxcur;
+	}
+
+	public String getGeneratenfo() {
+		return generatenfo;
+	}
+
+	public void setGeneratenfo(String generatenfo) {
+		this.generatenfo = generatenfo;
 	}
 
 	

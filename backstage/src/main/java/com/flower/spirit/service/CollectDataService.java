@@ -253,7 +253,8 @@ public class CollectDataService {
 						map.put("piclocal", piclocal);
 						map.put("ctime", ctime);
 						map.put("title", filename);
-						if (Global.getGeneratenfo) {
+						if(null!=entity.getGeneratenfo() && entity.getGeneratenfo().equalsIgnoreCase("Y")){
+//						if (Global.getGeneratenfo) {
 							EmbyMetadataGenerator.createFavoriteEpisodeNfo(map, dir, i + 1, dirpath);
 						}
 					}
@@ -300,7 +301,8 @@ public class CollectDataService {
 		// 生成tvshow.nfo元数据
 		String temporaryDirectory = FileUtil.generateDir(true, Global.platform.douyin.name(), false, null, taskname,
 				null);
-		if (Global.getGeneratenfo) {
+		if(null!=entity.getGeneratenfo() && entity.getGeneratenfo().equalsIgnoreCase("Y")){
+//		if (Global.getGeneratenfo) {
 			if (!(new File(temporaryDirectory + File.separator + "tvshow.nfo").exists())) {
 				EmbyMetadataGenerator.createFavoriteDouNfo(taskname, temporaryDirectory);
 			}
@@ -395,8 +397,8 @@ public class CollectDataService {
 							FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname, "mp4"),
 							videounrealaddr, entity.getOriginaladdress());
 					videoDataDao.save(videoDataEntity);
-
-					if (Global.getGeneratenfo) {
+					if(null!=entity.getGeneratenfo() && entity.getGeneratenfo().equalsIgnoreCase("Y")){
+//					if (Global.getGeneratenfo) {
 						Map<String, String> map = new HashMap<String, String>();
 						map.put("title", desc);
 						map.put("desc", desc);
@@ -566,13 +568,12 @@ public class CollectDataService {
 		String namepath = object.getJSONObject("data").getString("title");
 		String temporaryDirectory = FileUtil.generateDir(true, Global.platform.bilibili.name(), false, null, namepath,
 				null);
-		if (Global.getGeneratenfo) {
+		if(null!=collectDataEntity.getGeneratenfo() && collectDataEntity.getGeneratenfo().equalsIgnoreCase("Y")){
 			// 防止重复写问题
 			if (!(new File(temporaryDirectory + File.separator + "tvshow.nfo").exists())) {
 				// 文件不存在
 				EmbyMetadataGenerator.createFavoriteNfo(infobili, temporaryDirectory);
 			}
-
 		}
 		String api = "https://api.bilibili.com/x/v3/fav/resource/ids?media_id=" + newod + "&platform=web";
 		String httpGetBili = HttpUtil.httpGetBili(api, "UTF-8", Global.bilicookies);
@@ -639,7 +640,8 @@ public class CollectDataService {
 						// 创建
 						String temporaryDirectory = FileUtil.generateDir(true, Global.platform.bilibili.name(), false,
 								null, namepath, null);
-						if (Global.getGeneratenfo) {
+//						if (Global.getGeneratenfo) {
+						if(null!=collectDataEntity.getGeneratenfo() && collectDataEntity.getGeneratenfo().equalsIgnoreCase("Y")){
 							// 防止重复写问题
 							if (!(new File(temporaryDirectory + File.separator + "tvshow.nfo").exists())) {
 								// 文件不存在
