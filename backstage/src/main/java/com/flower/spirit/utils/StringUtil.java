@@ -60,21 +60,31 @@ public class StringUtil {
 				obj = obj.substring(0, 64);
 			}
 
-			// 1. 替换所有非中文、数字、字母的字符为点号
+			// 替换所有非中文、数字、字母为点号
 			String result = obj.replaceAll("[^A-Za-z0-9\\u4e00-\\u9fa5]+", ".");
 
-			// 2. 处理连续的点号
+			// 合并多个点号为一个
 			result = result.replaceAll("\\.+", ".");
+			
 
-			// 3. 去除首尾的点号
+
+			// 去除首尾点号
 			result = result.replaceAll("^\\.|\\.$", "");
 
-			// 4. 如果结果为空，使用备用ID
+			// 去除孤立的点号（即两个点号之间无字符的情况）
+			result = result.replaceAll("(?<=\\.)\\.(?=\\.)", "");
+
+			// 再次去除首尾点号，防止中间清理后新产生的
+			result = result.replaceAll("^\\.|\\.$", "");
+
+			result = result.replace(".", "");
+			
+			// 如果结果为空，使用备用ID
 			if (result.isEmpty()) {
 				return aid;
 			}
 
-			// 5. 确保文件名不以数字开头（Jellyfin可能会误认为是集数）
+			// 文件名不能以数字开头
 			if (result.matches("^[0-9].*")) {
 				result = "ep" + result;
 			}
@@ -84,6 +94,7 @@ public class StringUtil {
 			return aid;
 		}
 	}
+
 
 	public static String getRemoteAddr(HttpServletRequest request) {
 		String remoteAddr = request.getHeader("X-Real-IP");

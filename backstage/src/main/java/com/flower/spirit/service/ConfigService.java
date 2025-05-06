@@ -60,6 +60,9 @@ public class ConfigService {
 		if(null!=configEntity.getYtdlpmode() && !"".equals(configEntity.getYtdlpmode())) {
 			Global.ytdlpmode = configEntity.getYtdlpmode();
 		}
+		if(null!=configEntity.getNfonetaddr() && !"".equals(configEntity.getNfonetaddr())) {
+			Global.nfonetaddr = configEntity.getNfonetaddr();
+		}
 		
 		return new AjaxEntity(Global.ajax_option_success, "操作成功", configEntity);
 	}

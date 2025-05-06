@@ -90,6 +90,9 @@ public class AppConfig {
 		if(null!=data.getYtdlpmode() && !"".equals(data.getYtdlpmode())) {
 			Global.ytdlpmode = data.getYtdlpmode();
 		}
+		if(null!=data.getNfonetaddr() && !"".equals(data.getNfonetaddr())) {
+			Global.nfonetaddr = data.getNfonetaddr();
+		}
 		if (data.getAgenttype() != null && !data.getAgenttype().trim().isEmpty() &&
 			    data.getAgentaddress() != null && !data.getAgentaddress().trim().isEmpty() &&
 			    data.getAgentport() != null && !data.getAgentport().trim().isEmpty()) {

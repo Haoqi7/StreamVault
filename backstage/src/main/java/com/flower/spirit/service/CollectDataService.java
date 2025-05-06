@@ -246,6 +246,9 @@ public class CollectDataService {
 						// 下载up 头像 up头像不参与数据 只参与nfo
 						HttpUtil.downBiliFromUrl(upface, "upcover" + upmid + ".jpg", dir);
 						String uplocal = "upcover" + upmid + ".jpg";
+						if(null!=Global.nfonetaddr && !"".equals(Global.nfonetaddr)) {
+							uplocal = Global.nfonetaddr+codir+uplocal+"?apptoken="+Global.readonlytoken;
+						}
 						String piclocal = filename + ".jpg";
 						map.put("upname", upname);
 						map.put("upmid", upmid);

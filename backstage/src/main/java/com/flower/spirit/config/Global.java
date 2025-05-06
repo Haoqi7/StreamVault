@@ -112,6 +112,8 @@ public class Global {
 	
 	public static String ytdlpmode = "0";
 
+	public static String nfonetaddr = "";
+
 	@Value("${file.save}")
 	public void setSavefile(String value) {
 		Global.savefile = value;

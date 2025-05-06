@@ -53,6 +53,8 @@ public class ConfigEntity implements Serializable {
 	private String frontend; //video  nav
 	
 	private String ytdlpmode;
+	
+	private String nfonetaddr;
 
 	public Integer getId() {
 		return id;
@@ -164,6 +166,14 @@ public class ConfigEntity implements Serializable {
 
 	public void setYtdlpmode(String ytdlpmode) {
 		this.ytdlpmode = ytdlpmode;
+	}
+
+	public String getNfonetaddr() {
+		return nfonetaddr;
+	}
+
+	public void setNfonetaddr(String nfonetaddr) {
+		this.nfonetaddr = nfonetaddr;
 	}
 
 	

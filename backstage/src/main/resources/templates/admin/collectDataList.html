@@ -243,7 +243,7 @@
 							</select>
 						</div>
 					</div>
-					<div class="col-md-6">
+<!-- 					<div class="col-md-6">
 						<div class="form-group">
 							<label>是否生成NFO</label>
 							<select class="generatenfo form-control">
@@ -251,7 +251,7 @@
 								<option value="Y">是</option>
 							</select>
 						</div>
-					</div>
+					</div> -->
 				</div>
 
 				<!-- 收藏夹选择 -->
@@ -458,7 +458,7 @@
 					option.maxcur = $('.bilibili-type .monitor-max-fetch').val();
 				}
 			}
-			option['generatenfo'] =$('.generatenfo').val();
+			/* option['generatenfo'] =$('.generatenfo').val(); */
 			layer.load();
 			$.post("/admin/api/submitCollectData", option, function(data,status){
 				if(data.resCode == "000001"){

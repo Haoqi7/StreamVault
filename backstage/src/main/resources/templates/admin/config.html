@@ -81,17 +81,17 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>ip授权</label>
-                                                <input class="form-control" type="text" id="ipauth" name="ipauth" placeholder="目前没做">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
                                                 <label>开启提交记录</label>
                                                 <select id="openprocesshistory" class="form-control openprocesshistory" name="openprocesshistory">
                                                     <option value="0" th:selected="${config.openprocesshistory} eq '0'">否</option>
                                                     <option value="1" th:selected="${config.openprocesshistory} eq '1'">是</option>
                                                 </select>
+                                            </div>
+                                        </div>
+                                       <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>监控定时器cron</label>
+                                                <input class="form-control" type="text" id="taskcron" name="taskcron" placeholder="默认0 0 0/3 * * ?  三小时一次" th:value="${config.taskcron}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -105,10 +105,11 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>监控定时器cron</label>
-                                                <input class="form-control" type="text" id="taskcron" name="taskcron" placeholder="默认0 0 0/3 * * ?  三小时一次" th:value="${config.taskcron}">
+                                                <label>NFO元数据(提供给其他媒体库网络地址)<i class="mdi mdi-help" style="cursor: pointer; font-size: 12px;" onclick="layer.alert('NFO元数据网络地址用于其他媒体库访问本应用的部分图片资源。目前仅b站收藏夹的up头像 类做了适配 如果需要在公网访问，请填写可以从公网访问到的地址。例如：http://your-domain.com 或 http://your-ip') "></i></label>
+                                                <input class="form-control" type="text" id="nfonetaddr" name="nfonetaddr" th:value="${config.nfonetaddr}" placeholder="http://127.0.0.1 如需要公网 请填写本应用公网能访问到的地址">
                                             </div>
                                         </div>
+
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>主页配置&nbsp;<a href="https://bd.kwaie.com" onclick="return confirmRedirect(this);" style="font-size: 12px;" title="该demo非本仓库提供">播放主页DEMO</a></label>
@@ -498,6 +499,7 @@
               option['useragent'] = userAgent;
               option['readonlytoken'] = readonlytoken;
               option['ytdlpmode'] = $("#ytdlpmode").val();
+              option['nfonetaddr'] = $("#nfonetaddr").val();
               $.post("/admin/api/saveConfig",option,function(data,status){
                   if(data.resCode =="000001"){
                       layer.closeAll();
@@ -646,6 +648,7 @@
             var readonlytoken =$("#readonlytoken").val();
             option['readonlytoken'] = readonlytoken;
             option['ytdlpmode'] = $("#ytdlpmode").val();
+            option['nfonetaddr'] = $("#nfonetaddr").val();
             $.post("/admin/api/saveConfig",option,function(data,status){
                 if(data.resCode =="000001"){
                     layer.closeAll();
