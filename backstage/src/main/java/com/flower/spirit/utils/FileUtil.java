@@ -48,7 +48,7 @@ public class FileUtil {
      * @return  /cos/bili/odd/2025   /cos/bili/collection/fav
      */
     public static String generateDir(boolean real,String platform,boolean odd,String filename,String favname,String ext) {
-    	String datepath = DateUtils.getDate("yyyy")+System.getProperty("file.separator");
+    	String datepath = DateUtils.getDate("yyyy");
     	String resdir ="";
     	if(real) {
     		resdir = resdir+uploadRealPath+System.getProperty("file.separator");

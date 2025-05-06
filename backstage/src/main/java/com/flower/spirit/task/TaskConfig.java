@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronExpression;
@@ -21,7 +20,6 @@ import com.flower.spirit.service.ConfigService;
 import com.flower.spirit.utils.DateUtils;
 
 @Component
-@EnableScheduling
 public class TaskConfig implements SchedulingConfigurer {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskConfig.class);

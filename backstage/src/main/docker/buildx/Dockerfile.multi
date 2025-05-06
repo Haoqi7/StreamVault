@@ -1,40 +1,75 @@
 # ===== 构建阶段 =====
-FROM python:3.10-alpine AS builder
+FROM alpine:latest AS builder
 
-ENV TZ=Asia/Shanghai
-ARG YT_DLP_VERSION=2025.03.31
+ENV TZ=Asia/Shanghai \
+    BUILD_VERSION=2025.05.06.042010 \
+    YT_DLP_VERSION=2025.05.06.042010 \
+    VENV_PATH=/opt/venv
 
+# 使用中科大源，加快安装速度
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories && \
-    apk add --no-cache build-base libffi-dev python3-dev wget
+    apk update && apk upgrade
 
-# 创建虚拟环境并安装依赖
-RUN python3 -m venv /opt/venv && \
-    . /opt/venv/bin/activate && \
+# 安装构建依赖（含 Python 相关）
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    py3-virtualenv \
+    build-base \
+    python3-dev \
+    libffi-dev \
+    tzdata \
+    wget \
+    ffmpeg
+
+# 设置时区
+RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
+
+# 创建虚拟环境，安装 f2
+RUN python3 -m venv ${VENV_PATH} && \
+    . ${VENV_PATH}/bin/activate && \
     pip install --no-cache-dir f2
 
-# 下载 yt-dlp
-RUN wget -O /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp && \
-    chmod a+rx /usr/local/bin/yt-dlp
+# 下载 yt-dlp（Python 依赖，单独下载二进制）
+RUN wget -O /usr/local/bin/yt-dlp https://github.com/lemon8866/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp && \
+    chmod +x /usr/local/bin/yt-dlp
+
 
 # ===== 运行阶段 =====
-FROM openjdk:8-jre-alpine
+FROM alpine:latest
 
-ENV TZ=Asia/Shanghai
+ENV TZ=Asia/Shanghai \
+    VENV_PATH=/opt/venv \
+    YT_DLP_PATH=/usr/local/bin/yt-dlp
 
-# 拷贝 venv（只复制执行所需部分）
-COPY --from=builder /opt/venv /opt/venv
-COPY --from=builder /usr/local/bin/yt-dlp /usr/local/bin/yt-dlp
+# 使用中科大源
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories && \
+    apk update && apk upgrade
 
-ENV PATH="/opt/venv/bin:$PATH"
-ENV YT_DLP_PATH=/usr/local/bin/yt-dlp
+# 安装最小运行依赖（Java、Python runtime、ffmpeg）
+RUN apk add --no-cache \
+    openjdk8 \
+    python3 \
+    ffmpeg \
+    tzdata
 
-RUN apk add --no-cache ffmpeg
+# 设置时区
+RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
 
+# 复制构建好的虚拟环境和 yt-dlp 可执行文件
+COPY --from=builder /opt/venv ${VENV_PATH}
+COPY --from=builder /usr/local/bin/yt-dlp ${YT_DLP_PATH}
+
+# 挂载点
 VOLUME ["/tmp", "/app"]
+
+# 复制应用文件
 COPY db /home/app/db/
 COPY script /home/app/script/
 RUN mkdir -p /app/resources
+ADD spirit-0.0.1-SNAPSHOT.jar /app.jar
 
-ADD spirit-0.0.1-SNAPSHOT.jar app.jar
-
+# 设置 ENTRYPOINT
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar", "--spring.profiles.active=docker"]
