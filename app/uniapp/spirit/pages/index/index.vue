@@ -1,12 +1,27 @@
 <template>
-	<view class="content">
-		<textarea class="url" placeholder="输入或粘贴分享" v-model="originaladdress"></textarea>
-		<view class="option">
-			<button class="submit" @click="pushMessage()">提交</button>
+	<view class="container">
+		<view class="card">
+			<view class="card-header">
+				<text class="title">StreamVault</text>
+			</view>
+			<view class="card-content">
+				<textarea class="input-area" 
+					placeholder="请输入或粘贴视频分享链接" 
+					placeholder-class="placeholder"
+					v-model="originaladdress">
+				</textarea>
+				<button class="submit-btn" @click="pushMessage()">
+					<text class="btn-text">提交链接</text>
+				</button>
+			</view>
 		</view>
-		<view class="service"  @click="serverList()">
-			<view class="servername">服务器：{{servername}}</view>
-			<uni-icons type="gear-filled" size="20"></uni-icons>
+		
+		<view class="server-card" @click="serverList()">
+			<view class="server-info">
+				<uni-icons type="gear-filled" size="20" color="#0284da"></uni-icons>
+				<text class="server-text">当前服务器：{{servername || '未选择'}}</text>
+			</view>
+			<uni-icons type="right" size="16" color="#999"></uni-icons>
 		</view>
 	</view>
 </template>
@@ -112,27 +127,86 @@
 </script>
 
 <style>
-	.content{
-		width: 100%;
-		text-align: center;
-	}
-	.url{
-		display: inline-block;
-		border: 1px solid #bfbcbc;
-		border-radius: 5px;
-		margin-top: 4%;
-	}
-	.option{
-		margin: 12% 26%;
-		margin-bottom: 6%;
-	}
-	.option .submit{
-		background-color: #0284da;
-		color: #fff;
-		border-radius: 12rem;
-	}
-	.servername{
-		height: 1.5rem;
-		line-height: 1.5rem;
-	}
+.container {
+	min-height: 100vh;
+	padding: 20rpx;
+	background-color: #f5f5f5;
+}
+
+.card {
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 30rpx;
+	margin-top: 20rpx;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+	margin-bottom: 30rpx;
+}
+
+.title {
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #333;
+}
+
+.card-content {
+	display: flex;
+	flex-direction: column;
+	gap: 30rpx;
+}
+
+.input-area {
+	width: 100%;
+	height: 200rpx;
+	background: #f8f8f8;
+	border-radius: 12rpx;
+	padding: 20rpx;
+	font-size: 28rpx;
+	color: #333;
+}
+
+.placeholder {
+	color: #999;
+	font-size: 28rpx;
+}
+
+.submit-btn {
+	background: #0284da;
+	height: 88rpx;
+	border-radius: 44rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 20rpx;
+}
+
+.btn-text {
+	color: #fff;
+	font-size: 30rpx;
+	font-weight: 500;
+}
+
+.server-card {
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 30rpx;
+	margin-top: 30rpx;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.server-info {
+	display: flex;
+	align-items: center;
+	gap: 16rpx;
+}
+
+.server-text {
+	font-size: 28rpx;
+	color: #333;
+}
 </style>

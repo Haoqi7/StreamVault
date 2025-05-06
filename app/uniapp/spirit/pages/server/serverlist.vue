@@ -1,22 +1,41 @@
 <template>
-	<view>
-		<view class="serverList">
-			<view class="server" v-for="(item,index) in serverlist">
-				<view class="left">
-					<view class="line">服务器名称:{{item.servername}}</view>
-					<view class="line">地址:{{item.server}}</view>
-				</view>
-				<view class="right">
-					<view class="line" @click="swichServer(index)">{{item.default == 'y'?'默认':'切换'}}</view>
-					<view class="line" @click="deleteServer(index)">删除</view>
-				</view>
-			</view>
-			
+	<view class="container">
+		<view class="header">
+			<text class="title">服务器列表</text>
 		</view>
 		
-		<view class="option">
-			<button @click="pageAddServer()">新增服务器</button>
+		<view class="server-list">
+			<view class="server-card" v-for="(item,index) in serverlist" :key="index">
+				<view class="server-info">
+					<view class="name">
+						<text class="label">{{item.servername}}</text>
+						<text class="tag" v-if="item.default === 'y'">默认</text>
+					</view>
+					<text class="address">{{item.server}}:{{item.port}}</text>
+				</view>
+				
+				<view class="actions">
+					<button 
+						class="action-btn switch" 
+						:class="{'default': item.default === 'y'}"
+						@click="swichServer(index)"
+					>
+						{{item.default === 'y' ? '当前默认' : '设为默认'}}
+					</button>
+					<button class="action-btn delete" @click="deleteServer(index)">
+						<uni-icons type="trash" size="16" color="#666"></uni-icons>
+					</button>
+				</view>
+			</view>
 		</view>
+		
+		<view class="empty-state" v-if="serverlist.length === 0">
+			<text class="empty-text">暂无服务器，请添加</text>
+		</view>
+		
+		<button class="add-btn" @click="pageAddServer()">
+			<text class="btn-text">添加新服务器</text>
+		</button>
 	</view>
 </template>
 
@@ -63,43 +82,124 @@
 </script>
 
 <style>
-.serverList{
+.container {
+	min-height: 100vh;
+	padding: 20rpx;
+	background-color: #f5f5f5;
+}
+
+.header {
+	padding: 20rpx 10rpx;
+	margin-bottom: 20rpx;
+}
+
+.title {
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #333;
+}
+
+.server-list {
+	display: flex;
+	flex-direction: column;
+	gap: 20rpx;
+}
+
+.server-card {
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 24rpx;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.server-info {
+	margin-bottom: 20rpx;
+}
+
+.name {
+	display: flex;
+	align-items: center;
+	gap: 12rpx;
+	margin-bottom: 8rpx;
+}
+
+.label {
+	font-size: 30rpx;
+	font-weight: 500;
+	color: #333;
+}
+
+.tag {
+	background: #e8f3ff;
+	color: #0284da;
+	font-size: 24rpx;
+	padding: 4rpx 12rpx;
+	border-radius: 8rpx;
+}
+
+.address {
+	font-size: 26rpx;
+	color: #666;
+}
+
+.actions {
+	display: flex;
+	align-items: center;
+	gap: 16rpx;
+}
+
+.action-btn {
+	flex: 1;
+	height: 72rpx;
+	border-radius: 36rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 26rpx;
+	background: #f5f5f5;
+	color: #666;
+}
+
+.action-btn.switch {
+	background: #f0f9ff;
+	color: #0284da;
+}
+
+.action-btn.switch.default {
+	background: #e8f3ff;
+}
+
+.action-btn.delete {
+	flex: 0 0 72rpx;
+	padding: 0;
+}
+
+.empty-state {
+	padding: 80rpx 0;
 	text-align: center;
-	margin-top: 5%;
 }
-.serverList .server{
-	display: inline-block;
-	width: 95%;
-	text-align: left;
-	border-bottom: 1px solid #959393;
-	height: 4rem;
-	line-height: 4rem;
-}
-.serverList .server .left{
-	display: inline-block;
-	float: left;
-	width: 80%;
 
+.empty-text {
+	font-size: 28rpx;
+	color: #999;
 }
-.serverList .server .line{
-	height: 2rem;
-	line-height: 2rem;
 
+.add-btn {
+	position: fixed;
+	bottom: 40rpx;
+	left: 40rpx;
+	right: 40rpx;
+	background: #0284da;
+	height: 88rpx;
+	border-radius: 44rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
-.serverList .server .right{
-	display: inline-block;
-	float: left;
-	width: 20%;
-}
-.option{
-	position: absolute;
-	bottom: 2rem;
-	width: 100%;
-}
-.option button{
-	background-color: #0284da;
+
+.btn-text {
 	color: #fff;
-	border-radius: 12rem;
-	width: 10rem;
+	font-size: 30rpx;
+	font-weight: 500;
 }
 </style>

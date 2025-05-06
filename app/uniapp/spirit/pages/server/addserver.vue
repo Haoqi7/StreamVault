@@ -1,24 +1,55 @@
 <template>
-	<view>
-		<view class="line">
-			<view class="title">名称:</view>
-			<view class="input"><input v-model="servername" placeholder="小明1号" /></view>
+	<view class="container">
+		<view class="card">
+			<view class="card-header">
+				<text class="title">添加服务器</text>
+			</view>
+			<view class="form-group">
+				<view class="form-item">
+					<text class="label">服务器名称</text>
+					<input 
+						class="input" 
+						v-model="servername" 
+						placeholder="给服务器起个名字" 
+						placeholder-class="placeholder"
+					/>
+				</view>
+				
+				<view class="form-item">
+					<text class="label">服务器地址</text>
+					<input 
+						class="input" 
+						v-model="server" 
+						placeholder="http://xxx.com 或 http://ip" 
+						placeholder-class="placeholder"
+					/>
+				</view>
+				
+				<view class="form-item">
+					<text class="label">端口</text>
+					<input 
+						class="input" 
+						v-model="port" 
+						placeholder="请输入端口号" 
+						placeholder-class="placeholder"
+					/>
+				</view>
+				
+				<view class="form-item">
+					<text class="label">Token</text>
+					<input 
+						class="input" 
+						v-model="token" 
+						placeholder="请输入授权token" 
+						placeholder-class="placeholder"
+					/>
+				</view>
+			</view>
 		</view>
-		<view class="line">
-			<view class="title">服务器:</view>
-			<view class="input"><input v-model="server" placeholder="http://xxx.com or http://ip " /></view>
-		</view>
-		<view class="line">
-			<view class="title">端口:</view>
-			<view class="input"><input v-model="port" placeholder="11166"/></view>
-		</view>
-		<view class="line">
-			<view class="title">token:</view>
-			<view class="input"><input v-model="token" placeholder="app token" /></view>
-		</view>
-		<view class="option">
-			<button @click="saveServer()">保存</button>
-		</view>
+		
+		<button class="submit-btn" @click="saveServer()">
+			<text class="btn-text">保存服务器</text>
+		</button>
 	</view>
 </template>
 
@@ -81,29 +112,74 @@
 </script>
 
 <style>
-.line{
-	height: 3.5rem;
-	line-height: 3.5rem;
-	border-bottom: 1px solid #d3d0d0;
-	margin: 1% 3%;
+.container {
+	min-height: 100vh;
+	padding: 20rpx;
+	background-color: #f5f5f5;
 }
-.line .title{
-	width: 20%;
-	float: left;
+
+.card {
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 30rpx;
+	margin-bottom: 30rpx;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
 }
-.line .input,input{
-	width: 80%;
-	float: left;
-	height: 3.5rem;
-	line-height: 3.5rem;
+
+.card-header {
+	margin-bottom: 30rpx;
 }
-.option{
-	margin-top:5%;
+
+.title {
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #333;
 }
-.option button{
-	background-color: #0284da;
+
+.form-group {
+	display: flex;
+	flex-direction: column;
+	gap: 24rpx;
+}
+
+.form-item {
+	display: flex;
+	flex-direction: column;
+	gap: 12rpx;
+}
+
+.label {
+	font-size: 28rpx;
+	color: #666;
+	font-weight: 500;
+}
+
+.input {
+	height: 88rpx;
+	background: #f8f8f8;
+	border-radius: 12rpx;
+	padding: 0 24rpx;
+	font-size: 28rpx;
+	color: #333;
+}
+
+.placeholder {
+	color: #999;
+}
+
+.submit-btn {
+	background: #0284da;
+	height: 88rpx;
+	border-radius: 44rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 40rpx 30rpx;
+}
+
+.btn-text {
 	color: #fff;
-	border-radius: 12rem;
-	width: 10rem;
+	font-size: 30rpx;
+	font-weight: 500;
 }
 </style>

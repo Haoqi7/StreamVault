@@ -7,7 +7,7 @@
 			}
 		},
 		{
-			"path": "pages/videoPlay/videoPlay",
+			"path": "pages/video/videolist",
 			"style": {
 				"navigationBarTitleText": "播放"
 			}
@@ -29,11 +29,10 @@
 			}
 		},
 		{
-			"path" : "pages/videoPlay/swiperPlay",
+			"path" : "pages/video/videoPlay",
 			"style" : 
 			{
-				"navigationBarTitleText" : "咻咻",
-				"enablePullDownRefresh" : false
+				"navigationBarTitleText" : ""
 			}
 		}
     ],
@@ -50,13 +49,7 @@
 				"text": "推送"
 			},
 			{
-				"pagePath": "pages/videoPlay/swiperPlay",
-				"iconPath": "static/icon/xiuxiu.png",
-				"selectedIconPath": "static/icon/xiuxiu.png",
-				"text": "咻咻"
-			},
-			{
-				"pagePath": "pages/videoPlay/videoPlay",
+				"pagePath": "pages/video/videolist",
 				"iconPath": "static/icon/play.png",
 				"selectedIconPath": "static/icon/play.png",
 				"text": "列表"
