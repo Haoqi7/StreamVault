@@ -72,7 +72,7 @@ public class FileUtil {
     	if(filename!= null) {
     		if(Global.getGeneratenfo) {
         		if(favname != null) {
-        			resdir =resdir+"Season1";
+        			resdir =resdir+"Season1"+System.getProperty("file.separator")+filename;
         		}else {
         			resdir =resdir+filename;
         		}
