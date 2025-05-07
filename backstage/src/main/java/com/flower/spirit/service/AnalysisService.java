@@ -209,7 +209,6 @@ public class AnalysisService {
 				processHistoryService.saveProcess(saveProcess.getId(), url, platform);
 				sendNotify.sendNotifyData(title, url, platform);
 				logger.info("下载流程结束");
-
 			} catch (IOException e) {
 				// 失败
 				sendNotify.sendNotifyError(url, platform, e.getMessage());
