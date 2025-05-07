@@ -196,6 +196,7 @@ public class AnalysisService {
 				String coverdir = FileUtil.generateDir(true, Global.platform.kuaishou.name(), true, filename, null,
 						null);
 				HttpUtil.downloadFileWithOkHttp(coverUrl, coverfile, coverdir, header);
+				videofile = videofile+filename + ".mp4";
 				VideoDataEntity videoDataEntity = new VideoDataEntity(videoId, title, title, platform, coverunaddr,
 						videofile,
 						videounrealaddr, url);
@@ -206,7 +207,6 @@ public class AnalysisService {
 							videofile);
 				}
 				processHistoryService.saveProcess(saveProcess.getId(), url, platform);
-				videoDataDao.save(videoDataEntity);
 				sendNotify.sendNotifyData(title, url, platform);
 				logger.info("下载流程结束");
 
@@ -692,6 +692,7 @@ public class AnalysisService {
 		// HttpUtil.downloadFileWithOkHttp(cover, coverfile,coverdir);
 		HttpUtil.downloadFileWithOkHttp(cover, coverfile, coverdir, header);
 		// 推送完成后建立历史资料 此处注意 a2 地址需要与spring boot 一致否则 无法打开视频
+		videofile = videofile+filename + ".mp4";
 		VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId, desc, desc, platform, coverunaddr, videofile,
 				videounrealaddr, originaladdress);
 		// 生成元数据
