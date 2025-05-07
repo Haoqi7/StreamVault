@@ -196,16 +196,16 @@ public class AnalysisService {
 				String coverdir = FileUtil.generateDir(true, Global.platform.kuaishou.name(), true, filename, null,
 						null);
 				HttpUtil.downloadFileWithOkHttp(coverUrl, coverfile, coverdir, header);
-				videofile = videofile+filename + ".mp4";
-				VideoDataEntity videoDataEntity = new VideoDataEntity(videoId, title, title, platform, coverunaddr,
-						videofile,
-						videounrealaddr, url);
-				videoDataDao.save(videoDataEntity);
 				// 生成元数据
 				if (Global.getGeneratenfo) {
 					EmbyMetadataGenerator.createKuaiNfo(author, author, upload_date, videoId, title, title, coverfile,
 							videofile);
 				}
+				videofile = videofile+filename + ".mp4";
+				VideoDataEntity videoDataEntity = new VideoDataEntity(videoId, title, title, platform, coverunaddr,
+						videofile,
+						videounrealaddr, url);
+				videoDataDao.save(videoDataEntity);
 				processHistoryService.saveProcess(saveProcess.getId(), url, platform);
 				sendNotify.sendNotifyData(title, url, platform);
 				logger.info("下载流程结束");
@@ -691,15 +691,16 @@ public class AnalysisService {
 		String coverdir = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
 		// HttpUtil.downloadFileWithOkHttp(cover, coverfile,coverdir);
 		HttpUtil.downloadFileWithOkHttp(cover, coverfile, coverdir, header);
-		// 推送完成后建立历史资料 此处注意 a2 地址需要与spring boot 一致否则 无法打开视频
-		videofile = videofile+filename + ".mp4";
-		VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId, desc, desc, platform, coverunaddr, videofile,
-				videounrealaddr, originaladdress);
+
 		// 生成元数据
 		if (Global.getGeneratenfo) {
 			EmbyMetadataGenerator.createDouNfo(map.get("nickname"), map.get("uid"), map.get("create_time"), awemeId,
 					desc, desc, coverfile, videofile);
 		}
+		// 推送完成后建立历史资料 此处注意 a2 地址需要与spring boot 一致否则 无法打开视频
+		videofile = videofile+filename + ".mp4";
+		VideoDataEntity videoDataEntity = new VideoDataEntity(awemeId, desc, desc, platform, coverunaddr, videofile,
+				videounrealaddr, originaladdress);
 		videoDataDao.save(videoDataEntity);
 		logger.info("下载流程结束");
 	}
