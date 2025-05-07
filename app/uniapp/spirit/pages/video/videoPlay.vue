@@ -30,13 +30,10 @@
 			</view>
 
 			<!-- 操作栏 -->
-			<view class="action-bar">
-				<button class="share-btn" open-type="share">
-					<uni-icons type="share" size="20" color="#666"></uni-icons>
-					<text class="action-text">分享</text>
-				</button>
-			</view>
 
+
+			<!-- 操作栏 -->
+			 
 			<!-- 视频描述 -->
 			<view class="video-desc" v-if="videoInfo.videodesc">
 				<text class="desc-text">{{videoInfo.videodesc}}</text>
