@@ -31,12 +31,14 @@
 					:key="index"
 					@tap="palyVideo(item.videounrealaddr)"
 				>
-					<view class="video-cover">
-						<image class="cover-image" :src="item.videocover" mode="aspectFill"></image>
-					</view>
-					<view class="video-info">
-						<text class="video-title">{{item.videoname}}</text>
-						<text class="video-desc">{{item.videodesc}}</text>
+					<view class="video-card-inner">
+						<view class="video-cover">
+							<image class="cover-image" :src="item.videocover" mode="aspectFill"></image>
+						</view>
+						<view class="video-info">
+							<text class="video-title">{{item.videoname}}</text>
+							<text class="video-desc">{{item.videodesc}}</text>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -216,17 +218,22 @@
 }
 
 .content-wrap {
-	padding: 108rpx 12rpx 12rpx 12rpx;
+	padding-top: 108rpx;
 }
 
 .video-list {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 12rpx;
+	padding: 0 12rpx;
 }
 
 .video-card {
-	width: calc(50% - 6rpx);
+	width: 50%;
+	padding: 6rpx;
+	box-sizing: border-box;
+}
+
+.video-card-inner {
 	background: #fff;
 	border-radius: 12rpx;
 	overflow: hidden;
