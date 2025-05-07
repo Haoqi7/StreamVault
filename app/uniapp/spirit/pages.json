@@ -34,6 +34,34 @@
 			{
 				"navigationBarTitleText" : ""
 			}
+		},
+		{
+			"path" : "pages/admin/admin",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
+		},
+		{
+			"path" : "pages/admin/login",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
+		},
+		{
+			"path" : "pages/admin/videoData",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
+		},
+		{
+			"path" : "pages/admin/favData",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
 		}
     ],
 	"tabBar": {
@@ -53,6 +81,12 @@
 				"iconPath": "static/icon/play.png",
 				"selectedIconPath": "static/icon/play.png",
 				"text": "列表"
+			},
+			{
+				"pagePath": "pages/admin/admin",
+				"iconPath": "static/icon/admin.png",
+				"selectedIconPath": "static/icon/admin.png",
+				"text": "管理"
 			}
 			
 		]
