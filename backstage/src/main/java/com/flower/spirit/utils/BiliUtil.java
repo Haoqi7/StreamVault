@@ -85,8 +85,11 @@ public class BiliUtil {
 							filename + ".mp4",
 							Global.a2_token));
 		}
-		videoDataInfo.put("video",
-				FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, namepath, "mp4"));
+		String videodir = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, namepath, "mp4");
+		if(namepath!= null) {
+			videodir = FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, namepath, "mp4");
+		}
+		videoDataInfo.put("video",videodir);
 		videoDataInfo.put("videoname", filename + ".mp4");
 		// System.out.println(videoDataInfo);
 		return videoDataInfo;
@@ -241,8 +244,11 @@ public class BiliUtil {
 
 		// 更新视频信息
 		Map<String, String> result = new HashMap<>(videoInfo);
-
-		result.put("video", FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4"));
+		String videodir = FileUtil.generateDir(true, Global.platform.bilibili.name(), true, filename, null, "mp4");
+		if(fav != null) {
+			videodir = FileUtil.generateDir(true, Global.platform.bilibili.name(), false, filename, fav, "mp4");
+		}
+		result.put("video",videodir);
 		result.put("videoname", filename + ".mp4");
 
 		return result;
@@ -274,7 +280,7 @@ public class BiliUtil {
 		HttpUtil.downBiliFromUrl(audioUrl, filename + "-audio.m4s", tempDir);
 
 		// 合并音视频文件
-		String ffmpegCmd = String.format("ffmpeg -i %s -i %s -c:v copy -c:a copy -f mp4 %s",
+		String ffmpegCmd = String.format("ffmpeg -y -i %s -i %s -c:v copy -c:a copy -f mp4 %s",
 				videoFile, audioFile, outputPath);
 		// System.out.println(ffmpegCmd);
 		CommandUtil.command(ffmpegCmd);

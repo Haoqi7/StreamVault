@@ -562,7 +562,7 @@ public class CollectDataService {
 		// 收藏夹 修改 支持 分类目录
 		String newod = collectDataEntity.getOriginaladdress().replaceAll("bili-fav-", "");
 		String info = "https://api.bilibili.com/x/v3/fav/folder/info?media_id=" + newod;
-		System.out.println(newod);
+//		System.out.println(newod);
 		String infobili = HttpUtil.httpGetBili(info, "UTF-8", Global.bilicookies);
 		// 收藏夹介绍
 		JSONObject object = JSONObject.parseObject(infobili);
