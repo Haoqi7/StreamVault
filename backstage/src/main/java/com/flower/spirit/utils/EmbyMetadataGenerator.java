@@ -401,7 +401,7 @@ public class EmbyMetadataGenerator {
             String genre = "来自抖音";
             String rating = "0.0";
             String outputPath = output;
-            String ctime = DateUtils.getDate("yyyy");
+            String ctime = DateUtils.getDate("yyyy-MM-dd HH:mm:ss");
             // 确保输出目录存在
             new File(outputPath).mkdirs();
             // 生成初始tvshow.nfo，不包含UP主信息
