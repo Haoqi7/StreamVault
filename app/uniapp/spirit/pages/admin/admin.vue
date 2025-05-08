@@ -45,6 +45,21 @@
 				username: '管理员'
 			}
 		},
+		onShow() {
+			// 检查cookie是否过期
+			const expireTime = uni.getStorageSync('adminCookieExpire');
+			const currentTime = new Date().getTime();
+			
+			if (!expireTime || currentTime > expireTime) {
+				// cookie已过期，清除存储并跳转到登录页
+				uni.removeStorageSync('adminCookie');
+				uni.removeStorageSync('adminCookieExpire');
+				uni.redirectTo({
+					url: '/pages/admin/login'
+				});
+				return;
+			}
+		},
 		onLoad() {
 			this.checkLogin();
 		},
