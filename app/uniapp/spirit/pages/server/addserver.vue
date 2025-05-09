@@ -50,10 +50,15 @@
 		<button class="submit-btn" @click="saveServer()">
 			<text class="btn-text">保存服务器</text>
 		</button>
+		
+		<button class="import-btn" @click="importServer()">
+			<text class="btn-text">从分享导入</text>
+		</button>
 	</view>
 </template>
 
 <script>
+	import xorCrypto from '@/utils/xor-crypto.js'
 	export default {
 		data() {
 			return {
@@ -106,6 +111,65 @@
 				}else{
 					return;
 				}
+			},
+			importServer() {
+				uni.showModal({
+					title: '输入分享信息',
+					editable: true,
+					placeholderText: '请输入分享的加密信息',
+					success: (res) => {
+						if (res.confirm && res.content) {
+							uni.showModal({
+								title: '输入解密密钥',
+								editable: true,
+								placeholderText: '请输入解密密钥',
+								success: (keyRes) => {
+									if (keyRes.confirm && keyRes.content) {
+										try {
+											const decrypted = xorCrypto.decrypt(res.content, keyRes.content);
+											const serverData = JSON.parse(decrypted);
+											
+											// 直接保存服务器信息
+											if(this.serverlist.length < 99) {
+												const defaultstatus = this.serverlist.length === 0 ? "y" : "n";
+												const newServer = {
+													servername: serverData.servername,
+													server: serverData.server,
+													port: serverData.port,
+													token: serverData.token,
+													default: defaultstatus
+												};
+												
+												const temp = [...this.serverlist, newServer];
+												uni.setStorageSync('serverlist', temp);
+												
+												uni.showModal({
+													content: '导入成功',
+													showCancel: false,
+													success: function (res) {
+														if (res.confirm) {
+															uni.navigateBack({});
+														}
+													}
+												});
+											} else {
+												uni.showToast({
+													title: '服务器数量已达上限',
+													icon: 'none'
+												});
+											}
+										} catch (error) {
+											uni.showToast({
+												title: '解密失败，请检查密钥',
+												icon: 'none'
+											});
+										}
+									}
+								}
+							});
+						}
+					}
+				});
 			}
 		}
 	}
@@ -181,5 +245,25 @@
 	color: #fff;
 	font-size: 30rpx;
 	font-weight: 500;
+}
+
+.import-btn {
+	background: #f0f9ff;
+	height: 88rpx;
+	border-radius: 44rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 30rpx;
+}
+
+.import-btn .btn-text {
+	color: #0284da;
+	font-size: 30rpx;
+	font-weight: 500;
+}
+
+.import-btn:active {
+	background: #e8f3ff;
 }
 </style>

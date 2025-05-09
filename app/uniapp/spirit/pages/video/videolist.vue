@@ -238,12 +238,16 @@
 	border-radius: 12rpx;
 	overflow: hidden;
 	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+	height: 320rpx;
+	display: flex;
+	flex-direction: column;
 }
 
 .video-cover {
 	position: relative;
 	width: 100%;
 	padding-top: 56.25%; /* 16:9 比例 */
+	flex-shrink: 0;
 }
 
 .cover-image {
@@ -256,31 +260,37 @@
 }
 
 .video-info {
-	padding: 16rpx;
+	padding: 8rpx 12rpx;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
 }
 
 .video-title {
 	font-size: 28rpx;
 	font-weight: 500;
 	color: #333;
-	line-height: 1.4;
-	margin-bottom: 8rpx;
+	line-height: 1.3;
+	margin-bottom: 4rpx;
 	display: -webkit-box;
 	-webkit-line-clamp: 2;
 	-webkit-box-orient: vertical;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	height: 64rpx;
 }
 
 .video-desc {
 	font-size: 24rpx;
 	color: #999;
-	line-height: 1.4;
+	line-height: 1.3;
 	display: -webkit-box;
 	-webkit-line-clamp: 1;
 	-webkit-box-orient: vertical;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	height: 30rpx;
 }
 
 .loading-more {
