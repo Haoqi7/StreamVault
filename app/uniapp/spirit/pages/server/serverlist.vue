@@ -22,6 +22,9 @@
 					>
 						{{item.default === 'y' ? '当前默认' : '设为默认'}}
 					</button>
+					<button class="action-btn share" @click="shareServer(index)">
+						<uni-icons type="redo" size="16" color="#666"></uni-icons>
+					</button>
 					<button class="action-btn delete" @click="deleteServer(index)">
 						<uni-icons type="trash" size="16" color="#666"></uni-icons>
 					</button>
@@ -40,6 +43,7 @@
 </template>
 
 <script>
+	import xorCrypto from '@/utils/xor-crypto.js'
 	export default {
 		data() {
 			return {
@@ -76,6 +80,43 @@
 				uni.navigateTo({
 					url:"/pages/server/addserver"
 				})
+			},
+			shareServer(index) {
+				const server = this.serverlist[index];
+				const data = {
+					servername: server.servername,
+					server: server.server,
+					port: server.port,
+					token: server.token
+				};
+				
+				uni.showModal({
+					title: '输入加密密钥',
+					editable: true,
+					placeholderText: '请输入至少3位的密钥',
+					success: (res) => {
+						if (res.confirm && res.content) {
+							if (res.content.length < 3) {
+								uni.showToast({
+									title: '密钥长度必须大于3位',
+									icon: 'none'
+								});
+								return;
+							}
+							
+							const encrypted = xorCrypto.encrypt(JSON.stringify(data), res.content);
+							uni.setClipboardData({
+								data: encrypted,
+								success: () => {
+									uni.showToast({
+										title: '已复制加密信息',
+										icon: 'success'
+									});
+								}
+							});
+						}
+					}
+				});
 			}
 		}
 	}
@@ -167,6 +208,16 @@
 
 .action-btn.switch.default {
 	background: #e8f3ff;
+}
+
+.action-btn.share {
+	flex: 0 0 72rpx;
+	padding: 0;
+	background: #f5f5f5;
+}
+
+.action-btn.share:active {
+	background: #e8e8e8;
 }
 
 .action-btn.delete {

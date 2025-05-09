@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>视频列表-StreamVault</title>
+    <th:block th:insert="admin/include/header :: metaHeader"></th:block>
     <link href="../static/css/bootstrap.min.css" rel="stylesheet">
     <link href="../static/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="../static/css/style.min.css" rel="stylesheet">
@@ -53,6 +54,46 @@
             z-index: 999;
             display: none;
             pointer-events: none; /* 防止鼠标事件 */
+        }
+
+        .delete-progress {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            z-index: 1001;
+            min-width: 300px;
+            display: none;
+        }
+
+        .delete-progress .progress-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .delete-progress .progress-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .delete-progress .progress-item.success {
+            color: #28a745;
+        }
+
+        .delete-progress .progress-item.error {
+            color: #dc3545;
+        }
+
+        .delete-progress .progress-item.pending {
+            color: #6c757d;
         }
     </style>
 </head>
@@ -133,6 +174,11 @@
                                     <div class="col">
                                         <h5 class="card-title mb-0">视频列表</h5>
                                     </div>
+                                    <div class="col-auto">
+                                        <button class="btn btn-danger btn-sm" id="batchDelete">
+                                            <i class="mdi mdi-delete"></i> 批量删除
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -140,6 +186,12 @@
                                     <table class="table table-hover">
                                         <thead class="thead-light">
                                         <tr>
+                                            <th style="width: 40px">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="check-all">
+                                                    <label class="custom-control-label" for="check-all"></label>
+                                                </div>
+                                            </th>
                                             <th style="width: 60px">编号</th>
                                             <th style="width: 100px">封面</th>
                                             <th>视频信息</th>
@@ -189,6 +241,11 @@
 <!--    模态框end-->
 </div>
 
+<div class="delete-progress">
+    <h5>批量删除进度</h5>
+    <div class="progress-list"></div>
+</div>
+
 <script type="text/javascript" src="../static/js/jquery.min.js"></script>
 <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../static/js/perfect-scrollbar.min.js"></script>
@@ -202,6 +259,78 @@
             findList(1)
         })
 
+        // 全选/取消全选
+        $('#check-all').change(function() {
+            $('input[type="checkbox"]').prop('checked', $(this).prop('checked'));
+        });
+
+        // 批量删除
+        $('#batchDelete').click(function() {
+            var selectedIds = [];
+            var selectedNames = [];
+            $('input[type="checkbox"]:checked').each(function() {
+                if($(this).attr('id') !== 'check-all') {
+                    var id = $(this).data('id');
+                    selectedIds.push(id);
+                    selectedNames.push($(this).closest('tr').find('.video-info .font-weight-bold').text());
+                }
+            });
+
+            if(selectedIds.length === 0) {
+                layer.msg('请选择要删除的项目');
+                return;
+            }
+
+            layer.confirm("删除后下载的资源将一并删除,是否删除选中的"+selectedIds.length+"项?", function(index){
+                var deleteCount = 0;
+                var totalCount = selectedIds.length;
+                var $progress = $('.delete-progress');
+                var $progressList = $progress.find('.progress-list');
+                
+                // 初始化进度显示
+                $progressList.empty();
+                selectedNames.forEach(function(name, index) {
+                    $progressList.append('<div class="progress-item pending" data-id="'+selectedIds[index]+'">' + name + ' - 等待删除</div>');
+                });
+                $progress.show();
+                
+                function deleteNext() {
+                    if(deleteCount >= totalCount) {
+                        setTimeout(function(){
+                            $progress.hide();
+                            window.location.reload();
+                        }, 1500);
+                        return;
+                    }
+
+                    var id = selectedIds[deleteCount];
+                    var name = selectedNames[deleteCount];
+                    var $item = $progressList.find('.progress-item[data-id="'+id+'"]');
+                    
+                    $.get("/admin/api/deleteVideoData?id="+id, function(res){
+                        if(res.resCode == "000001"){
+                            $item.removeClass('pending').addClass('success')
+                                .html(name + ' - 删除成功');
+                            deleteCount++;
+                            deleteNext();
+                        } else {
+                            $item.removeClass('pending').addClass('error')
+                                .html(name + ' - 删除失败: ' + res.message);
+                            deleteCount++;
+                            deleteNext();
+                        }
+                    }).fail(function() {
+                        $item.removeClass('pending').addClass('error')
+                            .html(name + ' - 删除失败: 网络错误');
+                        deleteCount++;
+                        deleteNext();
+                    });
+                }
+
+                deleteNext();
+                layer.close(index);
+            });
+        });
     });
     function  updateData(){
         $('.editData').click(function (){
@@ -343,7 +472,7 @@
                 addressType = '投稿';
                 addressValue = item.originaladdress.substring(9);
             } else {
-                addressType = '收藏夹';
+                addressType = '分享链接';
                 addressValue = item.originaladdress;
             }
         } else {
@@ -387,6 +516,7 @@
                     var list = record.content;
                     for(var i = 0;i<list.length;i++){
                         html += '<tr>';
+                        html += '<td><div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="check-'+list[i].id+'" data-id="'+list[i].id+'"><label class="custom-control-label" for="check-'+list[i].id+'"></label></div></td>';
                         html += '<td>'+list[i].id+'</td>';
                         html += '<td>'+getImage(list[i].videocover)+'</td>';
                         html += '<td>'+formatVideoInfo(list[i])+'</td>';

@@ -159,6 +159,14 @@
 								title: res.data.message || '获取数据失败',
 								icon: 'none'
 							});
+							// 清除登录信息并跳转
+							uni.removeStorageSync('adminCookie');
+							uni.removeStorageSync('adminCookieExpire');
+							setTimeout(() => {
+								uni.redirectTo({
+									url: '/pages/admin/login'
+								});
+							}, 1500);
 						}
 					},
 					fail: () => {
@@ -166,6 +174,14 @@
 							title: '网络错误',
 							icon: 'none'
 						});
+						// 清除登录信息并跳转
+						uni.removeStorageSync('adminCookie');
+						uni.removeStorageSync('adminCookieExpire');
+						setTimeout(() => {
+							uni.redirectTo({
+								url: '/pages/admin/login'
+							});
+						}, 1500);
 					},
 					complete: () => {
 						uni.hideLoading();

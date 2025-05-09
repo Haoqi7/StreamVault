@@ -85,8 +85,10 @@
 							// 获取响应头中的cookie
 							const cookies = res.header['Set-Cookie'] || res.header['set-cookie'];
 							if (cookies) {
-								// 保存cookie到本地存储
+								// 设置cookie过期时间为24小时
+								const expireTime = new Date().getTime() + 24 * 60 * 60 * 1000;
 								uni.setStorageSync('adminCookie', cookies);
+								uni.setStorageSync('adminCookieExpire', expireTime);
 							}
 							
 							uni.showToast({
