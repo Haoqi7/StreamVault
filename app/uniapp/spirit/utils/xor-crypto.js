@@ -64,17 +64,47 @@ function base64Decode(input) {
   return str;
 }
 
-// 字符串转 Uint8Array
 function stringToBytes(str) {
-  const encoder = new TextEncoder();
-  return encoder.encode(str);
+  const bytes = [];
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code < 0x80) {
+      bytes.push(code);
+    } else if (code < 0x800) {
+      bytes.push(0xc0 | (code >> 6));
+      bytes.push(0x80 | (code & 0x3f));
+    } else {
+      bytes.push(0xe0 | (code >> 12));
+      bytes.push(0x80 | ((code >> 6) & 0x3f));
+      bytes.push(0x80 | (code & 0x3f));
+    }
+  }
+  return new Uint8Array(bytes);
 }
 
-// Uint8Array 转字符串
 function bytesToString(bytes) {
-  const decoder = new TextDecoder();
-  return decoder.decode(bytes);
+  let str = '';
+  let i = 0;
+  while (i < bytes.length) {
+    const byte1 = bytes[i++];
+    if (byte1 < 0x80) {
+      str += String.fromCharCode(byte1);
+    } else if (byte1 >= 0xc0 && byte1 < 0xe0) {
+      const byte2 = bytes[i++];
+      str += String.fromCharCode(((byte1 & 0x1f) << 6) | (byte2 & 0x3f));
+    } else {
+      const byte2 = bytes[i++];
+      const byte3 = bytes[i++];
+      str += String.fromCharCode(
+        ((byte1 & 0x0f) << 12) |
+        ((byte2 & 0x3f) << 6) |
+        (byte3 & 0x3f)
+      );
+    }
+  }
+  return str;
 }
+
 
 // XOR 加密核心逻辑
 function xorBytes(dataBytes, keyBytes) {
