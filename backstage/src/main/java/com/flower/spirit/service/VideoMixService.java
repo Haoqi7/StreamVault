@@ -149,9 +149,9 @@ public class VideoMixService {
 
 							// 构建临时文件路径
 							String tempFile = tempDir + "segment_" + segment.getSegmentNo() + ".mp4";
-							if(Global.encoder == null) {
-								EncoderUtil.checkAndSetEncoder();
-							}
+//							if(Global.encoder == null) {
+//								EncoderUtil.checkAndSetEncoder();
+//							}
 							// 使用FFmpeg提取视频片段并统一为30fps
 							String ffmpegCmd = String.format(
 							    "ffmpeg -y -i %s -ss %d -t %d -r 30 -c:v %s -crf 23 -preset medium -threads 4 %s",

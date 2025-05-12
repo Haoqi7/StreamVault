@@ -114,7 +114,7 @@ public class Global {
 
 	public static String nfonetaddr = "";
 
-	public static String encoder = null;
+	public static String encoder = "libx264";
 
 	@Value("${file.save}")
 	public void setSavefile(String value) {

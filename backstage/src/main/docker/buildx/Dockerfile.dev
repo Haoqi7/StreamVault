@@ -7,7 +7,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositorie
     apk add openjdk8 && \
     apk add ffmpeg && \
     apk add python3 py3-pip py3-virtualenv build-base python3-dev libffi-dev&& \
-	apk add intel-media-driver libva libva-intel-driver && \
     rm -rf /tmp/* /var/cache/apk/*
 	
 RUN python3 -m venv /opt/venv && \
