@@ -612,9 +612,13 @@ public class AnalysisService {
 				String upmid = owner.getString("mid");
 				String ctime = videoInfo.get("ctime");
 				// 下载up 头像 up头像不参与数据 只参与nfo
-				HttpUtil.downBiliFromUrl(upface, "upcover.jpg", dir);
+				String uplocal ="upcover.jpg";
+				HttpUtil.downBiliFromUrl(upface, uplocal, dir);
 				if (Global.getGeneratenfo) {
-					EmbyMetadataGenerator.createBillNfo(upname, "upcover.jpg", upmid, ctime, cid, title, desc,
+					if(null!=Global.nfonetaddr && !"".equals(Global.nfonetaddr)) {
+						uplocal = Global.nfonetaddr+dbdir+uplocal+"?apptoken="+Global.readonlytoken;
+					}
+					EmbyMetadataGenerator.createBillNfo(upname, uplocal, upmid, ctime, cid, title, desc,
 							filename + ".jpg", dir);
 				}
 				// 建档
