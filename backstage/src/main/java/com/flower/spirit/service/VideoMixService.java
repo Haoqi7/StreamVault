@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 
 import com.flower.spirit.entity.VideoMixEntity;
 import com.flower.spirit.entity.VideoMixSegmentEntity;
+import com.flower.spirit.utils.EncoderUtil;
 import com.flower.spirit.utils.FileUtil;
 import com.flower.spirit.entity.VideoDataEntity;
 import com.flower.spirit.dao.VideoMixDao;
@@ -148,14 +149,18 @@ public class VideoMixService {
 
 							// 构建临时文件路径
 							String tempFile = tempDir + "segment_" + segment.getSegmentNo() + ".mp4";
-
+							if(Global.encoder == null) {
+								EncoderUtil.checkAndSetEncoder();
+							}
 							// 使用FFmpeg提取视频片段并统一为30fps
 							String ffmpegCmd = String.format(
-									"ffmpeg -y -i %s -ss %d -t %d -r 30 -c:v libx264 -crf 23 -preset medium -threads 4 %s",
-									video.getVideoaddr(),
-									segment.getStartTime(),
-									segment.getEndTime() - segment.getStartTime(),
-									tempFile);
+							    "ffmpeg -y -i %s -ss %d -t %d -r 30 -c:v %s -crf 23 -preset medium -threads 4 %s",
+							    video.getVideoaddr(),
+							    segment.getStartTime(),
+							    segment.getEndTime() - segment.getStartTime(),
+							    Global.encoder,  // 使用动态选择的编码器
+							    tempFile
+							);
 
 							Process process = null;
 							BufferedReader errorReader = null;

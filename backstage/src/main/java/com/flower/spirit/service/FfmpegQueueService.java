@@ -101,8 +101,8 @@ public class FfmpegQueueService {
 				//执行合并任务
 				//判断是否存在 存在就删掉
 				FileUtils.deleteFile(entity.getFilepath());
-				System.out.println("ffmpeg -i "+video+" -i "+audio+" -c:v copy -c:a copy -f mp4 "+entity.getFilepath());
-				CommandUtil.command("ffmpeg -i "+video+" -i "+audio+" -c:v copy -c:a copy -f mp4 "+entity.getFilepath());
+				System.out.println("ffmpeg -y -i "+video+" -i "+audio+" -c:v copy -c:a copy -f mp4 "+entity.getFilepath());
+				CommandUtil.command("ffmpeg -y -i "+video+" -i "+audio+" -c:v copy -c:a copy -f mp4 "+entity.getFilepath());
 				//删除任务
 				FileUtils.deleteFile(video);
 				FileUtils.deleteFile(audio);

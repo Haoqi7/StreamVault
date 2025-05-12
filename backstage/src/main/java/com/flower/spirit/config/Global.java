@@ -114,6 +114,8 @@ public class Global {
 
 	public static String nfonetaddr = "";
 
+	public static String encoder = null;
+
 	@Value("${file.save}")
 	public void setSavefile(String value) {
 		Global.savefile = value;
