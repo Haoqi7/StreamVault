@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,18 +87,23 @@ public class AnalysisService {
 			logger.error("无效的token");
 			return;
 		}
-
+		if (StringUtils.isBlank(video) || video.length() < 5) {
+		    logger.error("提交了一个错误的链接地址");
+		    return;
+		}
 		logger.info("解析开始~原地址:" + video);
 		String platform = this.getPlatform(video);
 		String url = this.getUrl(video);
+		//通过url 进行简易的模式拦截  重复提交的问题
+		List<VideoDataEntity> videoListData = videoDataDao.findByOriginaladdress(url);
+		if(videoListData.size()>0) {
+			 logger.error("当前提交的链接已在媒体库中存在,本链接不下载");
+			 return;
+		}
 		Map<String, Runnable> platformHandlers = new HashMap<>();
 		platformHandlers.put("哔哩", () -> executeTask(bilibili, () -> this.bilivideo(platform, url)));
 		platformHandlers.put("抖音", () -> executeTask(domestic, () -> this.dyvideo(platform, url)));
 		platformHandlers.put("YouTube", () -> executeTask(ytdlp, () -> this.YouTube(platform, url)));
-		// platformHandlers.put("steam", () -> executeTask(steamcmd, () ->
-		// this.steamwork(video)));
-		// platformHandlers.put("tiktok", () -> executeTask(douyin, () ->
-		// this.tiktok(platform, url)));
 		platformHandlers.put("instagram", () -> executeTask(ytdlp, () -> this.instagram(platform, url)));
 		platformHandlers.put("twitter", () -> executeTask(ytdlp, () -> this.twitter(platform, url)));
 		platformHandlers.put("快手", () -> executeTask(domestic, () -> this.kuaishou(platform, url)));
