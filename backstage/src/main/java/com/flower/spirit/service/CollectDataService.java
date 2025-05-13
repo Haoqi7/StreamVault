@@ -379,6 +379,7 @@ public class CollectDataService {
 					HashMap<String, String> header = new HashMap<String, String>();
 					header.put("User-Agent", DouUtil.ua);
 					header.put("cookie", Global.tiktokCookie);
+					header.put("Referer", "https://www.douyin.com/");
 					if (Global.downtype.equals("http")) {
 						// 内置下载器
 						dir = FileUtil.generateDir(true, Global.platform.douyin.name(), false, filename, taskname,
@@ -400,6 +401,17 @@ public class CollectDataService {
 					videoDataDao.save(videoDataEntity);
 
 					if (Global.getGeneratenfo) {
+						String nickname = aweme_detail.getString("nickname");
+						String uid = aweme_detail.getString("uid");
+						String publisher = nickname+"-"+uid+".png";
+						String coverdir = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
+						HttpUtil.downloadFileWithOkHttp(aweme_detail.getString("avatar_thumb"), publisher, coverdir, header);
+						if(null!=Global.nfonetaddr && !"".equals(Global.nfonetaddr)) {
+							String publisherdir = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null, null);
+							//System.out.println(publisherdir);
+							publisher = Global.nfonetaddr+publisherdir+"/"+publisher+"?apptoken="+Global.readonlytoken;
+						}
+						
 						Map<String, String> map = new HashMap<String, String>();
 						map.put("title", desc);
 						map.put("desc", desc);
@@ -408,6 +420,7 @@ public class CollectDataService {
 						map.put("piclocal", filename + ".jpg");
 						map.put("upmid", aweme_detail.getString("uid"));
 						map.put("cid", awemeId);
+						map.put("upface", publisher);
 						EmbyMetadataGenerator.createFavoriteEpisodeDouNfo(map, dir, i + 1, temporaryDirectory);
 					}
 					logger.info("下载流程结束");

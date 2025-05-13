@@ -690,6 +690,7 @@ public class AnalysisService {
 							filename + ".mp4", Global.a2_token, cookie));
 		}
 		HashMap<String, String> header = new HashMap<String, String>();
+		header.put("Referer", "https://www.douyin.com/");
 		header.put("User-Agent", DouUtil.ua);
 		header.put("cookie", Global.tiktokCookie);
 		if (Global.downtype.equals("http")) {
@@ -711,7 +712,7 @@ public class AnalysisService {
 			
 			if(null!=Global.nfonetaddr && !"".equals(Global.nfonetaddr)) {
 				String publisherdir = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null, null);
-				System.out.println(publisherdir);
+				//System.out.println(publisherdir);
 				publisher = Global.nfonetaddr+publisherdir+"/"+publisher+"?apptoken="+Global.readonlytoken;
 			}
 			

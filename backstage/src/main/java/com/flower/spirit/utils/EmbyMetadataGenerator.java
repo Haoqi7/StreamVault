@@ -391,8 +391,8 @@ public class EmbyMetadataGenerator {
                     .append(createXmlTag("role", platform == Platform.BILIBILI ? "UP主" : DEFAULT_ROLE, 8));
 
             // 只有哔哩哔哩平台添加头像
-            if (platform == Platform.BILIBILI && videoInfo.get("upface") != null) {
-                nfoContent.append(createXmlTag("thumb", videoInfo.get("upface").replace('\\', '/'), 8));
+            if (videoInfo.get("upface") != null) {
+            	  nfoContent.append(createXmlTag("thumb", videoInfo.get("upface").replace('\\', '/'), 8));
             }
 
             nfoContent.append(createXmlTag("profile", videoInfo.get("upmid"), 8))
@@ -407,7 +407,7 @@ public class EmbyMetadataGenerator {
 
             // 添加UP主信息到tvshow.nfo
             addUpInfoToTvshowNfo(tvshow, videoInfo.get("upname"),
-                    platform == Platform.BILIBILI ? videoInfo.get("upface") : null,
+                    videoInfo.get("upface"),
                     videoInfo.get("upmid"));
 
         } catch (Exception e) {

@@ -176,6 +176,7 @@ public class DouUtil {
 			 res.put("nickname", nickname);
 			 res.put("uid", uid);
 			 res.put("create_time", create_time);
+			 res.put("avatar_thumb", data.getString("avatar_thumb"));
 			 return res;
 		 }
 		 return null;
