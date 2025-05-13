@@ -64,6 +64,7 @@ async def fetch_video(cookie: str, aweme_id: str):
         "desc": video.desc,
         "video_play_addr": json.dumps(video.video_play_addr),
         "nickname": video.nickname,
+        "avatar_thumb": video._get_attr_value("$.aweme_detail.author.avatar_thumb.url_list[0]"),
         "uid": video.uid,
         "create_time": video.create_time
     }
@@ -94,6 +95,7 @@ async def fetch_user_like_videos(cookie: str, uid: str, maxc: str, output_file: 
                 "desc": video["desc"],
                 "video_play_addr": json.dumps(video["video_play_addr"]),
                 "nickname": video["nickname"],
+                "avatar_thumb": video['author_avatar_thumb'],
                 "uid": video["uid"],
                 "create_time": video["create_time"]
             }
@@ -127,6 +129,7 @@ async def fetch_user_post_videos(cookie: str, uid: str, maxc: str, output_file: 
                 "desc": video["desc"],
                 "video_play_addr": json.dumps(video["video_play_addr"]),
                 "nickname": video["nickname"],
+                "avatar_thumb": video['author_avatar_thumb'],
                 "uid": video["uid"],
                 "create_time": video["create_time"]
             }
@@ -195,6 +198,7 @@ async def fetch_user_collects_videos(cookie: str, cid: str, maxc:str, output_fil
                 "desc": video["desc"],
                 "video_play_addr": json.dumps(video["video_play_addr"]),
                 "nickname": video["nickname"],
+                "avatar_thumb": video['author_avatar_thumb'],
                 "uid": video["uid"],
                 "create_time": video["create_time"]
             }

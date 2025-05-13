@@ -106,7 +106,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>NFO元数据(提供给其他媒体库网络地址)<i class="mdi mdi-help" style="cursor: pointer; font-size: 12px;" onclick="layer.alert('NFO元数据网络地址用于其他媒体库访问本应用的部分图片资源。目前仅b站收藏夹的up头像 类做了适配 如果需要在公网访问，请填写可以从公网访问到的地址。例如：http://your-domain.com 或 http://your-ip') "></i></label>
+                                                <label>NFO元数据(提供给其他媒体库网络地址)<i class="mdi mdi-help" style="cursor: pointer; font-size: 12px;" onclick="layer.alert('NFO元数据网络地址用于其他媒体库访问本应用的部分图片资源。目前仅b站 抖音 的up头像做了适配 如果需要在公网访问，请填写可以从公网访问到的地址。例如：http://your-domain.com 或 http://your-ip') "></i></label>
                                                 <input class="form-control" type="text" id="nfonetaddr" name="nfonetaddr" th:value="${config.nfonetaddr}" placeholder="http://127.0.0.1 如需要公网 请填写本应用公网能访问到的地址">
                                             </div>
                                         </div>
@@ -244,7 +244,7 @@
                                 <form action="#" method="post" onsubmit="return false;">
                                     <input type="hidden" class="cookiesid" th:value="${cookies.id}" />
                                     <div class="form-group">
-                                        <label>快手Cookie(快手抖音必填)</label>
+                                        <label>快手Cookie(快手必填)</label>
                                         <input type="type" name="kuaishouCookie"  autocomplete="off" class="form-control kuaishouCookie" th:value="${cookies.kuaishouCookie}">
                                     </div>
                                     <div class="form-group">
