@@ -611,10 +611,11 @@ public class AnalysisService {
 				String upname = owner.getString("name");
 				String upmid = owner.getString("mid");
 				String ctime = videoInfo.get("ctime");
-				// 下载up 头像 up头像不参与数据 只参与nfo
-				String uplocal ="upcover.jpg";
-				HttpUtil.downBiliFromUrl(upface, uplocal, dir);
+
 				if (Global.getGeneratenfo) {
+					// 下载up 头像 up头像不参与数据 只参与nfo
+					String uplocal ="upcover.jpg";
+					HttpUtil.downBiliFromUrl(upface, uplocal, dir);
 					if(null!=Global.nfonetaddr && !"".equals(Global.nfonetaddr)) {
 						uplocal = Global.nfonetaddr+dbdir+uplocal+"?apptoken="+Global.readonlytoken;
 					}
@@ -700,10 +701,22 @@ public class AnalysisService {
 		String coverdir = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
 		// HttpUtil.downloadFileWithOkHttp(cover, coverfile,coverdir);
 		HttpUtil.downloadFileWithOkHttp(cover, coverfile, coverdir, header);
-
 		// 生成元数据
 		if (Global.getGeneratenfo) {
-			EmbyMetadataGenerator.createDouNfo(map.get("nickname"), map.get("uid"), map.get("create_time"), awemeId,
+			//下载发布者头像
+			String nickname = map.get("nickname");
+			String uid = map.get("uid");
+			String publisher = nickname+"-"+uid+".png";
+			HttpUtil.downloadFileWithOkHttp(map.get("avatar_thumb"), publisher, coverdir, header);
+			
+			if(null!=Global.nfonetaddr && !"".equals(Global.nfonetaddr)) {
+				String publisherdir = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null, null);
+				System.out.println(publisherdir);
+				publisher = Global.nfonetaddr+publisherdir+"/"+publisher+"?apptoken="+Global.readonlytoken;
+			}
+			
+			
+			EmbyMetadataGenerator.createDouNfo(nickname,uid,publisher, map.get("create_time"), awemeId,
 					desc, desc, coverfile, videofile);
 		}
 		// 推送完成后建立历史资料 此处注意 a2 地址需要与spring boot 一致否则 无法打开视频
