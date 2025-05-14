@@ -2,8 +2,10 @@
 
 <div align="center">
 
-> 🚀 一站式视频资源管理与下载解决方案
+> 🚀 多平台视频下载整合方案  通过小程序 快捷指令 API WEB 等提交单链快速下载视频 并支持收藏夹模式及监控
 
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lemon8866/StreamVault)
 [![Docker Pulls](https://img.shields.io/docker/pulls/qingfeng2336/stream-vault)](https://hub.docker.com/r/qingfeng2336/stream-vault)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-1.8+-red.svg)](https://www.oracle.com/java/)
