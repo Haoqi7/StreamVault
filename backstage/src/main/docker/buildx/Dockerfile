@@ -1,10 +1,8 @@
-FROM alpine
+FROM eclipse-temurin:17-jre-alpine
 ENV TZ=Asia/Shanghai
-ARG BUILD_VERSION=2025.05.12.063524
+ARG BUILD_VERSION=2025.05.19.053522
 ENV YT_DLP_VERSION=$BUILD_VERSION
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories && \
-    apk upgrade --update-cache && \
-    apk add openjdk8 && \
+RUN apk upgrade --update-cache && \
     apk add ffmpeg && \
     apk add python3 py3-pip py3-virtualenv build-base python3-dev libffi-dev&& \
     rm -rf /tmp/* /var/cache/apk/*
