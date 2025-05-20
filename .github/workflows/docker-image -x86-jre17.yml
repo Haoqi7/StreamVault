@@ -1,0 +1,38 @@
+name: Build and Push Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'x86-jre17'
+        required: true
+        default: 'jre17'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push with Input Tag
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -t qingfeng2336/stream-vault:${{ github.event.inputs.image_tag }} \
+            --push \
+            -f ./backstage/src/main/docker/buildx/Dockerfile.jre17 \
+            ./backstage/src/main/docker/buildx
