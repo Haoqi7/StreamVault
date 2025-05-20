@@ -36,3 +36,4 @@ buildNumber.properties
 /app/desktop/StreamVault-tauri/node_modules/
 /app/desktop/StreamVault-tauri/src-tauri/target/
 /app/desktop/StreamVault-tauri/src-tauri/Cargo.lock
+/backstage/src/main/docker/buildx/script/logs

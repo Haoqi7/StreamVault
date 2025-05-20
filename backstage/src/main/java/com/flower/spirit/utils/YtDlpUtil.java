@@ -87,21 +87,41 @@ public class YtDlpUtil {
 		}
 		// System.out.println(command.toString());
 		ProcessBuilder processBuilder = new ProcessBuilder(command);
-		Process process = processBuilder.start();
-		InputStream inputStream = process.getInputStream();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-		StringBuilder stringBuilder = new StringBuilder();
-		String line;
-		while ((line = reader.readLine()) != null) {
-			stringBuilder.append(line);
-		}
-		int exitCode = process.waitFor();
-		logger.info("Command executed with exit code: " + exitCode);
-		String completeString = stringBuilder.toString();
-		if(exitCode!=0) {
-			logger.error(completeString);
-		}
-		return completeString;
+	    Process process = processBuilder.start();
+	    
+
+	    Thread stderrThread = new Thread(() -> {
+	        try (BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+	            String errLine;
+	            while ((errLine = errReader.readLine()) != null) {
+	                logger.warn("yt-dlp stderr: " + errLine);
+	            }
+	        } catch (IOException e) {
+	            logger.error("yt-dlp 错误输出失败", e);
+	        }
+	    });
+	    stderrThread.start();
+	    
+	    
+	    StringBuilder stringBuilder = new StringBuilder();
+	    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+	        String line;
+	        while ((line = reader.readLine()) != null) {
+	            stringBuilder.append(line).append("\n");
+	        }
+	    } finally {
+	        process.waitFor();
+	        stderrThread.join();
+	        process.destroy();
+	    }
+
+	    String completeString = stringBuilder.toString();
+	    if (process.exitValue() != 0) {
+	        logger.error(completeString);
+	    } else {
+	        logger.info("yt-dlp executed with exit code: " + process.exitValue());
+	    }
+	    return completeString;
 	}
 
 	public static boolean isVideoStream(JSONObject format) {
