@@ -377,7 +377,6 @@ public class BiliUtil {
 		}
 		String serchPersion = HttpUtil.getSerchPersion(api, "UTF-8");
 		JSONObject videoData = JSONObject.parseObject(serchPersion);
-		// System.out.println(videoData);
 		if (videoData.getString("code").equals("0")) {
 			// 优化多集问题 从page 里取
 
@@ -395,7 +394,7 @@ public class BiliUtil {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
 				String cid = jsonObject.getString("cid");
 				String title = jsonObject.getString("part");
-				String pic = jsonObject.getString("first_frame");
+				String pic = videoData.getJSONObject("data").getString("pic");
 				data.put("aid", aid);
 				data.put("bvid", bvid);
 				data.put("desc", desc);
@@ -405,7 +404,7 @@ public class BiliUtil {
 					data.put("quality", "0");
 				}
 				if (null == pic) {
-					pic = videoData.getJSONObject("data").getString("pic");
+					pic = jsonObject.getString("first_frame");
 				}
 				data.put("cid", cid);
 				data.put("title", title);
