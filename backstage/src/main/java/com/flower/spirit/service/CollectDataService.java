@@ -404,10 +404,10 @@ public class CollectDataService {
 						String nickname = aweme_detail.getString("nickname");
 						String uid = aweme_detail.getString("uid");
 						String publisher = nickname+"-"+uid+".png";
-						String coverdir = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, null, null);
+						String coverdir = FileUtil.generateDir(true, Global.platform.douyin.name(), true, filename, taskname, null);
 						HttpUtil.downloadFileWithOkHttp(aweme_detail.getString("avatar_thumb"), publisher, coverdir, header);
 						if(null!=Global.nfonetaddr && !"".equals(Global.nfonetaddr)) {
-							String publisherdir = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, null, null);
+							String publisherdir = FileUtil.generateDir(false, Global.platform.douyin.name(), true, filename, taskname, null);
 							//System.out.println(publisherdir);
 							publisher = Global.nfonetaddr+publisherdir+"/"+publisher+"?apptoken="+Global.readonlytoken;
 						}
